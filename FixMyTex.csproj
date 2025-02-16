@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="icons8-mutig-ai-32.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Hardcodet.Wpf.TaskbarNotification.Core" Version="2.0.0" />
+    <PackageReference Include="InputSimulator" Version="1.0.4" />
+    <PackageReference Include="OpenAI" Version="2.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="icons8-mutig-ai-32.png" />
+  </ItemGroup>
+
+</Project>
