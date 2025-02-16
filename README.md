@@ -26,3 +26,6 @@ Grammar, style, and text edits are just a shortcut away via customizable AI prom
 
 # Build & Deployment
 - todo
+
+# Attribution
+- Icons from [icons8.com](https://icons8.com)
