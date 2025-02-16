@@ -1,4 +1,4 @@
-# FixMyTex
+# FixMyTex ![icon](icons8-mutig-ai-32.png) 
 Grammar, style, and text edits are just a shortcut away via customizable AI prompts.
 
 # Getting started
