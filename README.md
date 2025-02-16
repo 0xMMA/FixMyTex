@@ -4,7 +4,7 @@ Grammar, style, and text edits are just a shortcut away via customizable AI prom
 # Getting started
 ## Setup
 1. download
-2. (build the app, cause there are no ready made artifacts for now)
+2. (build the app, because there are no ready made artifacts for now)
 3. add environment variable OPENAI_API_KEY (with your key)
 4. start the app (it will automaticly minimize itself)
 ## Usage
