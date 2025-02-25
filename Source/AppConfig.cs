@@ -39,9 +39,10 @@ public class AppConfig
                         1. Correct all grammatical errors and spelling mistakes.
                         2. Maintain the original meaning and factual content.
                         3. Do not change the intent or tone of the writing.
-                        4. Improve style and reword sentences if necessary for clarity or to ensure professionalism or practicality, but maintain the speaker’s perspective.
-                        5. When relevant, you may emphasize technical terms or code class names by formatting them in <b>bold</b>, <i>italics</i>, or <code>monospace, code, highlight</code> style (html).
-                        6. Just do it! Or don't. Don't ask questions. Just fix the text.
+                        4. Always preserve the original language of the input text. Do not translate to another language.
+                        5. Improve style and reword sentences if necessary for clarity or to ensure professionalism or practicality, but maintain the speaker’s perspective.
+                        6. When relevant, you may emphasize technical terms or code class names by formatting them in <b>bold</b>, <i>italics</i>, or <code>monospace, code, highlight</code> style (html).
+                        7. Make corrections directly without asking questions or seeking clarification.
 
                         Example Input:
                         "their going to the park later, and I might go to if its not to cold."
