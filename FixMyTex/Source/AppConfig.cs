@@ -5,8 +5,35 @@ namespace FixMyTex;
 
 public class AppConfig
 {
+    /// <summary>
+    /// Hotkey configurations
+    /// </summary>
     public List<HotkeyConfig>? Hotkeys { get; init; }
+    
+    /// <summary>
+    /// Default AI provider to use
+    /// </summary>
+    public static AiServiceFactory.ServiceProvider DefaultAiProvider { get; set; } = AiServiceFactory.ServiceProvider.OpenAI;
+    
+    /// <summary>
+    /// Default model to use for each provider
+    /// </summary>
+    public static Dictionary<AiServiceFactory.ServiceProvider, string> DefaultModels { get; } = new()
+    {
+        [AiServiceFactory.ServiceProvider.OpenAI] = "gpt-4o",
+        [AiServiceFactory.ServiceProvider.Claude] = "claude-3-haiku-20240307",
+        [AiServiceFactory.ServiceProvider.SemanticKernel] = "gpt-4o" // This will use the default model for the chosen SK provider
+    };
+    
+    /// <summary>
+    /// Default Semantic Kernel provider
+    /// </summary>
+    public static AiServiceFactory.SemanticKernelProvider DefaultSemanticKernelProvider { get; set; } = 
+        AiServiceFactory.SemanticKernelProvider.OpenAI;
 
+    /// <summary>
+    /// Load config from JSON file
+    /// </summary>
     public static AppConfig LoadFromJson(string filePath)
     {
         if (!File.Exists(filePath))
@@ -76,5 +103,4 @@ public class AppConfig
             ]
         };
     }
-
 }
