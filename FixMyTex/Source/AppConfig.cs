@@ -22,7 +22,11 @@ public class AppConfig
     }
 
     /// <summary> Default AI provider to use </summary>
-    public static AiServiceFactory.ServiceProvider DefaultAiProvider { get; set; } = AiServiceFactory.ServiceProvider.OpenAI;
+    public static AiServiceFactory.ServiceProvider DefaultAiProvider 
+    { 
+        get => App.DefaultProvider;
+        set => App.DefaultProvider = value; 
+    }
 
     /// <summary> Default model to use for each provider </summary>
     public static Dictionary<AiServiceFactory.ServiceProvider, string> DefaultModels { get; } = new()
@@ -32,13 +36,16 @@ public class AppConfig
 
         [AiServiceFactory.ServiceProvider.Claude] = "claude-3-5-haiku-latest",
 
-        [AiServiceFactory.ServiceProvider.SemanticKernel] = "gpt-4o" // This will use the default model for the chosen SK provider
+        [AiServiceFactory.ServiceProvider.SemanticKernel] =
+            DefaultSemanticKernelProvider == AiServiceFactory.SemanticKernelProvider.OpenAI ? "gpt-4o" : "claude-3-5-haiku-latest"
     };
 
     /// <summary> Default Semantic Kernel provider </summary>
-    public static AiServiceFactory.SemanticKernelProvider DefaultSemanticKernelProvider { get; set; } =
-
-        AiServiceFactory.SemanticKernelProvider.OpenAI;
+    public static AiServiceFactory.SemanticKernelProvider DefaultSemanticKernelProvider 
+    { 
+        get => App.DefaultSemanticKernelProvider;
+        set => App.DefaultSemanticKernelProvider = value; 
+    }
 
     /// <summary> Hotkey configurations </summary>
     public List<HotkeyConfig>? Hotkeys { get; init; }

@@ -34,7 +34,7 @@ public static class AiServiceFactory
     /// <param name="semanticKernelProvider">Optional semantic kernel provider (only applicable when provider is SemanticKernel)</param>
     /// <returns>An instance of IAiService</returns>
     public static IAiService CreateService(
-        ServiceProvider provider = ServiceProvider.OpenAI, 
+        ServiceProvider provider = ServiceProvider.SemanticKernel, 
         string? apiKey = null, 
         string? model = null,
         SemanticKernelProvider semanticKernelProvider = SemanticKernelProvider.OpenAI)
