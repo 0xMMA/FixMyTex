@@ -165,8 +165,9 @@ public partial class MainWindow : Window
             _hotkeyService.InitializeHotkeys(this, _config.Hotkeys);
         }
 
+#if !DEBUG
         //TODO: find ab better way to start minimized without flickering and without the minimize going just into small size 
-        // Start minimized
+        // Start minimized only in Release builds
         Dispatcher.BeginInvoke(
             new Action(
                 () =>
@@ -176,6 +177,7 @@ public partial class MainWindow : Window
                 }
             )
         );
+#endif
     }
 
     protected override void OnStateChanged(EventArgs e)
