@@ -1,4 +1,4 @@
-# FixMyTex ![icon](FixMyTex/icons8-mutig-ai-32.png) [![Build and Test](https://github.com/username/fixmytex/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/username/fixmytex/actions/workflows/build-and-test.yml)
+# FixMyTex ![icon](FixMyTex/icons8-mutig-ai-32.png) [![Build and Test](https://github.com/0xMMA/FixMyTex/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/0xMMA/FixMyTex/actions/workflows/build-and-test.yml)
 
 A desktop application that enhances your writing with AI-powered grammar, style, and text improvements - just a keyboard shortcut away.
 
