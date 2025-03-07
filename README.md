@@ -23,7 +23,7 @@ A desktop application that enhances your writing with AI-powered grammar, style,
    - Or build from source (see [Build Instructions](#build-instructions))
 2. Configure API keys:
    - OpenAI: Set `OPENAI_API_KEY` environment variable
-   - Claude: Set appropriate environment variables (see Configuration section)
+   - Claude: Set `ANTHROPIC_API_KEY` environment variable
 3. Launch the application - it will automatically minimize to the system tray
 
 ### Usage
