@@ -1,4 +1,4 @@
-# FixMyTex ![icon](FixMyTex/icons8-mutig-ai-32.png)
+# FixMyTex ![icon](FixMyTex/icons8-mutig-ai-32.png) [![Build and Test](https://github.com/username/fixmytex/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/username/fixmytex/actions/workflows/build-and-test.yml)
 
 A desktop application that enhances your writing with AI-powered grammar, style, and text improvements - just a keyboard shortcut away.
 
@@ -49,6 +49,21 @@ dotnet run --project FixMyTex
 # Create self-contained executable
 dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o ./bin/Release/SelfContained/
 ```
+
+### CI/CD Pipeline
+
+This project uses GitHub Actions for continuous integration and deployment:
+
+- **Build and Test**: Automatically builds and tests the application on every push and PR
+- **CodeQL Analysis**: Performs code quality and security analysis
+- **Release Workflow**: Creates draft releases with Windows binaries when version tags are pushed
+
+> **Note:** Update the repository URL in the README badges after forking this repository
+
+To create a new release:
+1. Push a tag with the format `v*` (e.g., `v1.0.0`)
+2. The release workflow will create a draft release with Windows binaries
+3. Review and publish the release
 
 ## Roadmap
 
