@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:FixMyTex"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         mc:Ignorable="d"
-        Title="FixMyTex" Height="350" Width="450">
+        Title="FixMyTex" Height="400" Width="450">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -54,13 +54,22 @@
                 <TextBlock Text="Select which underlying provider to use with Semantic Kernel" FontSize="11" Foreground="Gray" Margin="0,5,0,0"/>
             </StackPanel>
         </Grid>
-        
+
         <!-- Footer with links -->
-        <StackPanel Grid.Row="2" Margin="20,10,20,10">
-            <TextBlock HorizontalAlignment="Left" FontSize="9">
-                <Hyperlink NavigateUri="https://github.com/0xMMA/FixMyTex" RequestNavigate="Hyperlink_OnRequestNavigate">GitHub repo</Hyperlink>
+        <StackPanel Grid.Row="2" Margin="20,10,20,10"  Orientation="Horizontal" HorizontalAlignment="Center">
+            <TextBlock Margin="10"  FontSize="9">
+                <Hyperlink NavigateUri="https://github.com/0xMMA/FixMyTex"
+                           RequestNavigate="Hyperlink_OnRequestNavigate">
+                    GitHub
+                </Hyperlink>
             </TextBlock>
-            <TextBlock HorizontalAlignment="Right" FontSize="9">
+            <TextBlock  Margin="10"  FontSize="9">
+                <Hyperlink NavigateUri="https://www.linkedin.com/in/michael-martin-dev/"
+                           RequestNavigate="Hyperlink_OnRequestNavigate">
+                    LinkedIn
+                </Hyperlink>
+            </TextBlock>
+            <TextBlock  Margin="10"  FontSize="9">
                 <Hyperlink NavigateUri="https://icons8.com" RequestNavigate="Hyperlink_OnRequestNavigate">Icons by icons8.com</Hyperlink>
             </TextBlock>
         </StackPanel>

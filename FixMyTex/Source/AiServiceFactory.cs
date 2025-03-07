@@ -42,7 +42,7 @@ public static class AiServiceFactory
         return provider switch
         {
             ServiceProvider.OpenAI => new OpenAiService(apiKey, model ?? "gpt-4o"),
-            ServiceProvider.Claude => new ClaudeService(apiKey, model ?? "claude-3-haiku-20240307"),
+            ServiceProvider.Claude => new ClaudeService(apiKey, model ?? "claude-3-5-haiku-latest"),
             ServiceProvider.SemanticKernel => CreateSemanticKernelService(semanticKernelProvider, apiKey, model),
             ServiceProvider.Mock => CreateMockService(),
             _ => throw new ArgumentException($"Unsupported AI service provider: {provider}")

@@ -19,8 +19,8 @@ public class ClaudeService : IAiService
     /// Constructor for ClaudeService
     /// </summary>
     /// <param name="apiKey">Optional API key. If null, will retrieve from environment variable.</param>
-    /// <param name="model">Model to use. Defaults to "claude-3-haiku-20240307"</param>
-    public ClaudeService(string? apiKey = null, string model = "claude-3-haiku-20240307")
+    /// <param name="model">Model to use. Defaults to "claude-3-5-haiku-latest"</param>
+    public ClaudeService(string? apiKey = null, string model = "claude-3-5-haiku-latest")
     {
         _apiKey = apiKey ?? Environment.GetEnvironmentVariable(
             "ANTHROPIC_API_KEY",

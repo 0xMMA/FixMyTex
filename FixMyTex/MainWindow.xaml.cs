@@ -64,9 +64,10 @@ public partial class MainWindow : Window
                 break;
                 
             case AiServiceFactory.ServiceProvider.Claude:
-                ModelComboBox.Items.Add("claude-3-haiku-20240307");
-                ModelComboBox.Items.Add("claude-3-sonnet-20240229");
-                ModelComboBox.Items.Add("claude-3-opus-20240229");
+                ModelComboBox.Items.Add("claude-3-5-haiku-latest");
+                ModelComboBox.Items.Add("claude-3-7-sonnet-latest");
+                ModelComboBox.Items.Add("claude-3-5-sonnet-latest");
+                ModelComboBox.Items.Add("claude-3-opus-latest");
                 break;
                 
             case AiServiceFactory.ServiceProvider.SemanticKernel:
@@ -79,9 +80,10 @@ public partial class MainWindow : Window
                 }
                 else
                 {
-                    ModelComboBox.Items.Add("claude-3-haiku-20240307");
-                    ModelComboBox.Items.Add("claude-3-sonnet-20240229");
-                    ModelComboBox.Items.Add("claude-3-opus-20240229");
+                    ModelComboBox.Items.Add("claude-3-5-haiku-latest");
+                    ModelComboBox.Items.Add("claude-3-7-sonnet-latest");
+                    ModelComboBox.Items.Add("claude-3-5-sonnet-latest");
+                    ModelComboBox.Items.Add("claude-3-opus-latest");
                 }
                 break;
         }

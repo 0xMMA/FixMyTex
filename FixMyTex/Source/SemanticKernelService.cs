@@ -36,7 +36,7 @@ public class SemanticKernelService : IAiService
         string defaultModel = provider switch
         {
             ServiceProvider.OpenAI => "gpt-4o",
-            ServiceProvider.Anthropic => "claude-3-haiku-20240307",
+            ServiceProvider.Anthropic => "claude-3-5-haiku-latest",
             _ => throw new ArgumentException($"Unsupported AI service provider: {provider}")
         };
         
