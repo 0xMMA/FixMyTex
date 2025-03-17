@@ -67,13 +67,14 @@ To create a new release:
 
 ## Roadmap
 
-- [ ] Quick **Configure** (Radial Menu?) -> **Prompt** (change tone, change style, quick actions)
-  - [ ] Provide quick context with screenshots (_smart selection_ / _OCR rectangles_ + add/remove area).
+- [ ] [Quick Actions](docs/feature%20quick%20actions.md) (Radial Menu) -> **Prompt** (change tone, change style)
+  - [ ] [Smart Selection](docs/feature%20smart%20selection.md) (screenshots, OCR rectangles + add/remove area)
+
+- [ ] [Prompt Blocks](docs/prompt%20blocks.md) - modular prompt architecture
 - [ ] Interactive UI for configuration changes
 - [ ] In-app API key management (instead of environment variables)
 - [ ] Additional AI model support and customization
 - [ ] Quick chat functionality
-- [ ] Custom prompt templates
 - [ ] Self-update capability
 - [ ] Installer package
 
