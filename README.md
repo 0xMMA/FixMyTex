@@ -67,6 +67,8 @@ To create a new release:
 
 ## Roadmap
 
+- [ ] Quick **Configure** (Radial Menu?) -> **Prompt** (change tone, change style, quick actions)
+  - [ ] Provide quick context with screenshots (_smart selection_ / _OCR rectangles_ + add/remove area).
 - [ ] Interactive UI for configuration changes
 - [ ] In-app API key management (instead of environment variables)
 - [ ] Additional AI model support and customization
