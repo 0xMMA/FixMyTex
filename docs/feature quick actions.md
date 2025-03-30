@@ -3,6 +3,10 @@
 ## Goal
 Provide quick access to common text transformation actions and feedback mechanisms with a flexible, configurable system.
 
+### TBD
+- Initial Shortcut (STRG+G (2 times fast?)
+- Radial Menu shortcut driven for quick navigation (numbered, like a drill down, maybe even arrow keys?)
+
 ## Requirements
 
 ### 1. User Interface
