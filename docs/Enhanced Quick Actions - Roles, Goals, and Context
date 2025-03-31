@@ -1,0 +1,132 @@
+## Enhanced Quick Actions: Roles, Goals, and Context
+
+### Receiver Role Context
+
+1. **Audience Definition** (Who will read this?)
+   - **Hierarchical**
+     - Superior/Boss (1)
+     - Peer/Colleague (2)
+     - Direct Report/Team (3)
+   - **Relationship**
+     - Client/Customer (1)
+     - Partner/Vendor (2)
+     - General Public (3)
+   - **Expertise Level**
+     - Technical Expert (1)
+     - Domain Familiar (2)
+     - General Audience (3)
+
+2. **Communication Goals** (What's the purpose?)
+   - **Action-Oriented**
+     - Request Action (1)
+     - Provide Information (2)
+     - Get Decision/Approval (3)
+   - **Knowledge Transfer**
+     - Explain/Train (1)
+     - Document Process (2)
+     - Share Research/Findings (3)
+   - **Relationship Building**
+     - Build Rapport (1)
+     - Resolve Conflict (2)
+     - Express Appreciation (3)
+
+### Integration with Action System
+
+These role and goal contexts could be integrated in several ways:
+
+1. **As Initial Context Setting**
+   - Before showing the action menu, prompt for:
+     - "Who is this for?" (Role selection)
+     - "What's your goal?" (Purpose selection)
+   - Then customize available actions based on these choices
+
+2. **As Specialized Transformation Actions**
+   - Add a new top-level action category:
+     ```
+     Context Adaptation (6)
+     ├── Adapt for Audience (1)
+     │   ├── Boss/Management (1)
+     │   ├── Colleagues (2)
+     │   ├── Team Members (3)
+     │   ├── Customers (4)
+     │   └── General Public (5)
+     └── Adapt for Purpose (2)
+         ├── Get Action (1)
+         ├── Inform (2)
+         ├── Train/Explain (3)
+         ├── Document (4)
+         └── Build Relationship (5)
+     ```
+
+3. **As Smart Presets/Templates**
+   - Offer context-aware quick chains:
+     - "Update for Boss": Summarize + Highlight Key Points + Formal Style
+     - "Training Material": Structure Clearly + Explain Terms + Add Examples
+     - "Customer Communication": Friendly Tone + Clear Action Items + Professional Style
+
+### Menu Tree with Role/Goal Integration
+
+Here's how it could fit into the broader menu structure:
+
+```
+Quick Actions Menu
+├── Fix (1) [Basic improvements]
+├── Style (2) [Tone/voice changes]
+├── Transform (3) [Fundamental changes]
+├── Extract (4) [Pull specific elements]
+├── Analyze (5) [Provide insights]
+└── Contextualize (6) [Adapt for audience/purpose]
+    ├── For Audience (1)
+    │   ├── Management/Boss (1)
+    │   ├── Colleagues (2)
+    │   ├── Clients/Customers (3)
+    │   └── General Public (4)
+    └── For Purpose (2)
+        ├── Get Action/Decision (1)
+        ├── Inform/Update (2)
+        ├── Explain/Train (3)
+        ├── Document/Record (4)
+        └── Persuade/Convince (5)
+```
+
+### Smart Combinations and Recommendations
+
+The system could intelligently suggest combinations based on the context:
+
+1. **For Boss Communications**:
+   - Recommended: Summarize + Action Items at Top + Formal Style
+   - Chain: Extract Key Points → Restructure (Pyramid) → Style Formal
+
+2. **For Customer Support**:
+   - Recommended: Clear Instructions + Friendly Tone + Simple Language
+   - Chain: Simplify → Style Friendly → Format Steps Clearly
+
+3. **For Technical Documentation**:
+   - Recommended: Precise Language + Structured Format + Definition Highlights
+   - Chain: Fix Technical Terms → Extract Definitions → Convert to Markdown
+
+4. **For Meeting Minutes**:
+   - Recommended: Action Items Extraction + Clean Formatting + Timeline Clarity
+   - Chain: Extract Actions → Extract Decisions → Format as Minutes
+
+### Implementation Considerations
+
+1. **Context Memory**
+   - Remember frequent context combinations for specific applications
+   - Learn user preferences for different recipients/purposes
+
+2. **Smart Default Suggestions**
+   - Analyze text to guess the likely audience and purpose
+   - Suggest appropriate context settings based on content
+
+3. **UI Presentation**
+   - Could show as a "quick setup" before the main action menu:
+     ```
+     [For: Boss] [Purpose: Decision] → [Now choose action...]
+     ```
+   - Or integrate into the existing menu as additional modifiers
+
+4. **Progressive Disclosure**
+   - Start with simpler actions for new users
+   - Reveal context/role/goal options as users become more experienced
+
