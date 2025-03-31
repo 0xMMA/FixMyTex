@@ -19,7 +19,7 @@ A desktop application that enhances your writing with AI-powered grammar, style,
 
 ### Installation
 
-1. Download the latest release from the Releases page
+1. Download the latest release from the [Releases](https://github.com/0xMMA/FixMyTex/releases) page
    - Or build from source (see [Build Instructions](#build-instructions))
 2. Configure API keys:
    - OpenAI: Set `OPENAI_API_KEY` environment variable
