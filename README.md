@@ -22,8 +22,10 @@ A desktop application that enhances your writing with AI-powered grammar, style,
 1. Download the latest release from the [Releases](https://github.com/0xMMA/FixMyTex/releases) page
    - Or build from source (see [Build Instructions](#build-instructions))
 2. Configure API keys:
+   > API keys can be managed through the settings window
    - OpenAI: Set `OPENAI_API_KEY` environment variable
-   - Claude: Set `ANTHROPIC_API_KEY` environment variable
+   - Claude: Set `ANTHROPIC_API_KEY` environment variable  
+
 3. Launch the application - it will automatically minimize to the system tray
 
 ### Usage
@@ -69,10 +71,9 @@ To create a new release:
 
 - [ ] [Quick Actions](docs/feature%20quick%20actions.md) (Radial Menu) -> **Prompt** (change tone, change style)
   - [ ] [Smart Selection](docs/feature%20smart%20selection.md) (screenshots, OCR rectangles + add/remove area)
-
 - [ ] [Prompt Blocks](docs/prompt%20blocks.md) - modular prompt architecture
-- [ ] Interactive UI for configuration changes
-- [ ] In-app API key management (instead of environment variables)
+- [X] Interactive UI for configuration changes
+- [X] In-app API key management (instead of environment variables)
 - [ ] Additional AI model support and customization
 - [ ] Quick chat functionality
 - [ ] Self-update capability

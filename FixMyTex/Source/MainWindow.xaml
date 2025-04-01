@@ -77,7 +77,7 @@
        <!-- Navigation -->  
        <Border Grid.Column="0" Grid.Row="1"  
                BorderThickness="0,0,1,0"  
-               Margin="0,15">  
+               Margin="0,0,0,15">  
            <StackPanel Margin="10,0,0,10">  
                <Button x:Name="NavHome" Content="Home"  
                        Style="{StaticResource FluentNavigationButtonStyle}"  
@@ -104,7 +104,7 @@
        <!-- Content -->  
        <ContentControl Grid.Column="1" Grid.Row="1"  
                        Content="{Binding CurrentView}"  
-                       Margin="24,24"/>  
+                       Margin="24,0,24,24"/>  
  
        <!-- Footer with links -->  
        <Border Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2"  
