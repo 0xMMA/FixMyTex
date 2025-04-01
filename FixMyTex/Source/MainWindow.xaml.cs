@@ -23,6 +23,9 @@ public partial class MainWindow : Window
     private readonly APIConfigurationView _apiConfigView = new();
     private readonly AboutView _aboutView = new();
     
+    // Last active nav button
+    private Button _activeNavButton;
+    
     public MainWindow()
     {
         InitializeComponent();
@@ -33,7 +36,9 @@ public partial class MainWindow : Window
         loadConfig();
         setTrayIcon();
         
-        // Set default view
+        // Set default view and active nav
+        _activeNavButton = NavHome;
+        setActiveNavButton(_activeNavButton);
         _viewModel.CurrentView = _homeView;
     }
 
@@ -141,20 +146,36 @@ public partial class MainWindow : Window
         TrayIcon.Icon = bitmapImageToIcon(bitmapImage);
     }
     
+    private void setActiveNavButton(Button button)
+    {
+        // Reset previous active button
+        if (_activeNavButton != null)
+        {
+            _activeNavButton.Style = (Style)FindResource("FluentNavigationButtonStyle");
+        }
+        
+        // Set new active button
+        _activeNavButton = button;
+        _activeNavButton.Style = (Style)FindResource("FluentActiveNavigationButtonStyle");
+    }
+    
     #region Navigation
     
     private void NavHome_Click(object sender, RoutedEventArgs e)
     {
+        setActiveNavButton(NavHome);
         _viewModel.CurrentView = _homeView;
     }
     
     private void NavAPIConfig_Click(object sender, RoutedEventArgs e)
     {
+        setActiveNavButton(NavAPIConfig);
         _viewModel.CurrentView = _apiConfigView;
     }
     
     private void NavPrompts_Click(object sender, RoutedEventArgs e)
     {
+        setActiveNavButton(NavPrompts);
         _viewModel.CurrentView = new TextBlock 
         { 
             Text = "Prompt Templates - Coming Soon", 
@@ -166,6 +187,7 @@ public partial class MainWindow : Window
     
     private void NavHotkeys_Click(object sender, RoutedEventArgs e)
     {
+        setActiveNavButton(NavHotkeys);
         _viewModel.CurrentView = new TextBlock 
         { 
             Text = "Hotkey Configuration - Coming Soon", 
@@ -177,6 +199,7 @@ public partial class MainWindow : Window
     
     private void NavAbout_Click(object sender, RoutedEventArgs e)
     {
+        setActiveNavButton(NavAbout);
         _viewModel.CurrentView = _aboutView;
     }
     

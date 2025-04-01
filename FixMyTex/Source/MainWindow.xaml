@@ -7,7 +7,9 @@
         xmlns:common="clr-namespace:FixMyTex.Features.Common"
         xmlns:local="clr-namespace:FixMyTex"
         mc:Ignorable="d"
-        Title="FixMyTex" Height="450" Width="600">
+        WindowStyle="None"
+        Height="700" Width="800"
+        >
 
     <Window.Resources>
         <common:MainWindowViewModel x:Key="ViewModel" />
@@ -15,7 +17,7 @@
     
     <Grid DataContext="{StaticResource ViewModel}">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="150"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
@@ -24,34 +26,40 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         
-        <!-- Header -->
-        <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0" 
-                   Text="FixMyTex" FontSize="18" FontWeight="Bold" 
-                   Margin="20,15,0,15" VerticalAlignment="Center"/>
+         <!--Header--> 
+        <Border Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0" 
+                BorderThickness="0,0,0,1" 
+                Padding="20, 15, 20, 0">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="/icons8-mutig-ai-32.png" Width="32" Height="32" Margin="0,0,12,0"/>
+                <TextBlock Text="FixMyTex" Style="{StaticResource FluentTitleTextStyle}" Margin="0" VerticalAlignment="Center"/>
+            </StackPanel>
+        </Border>
         
         <!-- Navigation -->
         <Border Grid.Column="0" Grid.Row="1" 
-                BorderBrush="#EEEEEE" BorderThickness="0,0,1,0">
-            <StackPanel Margin="10">
+                BorderThickness="0,0,1,0"
+                Margin="0,15"
+                >
+            <StackPanel Margin="10,0,0,10">
                 <Button x:Name="NavHome" Content="Home" 
-                        Margin="0,5,0,5" Padding="10,5" 
-                        HorizontalContentAlignment="Left"
+                        Style="{StaticResource FluentNavigationButtonStyle}"
                         Click="NavHome_Click"/>
+                        
                 <Button x:Name="NavAPIConfig" Content="API Configuration" 
-                        Margin="0,5,0,5" Padding="10,5" 
-                        HorizontalContentAlignment="Left"
+                        Style="{StaticResource FluentNavigationButtonStyle}"
                         Click="NavAPIConfig_Click"/>
+                        
                 <Button x:Name="NavPrompts" Content="Prompt Templates" 
-                        Margin="0,5,0,5" Padding="10,5" 
-                        HorizontalContentAlignment="Left"
+                        Style="{StaticResource FluentNavigationButtonStyle}"
                         Click="NavPrompts_Click"/>
+                        
                 <Button x:Name="NavHotkeys" Content="Hotkeys" 
-                        Margin="0,5,0,5" Padding="10,5" 
-                        HorizontalContentAlignment="Left"
+                        Style="{StaticResource FluentNavigationButtonStyle}"
                         Click="NavHotkeys_Click"/>
+                        
                 <Button x:Name="NavAbout" Content="About" 
-                        Margin="0,5,0,5" Padding="10,5" 
-                        HorizontalContentAlignment="Left"
+                        Style="{StaticResource FluentNavigationButtonStyle}"
                         Click="NavAbout_Click"/>
             </StackPanel>
         </Border>
@@ -59,31 +67,34 @@
         <!-- Content -->
         <ContentControl Grid.Column="1" Grid.Row="1" 
                         Content="{Binding CurrentView}" 
-                        Margin="20,10,20,10"/>
+                        Margin="24,24"/>
         
-        <!-- Footer with links -->
-        <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" 
-                    Margin="20,10,20,10" Orientation="Horizontal" 
-                    HorizontalAlignment="Center">
-            <TextBlock Margin="10" FontSize="9">
-                <Hyperlink NavigateUri="https://github.com/0xMMA/FixMyTex"
-                           RequestNavigate="Hyperlink_OnRequestNavigate">
-                    GitHub
-                </Hyperlink>
-            </TextBlock>
-            <TextBlock Margin="10" FontSize="9">
-                <Hyperlink NavigateUri="https://www.linkedin.com/in/michael-martin-dev/"
-                           RequestNavigate="Hyperlink_OnRequestNavigate">
-                    LinkedIn
-                </Hyperlink>
-            </TextBlock>
-            <TextBlock Margin="10" FontSize="9">
-                <Hyperlink NavigateUri="https://icons8.com" 
-                           RequestNavigate="Hyperlink_OnRequestNavigate">
-                    Icons by icons8.com
-                </Hyperlink>
-            </TextBlock>
-        </StackPanel>
+        <!-- Footer with links --><!--
+        <Border Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" 
+                BorderThickness="0,1,0,0" 
+                BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}"
+                >
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <TextBlock Margin="10,5">
+                    <Hyperlink NavigateUri="https://github.com/0xMMA/FixMyTex"
+                            RequestNavigate="Hyperlink_OnRequestNavigate">
+                        GitHub
+                    </Hyperlink>
+                </TextBlock>
+                <TextBlock Margin="10,5">
+                    <Hyperlink NavigateUri="https://www.linkedin.com/in/michael-martin-dev/"
+                            RequestNavigate="Hyperlink_OnRequestNavigate">
+                        LinkedIn
+                    </Hyperlink>
+                </TextBlock>
+                <TextBlock Margin="10,5">
+                    <Hyperlink NavigateUri="https://icons8.com" 
+                            RequestNavigate="Hyperlink_OnRequestNavigate">
+                        Icons by icons8.com
+                    </Hyperlink>
+                </TextBlock>
+            </StackPanel>
+        </Border>-->
         
         <!-- Tray Icon -->
         <tb:TaskbarIcon x:Name="TrayIcon"

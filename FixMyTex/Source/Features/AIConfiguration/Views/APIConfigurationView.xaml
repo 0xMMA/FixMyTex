@@ -4,51 +4,86 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        
-        <!-- Provider Selection -->
-        <StackPanel Grid.Row="0" Margin="0,10,0,10">
-            <TextBlock Text="AI Provider" FontWeight="SemiBold" Margin="0,0,0,5"/>
-            <ComboBox x:Name="ProviderComboBox" Width="200" HorizontalAlignment="Left"/>
-            <TextBlock Text="Select which AI provider to use for text correction" FontSize="11" Foreground="Gray" Margin="0,5,0,0"/>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,0,-24,0">
+        <StackPanel Margin="0,0,24,0">
+            <!-- Title -->
+            <TextBlock Text="API Configuration" 
+                       Style="{StaticResource FluentTitleTextStyle}" />
+            
+            <TextBlock Style="{StaticResource FluentBodyTextStyle}" Margin="0,0,0,24">
+                Configure your AI service providers and API keys.
+            </TextBlock>
+            
+            <!-- Provider Selection -->
+            <Border Style="{StaticResource FluentCardBorderStyle}">
+                <StackPanel>
+                    <TextBlock Text="AI Provider" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                    <ComboBox x:Name="ProviderComboBox" Width="300" HorizontalAlignment="Left" Margin="0,0,0,8"/>
+                    <TextBlock Text="Select which AI provider to use for text correction" 
+                               FontSize="12" Opacity="0.7" Margin="0,0,0,0"/>
+                </StackPanel>
+            </Border>
+            
+            <!-- API Key Configuration -->
+            <Border Style="{StaticResource FluentCardBorderStyle}">
+                <StackPanel>
+                    <TextBlock Text="API Key" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <PasswordBox x:Name="ApiKeyPasswordBox" Grid.Column="0" HorizontalAlignment="Stretch" 
+                                     Margin="0,0,8,0" Padding="8,6" />
+                        <Button x:Name="SaveApiKeyButton" Grid.Column="1" Content="Save Key" 
+                                Click="SaveApiKeyButton_Click" Padding="12,6"/>
+                    </Grid>
+                    <TextBlock x:Name="ApiKeySourceText" 
+                               Text="Using API key from environment variable" 
+                               FontSize="12" Opacity="0.7" Margin="0,8,0,0"/>
+                </StackPanel>
+            </Border>
+            
+            <!-- Model Selection -->
+            <Border Style="{StaticResource FluentCardBorderStyle}">
+                <StackPanel>
+                    <TextBlock Text="Model" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                    <ComboBox x:Name="ModelComboBox" Width="300" HorizontalAlignment="Left" Margin="0,0,0,8"/>
+                    <TextBlock Text="Select which model to use for the selected provider" 
+                               FontSize="12" Opacity="0.7" Margin="0,0,0,0"/>
+                </StackPanel>
+            </Border>
+            
+            <!-- Semantic Kernel Options (only visible when SemanticKernel is selected) -->
+            <Border x:Name="SemanticKernelSection" Style="{StaticResource FluentCardBorderStyle}"
+                    Visibility="Collapsed">
+                <StackPanel>
+                    <TextBlock Text="Semantic Kernel Provider" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,8">
+                        <RadioButton x:Name="RadioOpenAI" Content="OpenAI" Margin="0,0,20,0" 
+                                     Checked="RadioOpenAI_Checked"/>
+                        <RadioButton x:Name="RadioClaude" Content="Claude" Checked="RadioClaude_Checked"/>
+                    </StackPanel>
+                    <TextBlock Text="Select which underlying provider to use with Semantic Kernel" 
+                               FontSize="12" Opacity="0.7" Margin="0,0,0,0"/>
+                </StackPanel>
+            </Border>
+            
+            <!-- Help Section -->
+            <Border Style="{StaticResource FluentAccentCardStyle}">
+                <StackPanel>
+                    <TextBlock Text="API Keys Help" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                    <TextBlock TextWrapping="Wrap" Margin="0,0,0,8">
+                        • To use OpenAI API: Set the OPENAI_API_KEY environment variable or enter it above
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap" Margin="0,0,0,8">
+                        • To use Claude API: Set the ANTHROPIC_API_KEY environment variable or enter it above
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap">
+                        • API keys are stored securely in your user environment variables
+                    </TextBlock>
+                </StackPanel>
+            </Border>
         </StackPanel>
-        
-        <!-- API Key Configuration -->
-        <StackPanel Grid.Row="1" Margin="0,10,0,10">
-            <TextBlock Text="API Key" FontWeight="SemiBold" Margin="0,0,0,5"/>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <PasswordBox x:Name="ApiKeyPasswordBox" Grid.Column="0" HorizontalAlignment="Stretch" Margin="0,0,5,0"/>
-                <Button x:Name="SaveApiKeyButton" Grid.Column="1" Content="Save Key" Click="SaveApiKeyButton_Click"/>
-            </Grid>
-            <TextBlock x:Name="ApiKeySourceText" Text="Using API key from environment variable" FontSize="11" Foreground="Gray" Margin="0,5,0,0"/>
-        </StackPanel>
-        
-        <!-- Model Selection -->
-        <StackPanel Grid.Row="2" Margin="0,10,0,10">
-            <TextBlock Text="Model" FontWeight="SemiBold" Margin="0,0,0,5"/>
-            <ComboBox x:Name="ModelComboBox" Width="200" HorizontalAlignment="Left"/>
-            <TextBlock Text="Select which model to use for the selected provider" FontSize="11" Foreground="Gray" Margin="0,5,0,0"/>
-        </StackPanel>
-        
-        <!-- Semantic Kernel Options (only visible when SemanticKernel is selected) -->
-        <StackPanel x:Name="SemanticKernelSection" Grid.Row="3" Margin="0,10,0,10" Visibility="Collapsed">
-            <TextBlock Text="Semantic Kernel Provider" FontWeight="SemiBold" Margin="0,0,0,5"/>
-            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                <RadioButton x:Name="RadioOpenAI" Content="OpenAI" Margin="0,0,20,0" Checked="RadioOpenAI_Checked"/>
-                <RadioButton x:Name="RadioClaude" Content="Claude" Checked="RadioClaude_Checked"/>
-            </StackPanel>
-            <TextBlock Text="Select which underlying provider to use with Semantic Kernel" FontSize="11" Foreground="Gray" Margin="0,5,0,0"/>
-        </StackPanel>
-    </Grid>
+    </ScrollViewer>
 </UserControl>
