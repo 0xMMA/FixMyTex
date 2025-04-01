@@ -1,0 +1,112 @@
+<UserControl x:Class="FixMyTex.Features.Common.Views.HomeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d">
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="10">
+                <!-- Welcome Section -->
+                <TextBlock Text="Welcome to FixMyTex" 
+                           FontSize="24" FontWeight="Bold" 
+                           Margin="0,0,0,15" />
+                           
+                <TextBlock TextWrapping="Wrap" Margin="0,0,0,15">
+                    FixMyTex enhances your writing with AI-powered grammar, style, and text improvements 
+                    - just a keyboard shortcut away.
+                </TextBlock>
+                
+                <!-- Quick Start -->
+                <TextBlock Text="Quick Start" 
+                           FontSize="18" FontWeight="SemiBold" 
+                           Margin="0,10,0,10" />
+                           
+                <Border Background="#F9F9F9" Padding="15" Margin="0,0,0,15"
+                        CornerRadius="5" BorderBrush="#EEEEEE" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock TextWrapping="Wrap" Margin="0,0,0,10">
+                            <Run FontWeight="Bold">1.</Run> Select text in any application
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Margin="0,0,0,10">
+                            <Run FontWeight="Bold">2.</Run> Press <TextBlock FontFamily="Consolas" Background="#F0F0F0" Padding="2,0">Ctrl+G</TextBlock> to enhance your text
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap">
+                            <Run FontWeight="Bold">3.</Run> Your text will be replaced with the improved version
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Features -->
+                <TextBlock Text="Key Features" 
+                           FontSize="18" FontWeight="SemiBold" 
+                           Margin="0,10,0,10" />
+                
+                <UniformGrid Columns="2" Margin="0,0,0,15">
+                    <Border Margin="0,0,5,5" Background="#F9F9F9" Padding="15" 
+                            CornerRadius="5" BorderBrush="#EEEEEE" BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock FontWeight="Bold">Multiple AI Providers</TextBlock>
+                            <TextBlock TextWrapping="Wrap">
+                                Support for OpenAI, Claude, and Microsoft Semantic Kernel
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+                    
+                    <Border Margin="5,0,0,5" Background="#F9F9F9" Padding="15" 
+                            CornerRadius="5" BorderBrush="#EEEEEE" BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock FontWeight="Bold">Smart Formatting</TextBlock>
+                            <TextBlock TextWrapping="Wrap">
+                                Detects source application and applies appropriate formatting
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+                    
+                    <Border Margin="0,5,5,0" Background="#F9F9F9" Padding="15" 
+                            CornerRadius="5" BorderBrush="#EEEEEE" BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock FontWeight="Bold">Global Hotkeys</TextBlock>
+                            <TextBlock TextWrapping="Wrap">
+                                Works across all applications with customizable shortcuts
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+                    
+                    <Border Margin="5,5,0,0" Background="#F9F9F9" Padding="15" 
+                            CornerRadius="5" BorderBrush="#EEEEEE" BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock FontWeight="Bold">Minimal Interface</TextBlock>
+                            <TextBlock TextWrapping="Wrap">
+                                Runs in the background with minimal workflow interruption
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+                </UniformGrid>
+                
+                <!-- Coming Soon -->
+                <TextBlock Text="Coming Soon" 
+                           FontSize="18" FontWeight="SemiBold" 
+                           Margin="0,10,0,10" />
+                
+                <Border Background="#F0F7FF" Padding="15" Margin="0,0,0,15"
+                        CornerRadius="5" BorderBrush="#D0E0FF" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock TextWrapping="Wrap" Margin="0,0,0,8">
+                            <Run FontWeight="Bold">• Quick Actions:</Run> Radial menu for quick text transformations
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Margin="0,0,0,8">
+                            <Run FontWeight="Bold">• Smart Selection:</Run> OCR and screenshot integration
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Margin="0,0,0,8">
+                            <Run FontWeight="Bold">• Prompt Blocks:</Run> Modular prompt architecture
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap">
+                            <Run FontWeight="Bold">• API Key Management:</Run> In-app configuration
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
