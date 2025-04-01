@@ -3,6 +3,7 @@ using System.Drawing;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using FixMyTex.Features.AIConfiguration.Views;
@@ -201,6 +202,90 @@ public partial class MainWindow : Window
     {
         setActiveNavButton(NavAbout);
         _viewModel.CurrentView = _aboutView;
+    }
+    
+    #endregion
+    
+    #region Window Controls
+    
+    /// <summary>
+    /// Handles drag movement of the window when clicking on the header
+    /// </summary>
+    private void WindowHeader_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ClickCount == 2)
+        {
+            // Double-click to maximize/restore
+            WindowState = WindowState == WindowState.Maximized 
+                ? WindowState.Normal 
+                : WindowState.Maximized;
+        }
+        else
+        {
+            // Single click to drag
+            DragMove();
+        }
+    }
+    
+    /// <summary>
+    /// Handles the minimize button click
+    /// </summary>
+    private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState.Minimized;
+    }
+    
+    /// <summary>
+    /// Handles the close button click
+    /// </summary>
+    private void CloseButton_Click(object sender, RoutedEventArgs e)
+    {
+        Close();
+    }
+    
+    /// <summary>
+    /// Handles the resize grip mouse down event for resizing the window
+    /// </summary>
+    private void ResizeGrip_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (Mouse.Capture(sender as UIElement))
+        {
+            // Start a resize drag operation
+            this.ResizeMode = ResizeMode.CanResize;
+            _ = DragResizeStart(sender, e);
+        }
+    }
+    
+    private bool DragResizeStart(object sender, MouseButtonEventArgs e)
+    {
+        var window = this;
+        // Create a resize grip that tracks the mouse and updates window size
+        var gripPosition = e.GetPosition(window);
+        
+        window.MouseMove += ResizeMouseMove;
+        window.MouseLeftButtonUp += ResizeMouseLeftButtonUp;
+        
+        return true;
+        
+        void ResizeMouseMove(object moveSender, MouseEventArgs moveE)
+        {
+            var currentPosition = moveE.GetPosition(window);
+            var delta = new Vector(currentPosition.X - gripPosition.X, currentPosition.Y - gripPosition.Y);
+            
+            // Update the window width and height based on drag
+            window.Width = Math.Max(window.MinWidth, window.Width + delta.X);
+            window.Height = Math.Max(window.MinHeight, window.Height + delta.Y);
+            
+            // Update grip position for next move
+            gripPosition = currentPosition;
+        }
+        
+        void ResizeMouseLeftButtonUp(object upSender, MouseButtonEventArgs upE)
+        {
+            window.MouseMove -= ResizeMouseMove;
+            window.MouseLeftButtonUp -= ResizeMouseLeftButtonUp;
+            (sender as UIElement)?.ReleaseMouseCapture();
+        }
     }
     
     #endregion
