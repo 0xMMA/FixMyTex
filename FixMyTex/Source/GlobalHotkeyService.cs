@@ -1,9 +1,15 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
 
 using WindowsInput;
 using WindowsInput.Native;
+
+using FixMyTex.Features.QuickActions.Views;
+using FixMyTex.Features.QuickActions.Services;
 
 namespace FixMyTex;
 
@@ -11,7 +17,12 @@ public class GlobalHotkeyService
 {
     private          HwndSource?                   hwndSource;
     private readonly Dictionary<int, HotkeyConfig> hotkeyMap = new();
-
+    
+    // Double-press detection
+    private DateTime lastKeyPressTime = DateTime.MinValue;
+    private int lastHotkeyId = -1;
+    private const double DoublePressThresholdMs = 500; // 500ms threshold for double-press
+    
     private const int WM_HOTKEY = 0x0312;
 
     // Windows API calls
@@ -73,8 +84,32 @@ public class GlobalHotkeyService
             var hotkeyId = wParam.ToInt32();
             if (hotkeyMap.TryGetValue(hotkeyId, out var hotKeyConfig))
             {
-                // Fire an event or handle logic here. We'll just do the logic in place.
-                _       = HandleHotkeyActionAsync(hotKeyConfig);
+                _ = HandleQuickActionsWindowAsync(hotKeyConfig);
+                //// Check for double press
+                //var now = DateTime.Now;
+                //bool isDoublePress = false;
+                
+                //if (lastHotkeyId == hotkeyId && 
+                //    (now - lastKeyPressTime).TotalMilliseconds < DoublePressThresholdMs)
+                //{
+                //    // This is a double press
+                //    isDoublePress = true;
+                //}
+                
+                //// Update last key press time and ID
+                //lastKeyPressTime = now;
+                //lastHotkeyId = hotkeyId;
+                
+                //// Handle differently based on single or double press
+                //if (isDoublePress)
+                //{
+                //    _ = HandleQuickActionsWindowAsync(hotKeyConfig);
+                //}
+                //else
+                //{
+                //    _ = HandleHotkeyActionAsync(hotKeyConfig);
+                //}
+                
                 handled = true;
             }
         }
@@ -95,7 +130,7 @@ public class GlobalHotkeyService
             string originalText = ClipboardService.GetClipboardText();
             if (string.IsNullOrWhiteSpace(originalText))
             {
-                MessageBox.Show("No text in clipboard!");
+                System.Windows.MessageBox.Show("No text in clipboard!");
                 return;
             }
 
@@ -150,7 +185,45 @@ public class GlobalHotkeyService
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error: {ex.Message}");
+            System.Windows.MessageBox.Show($"Error: {ex.Message}");
+        }
+    }
+
+    // Method to handle showing the QuickActions window on double press
+    private async Task HandleQuickActionsWindowAsync(HotkeyConfig config)
+    {
+        try
+        {
+            // Get the selected text for the QuickActions window
+            var simulator = new InputSimulator();
+            simulator.Keyboard.ModifiedKeyStroke(VirtualKeyCode.CONTROL, VirtualKeyCode.VK_C);
+            await Task.Delay(100);
+
+            string selectedText = ClipboardService.GetClipboardText();
+            if (string.IsNullOrWhiteSpace(selectedText))
+            {
+                // If no text is selected, we can still show the window with empty text
+                selectedText = string.Empty;
+            }
+
+            // Create services for QuickActions window
+            var quickActionService = new Features.QuickActions.Services.MockQuickActionService();
+            var textEnhancementService = new Features.QuickActions.Services.MockTextEnhancementService();
+
+            // Create and show QuickActions window
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                var quickActionsWindow = new Features.QuickActions.Views.QuickActionsWindow(
+                    quickActionService,
+                    textEnhancementService,
+                    selectedText);
+                
+                quickActionsWindow.Show();
+            });
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show($"Error showing Quick Actions: {ex.Message}");
         }
     }
 

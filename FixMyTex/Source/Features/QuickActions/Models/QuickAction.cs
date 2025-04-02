@@ -41,16 +41,5 @@ namespace FixMyTex.Features.QuickActions.Models
         public required string Prompt { get; set; }
     }
     
-    /// <summary>
-    /// Categories of quick actions
-    /// </summary>
-    public enum QuickActionCategory
-    {
-        Fix,        // Basic improvements (grammar, spelling)
-        Style,      // Tone/voice changes
-        Transform,  // Fundamental changes (summarize, expand)
-        Extract,    // Pull specific elements (key points, action items)
-        Analyze,    // Provide insights about the text
-        Contextualize // Adapt for audience/purpose
-    }
+   
 }
