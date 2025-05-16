@@ -275,21 +275,9 @@
                                    Margin="0,0,0,8"/>
                         
                         <StackPanel Grid.Row="1" Orientation="Horizontal">
-                            <Button Content="Apply (Enter)" 
-                                    Background="#2196F3" 
-                                    Foreground="White"
-                                    BorderThickness="0"
-                                    Padding="16,8"
-                                    Margin="0,0,8,0"
-                                    Command="{Binding ApplyEnhancementsCommand}"/>
                             
-                            <Button Content="Cancel (Esc)" 
-                                    Background="#333333" 
-                                    Foreground="White"
-                                    BorderThickness="0"
-                                    Padding="16,8"
-                                    Margin="0,0,8,0"
-                                    Command="{Binding CancelCommand}"/>
+                            
+                           
                             
                             <Button Content="Save Preset" 
                                     Background="#333333" 
@@ -298,13 +286,22 @@
                                     Padding="16,8"
                                     Margin="0,0,8,0"
                                     Command="{Binding SavePresetCommand}"/>
-                            
-                            <Button Content="Advanced" 
+
+                            <Button Content="Cancel (Esc)" 
                                     Background="#333333" 
                                     Foreground="White"
                                     BorderThickness="0"
                                     Padding="16,8"
-                                    Margin="0"/>
+                                    Margin="0,0,8,0"
+                                    Command="{Binding CancelCommand}"/>
+
+                            <Button Content="Apply (Enter)" 
+                                    Background="#2196F3" 
+                                    Foreground="White"
+                                    BorderThickness="0"
+                                    Padding="16,8"
+                                    Margin="0,0,8,0"
+                                    Command="{Binding ApplyEnhancementsCommand}"/>
                         </StackPanel>
                     </Grid>
                 </Border>
