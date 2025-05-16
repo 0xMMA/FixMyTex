@@ -31,6 +31,21 @@
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="Margin" Value="0,0,0,8"/>
     </Style>
+    
+    <!-- Button Text Styles -->
+    <Style x:Key="ButtonPrimaryTextStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    
+    <Style x:Key="ButtonSecondaryTextStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="8"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}"/>
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="Margin" Value="0,-2,0,0"/>
+    </Style>
 
     <!-- Border Styles -->
     <Style x:Key="CardBorderStyle" TargetType="Border">
