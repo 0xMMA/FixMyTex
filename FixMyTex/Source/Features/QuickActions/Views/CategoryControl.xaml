@@ -6,49 +6,61 @@
             xmlns:local="clr-namespace:FixMyTex.Features.QuickActions.Views"
             xmlns:viewModels="clr-namespace:FixMyTex.Features.QuickActions.ViewModels"
             xmlns:models="clr-namespace:FixMyTex.Features.QuickActions.Models"
+            xmlns:controls="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
+            d:DataContext="{d:DesignInstance Type=viewModels:CategoryViewModel, IsDesignTimeCreatable=True}"
             x:Name="ThisControl"
             mc:Ignorable="d">
     <Border Background="#1E1E1E" BorderBrush="#333333" BorderThickness="1" CornerRadius="8" Margin="4">
-        <Grid>
+        <Grid x:Name="localGrid">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            
+
             <!-- Category Title -->
             <TextBlock Grid.Row="0" 
-                       Text="{Binding Title, ElementName=ThisControl}" 
-                       Foreground="{Binding Color, ElementName=ThisControl, Converter={StaticResource StringToBrushConverter}}"
+                       Text="{Binding Title}"
+                       Foreground="{Binding Color, Converter={StaticResource StringToBrushConverter}}"
                        FontWeight="Bold" 
                        FontSize="16" 
                        HorizontalAlignment="Center"
                        Margin="0,8,0,6"/>
-            
+
             <!-- Quick Action Buttons -->
-            <ItemsControl Grid.Row="1" 
-                         ItemsSource="{Binding QuickActions, ElementName=ThisControl}">
+            <ItemsControl Grid.Row="1" ScrollViewer.CanContentScroll="True" 
+                          ItemsSource="{Binding QuickActions}"
+                          MaxHeight="110"
+                          >
+                
                 <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type models:QuickAction}">
-                        <local:QuickActionButton 
+                        <ItemsPanelTemplate>
+                        <controls:VirtualizingWrapPanel 
+                            SpacingMode="BetweenItemsOnly"
+                            AllowDifferentSizedItems="True" 
+                            Orientation="Vertical"
+                            StretchItems="False"
+                            />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type models:QuickAction}">
+                            <local:QuickActionButton 
+                            HorizontalAlignment="Left"
                             Number="{Binding ShortcutNumber}"
                             Text="{Binding Name}"
-                            NumberBackground="{Binding Color, ElementName=ThisControl, Converter={StaticResource StringToBrushConverter}}"
-                            Command="{Binding SelectQuickActionCommand, ElementName=ThisControl}"
+                            NumberBackground="{Binding Color, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource StringToBrushConverter}}"
+                            Command="{Binding SelectQuickActionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}"
-                            Margin="2"/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-            
+                            />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
             <!-- Additional Options -->
+            <!--
             <ItemsControl Grid.Row="2" 
-                         ItemsSource="{Binding AdditionalOptions, ElementName=ThisControl}"
+                         ItemsSource="{Binding AdditionalOptions}"
                          Margin="0,4,0,8">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -66,7 +78,7 @@
                         </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
-            </ItemsControl>
+            </ItemsControl>-->
         </Grid>
     </Border>
 </UserControl>

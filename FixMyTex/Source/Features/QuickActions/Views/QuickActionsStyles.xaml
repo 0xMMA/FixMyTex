@@ -20,9 +20,9 @@
     <viewModels:CategoryToBrushConverter x:Key="CategoryToBrushConverter"/>
     
     <!-- Button Styles -->
-    <Style x:Key="QuickActionButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
-        <Setter Property="Padding" Value="8,4"/>
-        <Setter Property="Margin" Value="4"/>
+    <Style x:Key="QuickActionButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Padding" Value="8"/>
+        <Setter Property="Margin" Value="8"/>
     </Style>
 
     <!-- Text Styles -->

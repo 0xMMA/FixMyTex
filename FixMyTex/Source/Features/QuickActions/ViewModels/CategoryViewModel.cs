@@ -10,12 +10,16 @@ namespace FixMyTex.Features.QuickActions.ViewModels
     {
         private string _title;
         private string _color;
-        
+
+        public CategoryViewModel()
+        {
+            //DESIGNER ONLY
+        }
         public CategoryViewModel(QuickActionCategory category)
         {
             Category = category;
-            QuickActions = new ObservableCollection<QuickAction>();
-            AdditionalOptions = new ObservableCollection<string>();
+            QuickActions = [];
+            AdditionalOptions = [];
             
             // Set title and color based on category
             SetDisplayProperties(category);

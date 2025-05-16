@@ -21,7 +21,11 @@ namespace FixMyTex.Features.QuickActions.ViewModels
         private QuickActionCategory _selectedCategory = QuickActionCategory.Fix;
         private bool _isEnhancing = false;
         private ObservableCollection<QuickAction> _activeQuickActions = new();
-        
+
+        public QuickActionsViewModel()
+        {
+            // only for designer!
+        }
         public QuickActionsViewModel(
             IQuickActionService quickActionService,
             ITextEnhancementService textEnhancementService)
@@ -37,7 +41,7 @@ namespace FixMyTex.Features.QuickActions.ViewModels
             SavePresetCommand = new RelayCommand(async () => await SavePreset(), () => ActiveQuickActions.Any());
             
             // Initialize categories
-            Categories = new ObservableCollection<CategoryViewModel>();
+            Categories = [];
             
             // Start initialization - don't ConfigureAwait(false) since we need to update UI
             _ = InitializeCategoriesAsync();
