@@ -6,16 +6,18 @@
         xmlns:local="clr-namespace:FixMyTex.Features.QuickActions.Views"
         xmlns:viewModels="clr-namespace:FixMyTex.Features.QuickActions.ViewModels"
         xmlns:ic="clr-namespace:FluentIcons.Wpf;assembly=FluentIcons.Wpf"
+        xmlns:controls="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
         mc:Ignorable="d"
         Title="Quick Actions" 
         Width="1000" Height="700"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
-        ResizeMode="CanResize"
+        ResizeMode="CanResizeWithGrip"
         WindowStartupLocation="CenterScreen"
-        ShowInTaskbar="False"
+        ShowInTaskbar="True"
         Topmost="True"
+        d:DataContext="{d:DesignInstance Type=viewModels:QuickActionsViewModel, IsDesignTimeCreatable=True}"
         KeyDown="Window_KeyDown">
     
     <Window.Resources>
@@ -26,7 +28,7 @@
     </Window.Resources>
     
     <Border Background="#1E1E1E" BorderBrush="#333333" BorderThickness="1" CornerRadius="10">
-        <Grid>
+        <Grid x:Name="localGrid">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -71,15 +73,21 @@
             </Border>
             
             <!-- Categories -->
-            <ScrollViewer Grid.Row="1" 
-                          HorizontalScrollBarVisibility="Auto" 
-                          VerticalScrollBarVisibility="Disabled"
-                          Padding="8">
-                <ItemsControl ItemsSource="{Binding Categories}">
+            <!--<ScrollViewer Grid.Row="1"-->
+            <ItemsControl Grid.Row="1" ItemsSource="{Binding Categories}" 
+                          ScrollViewer.CanContentScroll="True" 
+                          >
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <WrapPanel Orientation="Horizontal"/>
-                        </ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" />
+                            <!--<controls:VirtualizingWrapPanel 
+                                SpacingMode="Uniform"
+                                AllowDifferentSizedItems="True" 
+                                Orientation="Horizontal"
+                                StretchItems="False"
+                                
+                            />-->
+                    </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
@@ -90,13 +98,11 @@
                                 AdditionalOptions="{Binding AdditionalOptions}"
                                 SelectQuickActionCommand="{Binding DataContext.SelectQuickActionCommand, 
                                     RelativeSource={RelativeSource AncestorType=Window}}"
-                                Width="180"
-                                Height="100"
-                                Margin="4"/>
+                                />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-            </ScrollViewer>
+            <!--</ScrollViewer>-->
             
             <!-- Text Comparison -->
             <Grid Grid.Row="2" Margin="12,0">

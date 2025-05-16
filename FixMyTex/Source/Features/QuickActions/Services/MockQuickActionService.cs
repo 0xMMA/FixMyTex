@@ -21,8 +21,8 @@ namespace FixMyTex.Features.QuickActions.Services
             {
                 // Fix category
                 new QuickAction { Id = "fix_grammar", Name = "Grammar", ShortcutNumber = 1, Category = QuickActionCategory.Fix, Prompt = "Fix grammar errors in the text" },
-                new QuickAction { Id = "fix_spelling", Name = "Spelling", ShortcutNumber = 2, Category = QuickActionCategory.Fix, Prompt = "Fix spelling errors in the text" },
-                new QuickAction { Id = "fix_punctuation", Name = "Punct.", ShortcutNumber = 3, Category = QuickActionCategory.Fix, Prompt = "Fix punctuation errors in the text" },
+                //new QuickAction { Id = "fix_spelling", Name = "Spelling", ShortcutNumber = 2, Category = QuickActionCategory.Fix, Prompt = "Fix spelling errors in the text" },
+                //new QuickAction { Id = "fix_punctuation", Name = "Punctation", ShortcutNumber = 3, Category = QuickActionCategory.Fix, Prompt = "Fix punctuation errors in the text" },
                 
                 // Style category
                 new QuickAction { Id = "style_formal", Name = "Formal", ShortcutNumber = 1, Category = QuickActionCategory.Style, Prompt = "Make the text more formal" },
