@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FixMyTex.Features.QuickActions.Views"
         xmlns:viewModels="clr-namespace:FixMyTex.Features.QuickActions.ViewModels"
+        xmlns:ic="clr-namespace:FluentIcons.Wpf;assembly=FluentIcons.Wpf"
         mc:Ignorable="d"
         Title="Quick Actions" 
         Width="1000" Height="700"
@@ -55,22 +56,15 @@
                                 Margin="4,0"
                                 ToolTip="Settings"
                                 Click="SettingsButton_Click">
-                            <Path Data="M9.3,2.2 L10.7,2.2 C11.3,2.2 11.8,2.7 11.9,3.3 L12.1,4.7 C12.3,4.9 12.5,5 12.6,5.1 L14,4.5 C14.6,4.3 15.2,4.5 15.5,5.1 L16.2,6.4 C16.5,6.9 16.4,7.6 16,8 L14.9,9 C14.9,9.3 14.9,9.7 14.9,10 C14.9,10.3 14.9,10.7 14.9,11 L16,12 C16.4,12.4 16.5,13.1 16.2,13.6 L15.5,14.9 C15.2,15.5 14.6,15.7 14,15.5 L12.6,14.9 C12.4,15 12.3,15.1 12.1,15.3 L11.9,16.7 C11.8,17.3 11.3,17.8 10.7,17.8 L9.3,17.8 C8.7,17.8 8.2,17.3 8.1,16.7 L7.9,15.3 C7.7,15.1 7.5,15 7.4,14.9 L6,15.5 C5.4,15.7 4.8,15.5 4.5,14.9 L3.8,13.6 C3.5,13.1 3.6,12.4 4,12 L5.1,11 C5.1,10.7 5.1,10.3 5.1,10 C5.1,9.7 5.1,9.3 5.1,9 L4,8 C3.6,7.6 3.5,6.9 3.8,6.4 L4.5,5.1 C4.8,4.5 5.4,4.3 6,4.5 L7.4,5.1 C7.6,5 7.7,4.9 7.9,4.7 L8.1,3.3 C8.2,2.7 8.7,2.2 9.3,2.2 Z M10,13.5 C11.9,13.5 13.5,11.9 13.5,10 C13.5,8.1 11.9,6.5 10,6.5 C8.1,6.5 6.5,8.1 6.5,10 C6.5,11.9 8.1,13.5 10,13.5 Z"
-                                  Fill="#CCCCCC"
-                                  Width="18" Height="18"
-                                  Stretch="Uniform"/>
+                            <ic:FluentIcon Icon="Settings" IconVariant="Regular" IconSize="Size20" Foreground="#CCCCCC"/>
                         </Button>
                         
                         <Button x:Name="CloseButton"
                                 Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
-                                
                                 Margin="4,0"
                                 Click="CloseButton_Click"
                                 ToolTip="Close">
-                            <Path Data="M0,0 L10,10 M0,10 L10,0"
-                                  Stroke="#CCCCCC"
-                                  StrokeThickness="1.5"
-                                  Width="10" Height="10"/>
+                            <ic:FluentIcon Icon="Dismiss" IconVariant="Regular" IconSize="Size20" Foreground="#CCCCCC"/>
                         </Button>
                     </StackPanel>
                 </Grid>
@@ -204,8 +198,7 @@
                         BorderThickness="1" 
                         CornerRadius="8"
                         Margin="0,0,8,0"
-                        MinHeight="80"
-                        Padding="12">
+                        Padding="13">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -260,8 +253,7 @@
                         BorderThickness="1" 
                         CornerRadius="8"
                         Margin="8,0,0,0"
-                        MinHeight="80"
-                        Padding="16">
+                        Padding="13">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -279,29 +271,102 @@
                             
                            
                             
-                            <Button Content="Save Preset" 
-                                    Background="#333333" 
+                            <Button Background="#333333" 
                                     Foreground="White"
                                     BorderThickness="0"
-                                    Padding="16,8"
+                                    Padding="13,8,13,4"
                                     Margin="0,0,8,0"
-                                    Command="{Binding SavePresetCommand}"/>
+                                    Command="{Binding SavePresetCommand}">
+                                <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
 
-                            <Button Content="Cancel (Esc)" 
-                                    Background="#333333" 
-                                    Foreground="White"
-                                    BorderThickness="0"
-                                    Padding="16,8"
-                                    Margin="0,0,8,0"
-                                    Command="{Binding CancelCommand}"/>
+                                    <!-- Icon -->
+                                    <ic:FluentIcon Grid.Row="0" Grid.Column="0" 
+                                                   Icon="Save" IconVariant="Regular" IconSize="Size20" 
+                                                   Margin="0,0,8,0"/>
 
-                            <Button Content="Apply (Enter)" 
-                                    Background="#2196F3" 
+                                    <!-- Save Preset Text -->
+                                    <TextBlock Grid.Row="0" Grid.Column="1" 
+                                               Text="Save Preset" Style="{StaticResource ButtonPrimaryTextStyle}"/>
+                                               
+                                    <!-- Spacer to match buttons with shortcuts -->
+                                    <TextBlock Grid.Row="1" Grid.Column="1" 
+                                               Text=" " 
+                                               Style="{StaticResource ButtonSecondaryTextStyle}" />
+                                </Grid>
+                            </Button>
+
+                            <Button Background="#333333" 
                                     Foreground="White"
                                     BorderThickness="0"
-                                    Padding="16,8"
+                                    Padding="13,8,13,4"
                                     Margin="0,0,8,0"
-                                    Command="{Binding ApplyEnhancementsCommand}"/>
+                                    Command="{Binding CancelCommand}">
+                                <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Icon -->
+                                    <ic:FluentIcon Grid.Row="0" Grid.Column="0" 
+                                                   Icon="Dismiss" IconVariant="Regular" IconSize="Size20" 
+                                                   Margin="0,0,8,0"/>
+
+                                    <!-- Cancel Text -->
+                                    <TextBlock Grid.Row="0" Grid.Column="1" 
+                                               Text="Cancel" Style="{StaticResource ButtonPrimaryTextStyle}"/>
+
+                                    <!-- Esc Text - positioned under Cancel -->
+                                    <TextBlock Grid.Row="1" Grid.Column="1" 
+                                               Text="(Esc)" 
+                                               Style="{StaticResource ButtonSecondaryTextStyle}"
+                                                />
+                                </Grid>
+                            </Button>
+
+                            <Button Background="#2196F3" 
+                                    Foreground="White"
+                                    BorderThickness="0"
+                                    Padding="13,8,13,4"
+                                    Margin="0,0,8,0"
+                                    Command="{Binding ApplyEnhancementsCommand}">
+                                <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Icon -->
+                                    <ic:FluentIcon Grid.Row="0" Grid.Column="0"  
+                                                   Icon="ArrowCircleRight" IconVariant="Regular" IconSize="Size20" 
+                                                   Margin="0,0,8,0"/>
+
+                                    <!-- Apply Text -->
+                                    <TextBlock Grid.Row="0" Grid.Column="1" 
+                                               Text="Apply" Style="{StaticResource ButtonPrimaryTextStyle}"/>
+
+                                    <!-- Enter Text - positioniert unter Apply -->
+                                    <TextBlock Grid.Row="1" Grid.Column="1" 
+                                               Text="(Enter)" 
+                                               Style="{StaticResource ButtonSecondaryTextStyle}" />
+                                </Grid>
+                            </Button>
                         </StackPanel>
                     </Grid>
                 </Border>
