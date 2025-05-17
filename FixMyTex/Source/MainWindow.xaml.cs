@@ -21,7 +21,7 @@ public partial class MainWindow : Window
     
     // Views
     private readonly HomeView _homeView = new();
-    private readonly APIConfigurationView _apiConfigView = new();
+    private readonly ApiConfigurationView _apiConfigView = new();
     private readonly AboutView _aboutView = new();
     
     // Last active nav button

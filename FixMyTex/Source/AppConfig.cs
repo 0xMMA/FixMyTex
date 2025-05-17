@@ -32,20 +32,13 @@ public class AppConfig
     public static Dictionary<AiServiceFactory.ServiceProvider, string> DefaultModels { get; } = new()
 
     {
-        [AiServiceFactory.ServiceProvider.OpenAI] = "gpt-4o",
+        [AiServiceFactory.ServiceProvider.OpenAi] = "gpt-4o",
 
         [AiServiceFactory.ServiceProvider.Claude] = "claude-3-5-haiku-latest",
 
-        [AiServiceFactory.ServiceProvider.SemanticKernel] =
-            DefaultSemanticKernelProvider == AiServiceFactory.SemanticKernelProvider.OpenAI ? "gpt-4o" : "claude-3-5-haiku-latest"
+        [AiServiceFactory.ServiceProvider.Google] = "gemini-2.0-flash-lite",
     };
 
-    /// <summary> Default Semantic Kernel provider </summary>
-    public static AiServiceFactory.SemanticKernelProvider DefaultSemanticKernelProvider 
-    { 
-        get => App.DefaultSemanticKernelProvider;
-        set => App.DefaultSemanticKernelProvider = value; 
-    }
 
     /// <summary> Hotkey configurations </summary>
     public List<HotkeyConfig>? Hotkeys { get; init; }
