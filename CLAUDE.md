@@ -12,17 +12,26 @@ dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true 
 ## Environment Setup
 - Set OPENAI_API_KEY environment variable for OpenAI API access
 - Set ANTHROPIC_API_KEY environment variable for Claude API access
+- Set AZURE_OPENAI_API_KEY environment variable for Azure OpenAI API access
+- Set HUGGINGFACE_API_KEY environment variable for HuggingFace API access
+- Set GOOGLE_API_KEY environment variable for Google AI (Gemini) API access
 - Target framework: .NET 9.0-windows with WPF
 
 ## AI Service Providers
-FixMyTex supports multiple AI service providers:
+FixMyTex uses LangChain to abstract AI service providers:
+
 - OpenAI (GPT models)
 - Claude (Anthropic models)
-- SemanticKernel (Microsoft's framework supporting both OpenAI and Claude)
+- Azure OpenAI (Microsoft's cloud-based OpenAI models)
+- HuggingFace (Open-source models)
+- Google (Gemini models)
+- Mock provider (for testing)
 
 Default models:
 - OpenAI: gpt-4o
 - Claude: claude-3-5-haiku-latest
+- Google: gemini-2.0-flash-lite
+- HuggingFace: meta-llama/Llama-3.1-8B-Instruct
 
 ## Code Style Guidelines
 - **Naming**: PascalCase for public members (classes, methods, properties), camelCase for private/internal
@@ -36,17 +45,27 @@ Default models:
 
 ## Project Structure
 - Source/ folder contains service classes and core functionality
-  - IAiService.cs: Interface for AI service providers
-  - OpenAiService.cs: Implementation for OpenAI
-  - ClaudeService.cs: Implementation for Anthropic's Claude
-  - SemanticKernelService.cs: Implementation using Microsoft's Semantic Kernel
-  - AiServiceFactory.cs: Factory to create AI service instances
+  - AiServiceFactory.cs: Factory to create LangChain-based ChatModel instances
   - AppConfig.cs: Application configuration including the default prompt
   - ClipboardHelper.cs/ClipboardService.cs: Handle clipboard functionality
   - GlobalHotkeyService.cs: Manages global keyboard shortcuts
   - HotkeyConfig.cs: Configuration for keyboard shortcuts
 - FixMyTex.Tests/ contains unit tests for the application
 - MainWindow handles UI interactions
+
+## LangChain Integration
+The application has been refactored to use LangChain's provider architecture:
+- **AI Providers**: Uses LangChain's ChatModel interface to abstract provider-specific APIs
+- **Provider Factory**: AiServiceFactory creates appropriate ChatModel instances
+- **Environment Variables**: Each provider uses its own environment variable for API keys
+- **Configuration**: Default models are specified in AppConfig.cs
+- **Provider Selection**: Users can choose between different AI providers in the UI
+
+Future planned features (see "feature pyradmidal structuring.md"):
+- Hybrid Chain-Agent Architecture
+- Multi-Stage Processing Pipeline
+- Memory and Learning systems
+- Visual debugging capabilities
 
 ## Formatting Tags
 The application uses specific tags to determine the formatting style:
@@ -89,6 +108,13 @@ Enhanced text selection capabilities:
 - OCR processing of selected screen areas
 - Image annotation capabilities
 - Integration with context for AI processing
+
+### Pyramidal Structuring (LangChain)
+Advanced email structuring with multi-stage processing:
+- Analysis chain for content extraction and intent analysis
+- Structure chain for hierarchy creation and organization
+- Validation with quality assurance
+- Memory system for user patterns and learning
 
 ## Testing
 - Unit tests use xUnit
