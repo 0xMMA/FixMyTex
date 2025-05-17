@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 
 namespace FixMyTex;
 
@@ -7,10 +6,8 @@ namespace FixMyTex;
 public partial class App : Application
 {
     // Default provider is always SemanticKernel
-    public static AiServiceFactory.ServiceProvider DefaultProvider { get; set; } = AiServiceFactory.ServiceProvider.SemanticKernel;
+    public static AiServiceFactory.ServiceProvider DefaultProvider { get; set; } = AiServiceFactory.ServiceProvider.OpenAi;
     
-    // Default SemanticKernel backend to use based on available API keys
-    public static AiServiceFactory.SemanticKernelProvider DefaultSemanticKernelProvider { get; set; } = AiServiceFactory.SemanticKernelProvider.OpenAI;
     
     /// <inheritdoc />
     protected override void OnStartup(StartupEventArgs e)
@@ -20,11 +17,23 @@ public partial class App : Application
         // Check environment variables to determine which backend for SemanticKernel
         if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("OPENAI_API_KEY", EnvironmentVariableTarget.User)))
         {
-            DefaultSemanticKernelProvider = AiServiceFactory.SemanticKernelProvider.OpenAI;
+            DefaultProvider = AiServiceFactory.ServiceProvider.OpenAi;
         }
         else if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY", EnvironmentVariableTarget.User)))
         {
-            DefaultSemanticKernelProvider = AiServiceFactory.SemanticKernelProvider.Claude;
+            DefaultProvider = AiServiceFactory.ServiceProvider.Claude;
+        }
+        else if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("HUGGINGFACE_API_KEY", EnvironmentVariableTarget.User)))
+        {
+            DefaultProvider = AiServiceFactory.ServiceProvider.HuggingFace;
+        }
+        else if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GOOGLE_API_KEY", EnvironmentVariableTarget.User)))
+        {
+            DefaultProvider = AiServiceFactory.ServiceProvider.Google;
+        }
+        else if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY", EnvironmentVariableTarget.User)))
+        {
+            DefaultProvider = AiServiceFactory.ServiceProvider.AzureOpenAi;
         }
         else
         {

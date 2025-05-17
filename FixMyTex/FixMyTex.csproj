@@ -71,12 +71,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Anthropic" Version="3.4.0" />
     <PackageReference Include="FluentIcons.WPF" Version="1.1.300" />
     <PackageReference Include="Hardcodet.Wpf.TaskbarNotification.Core" Version="2.0.0" />
     <PackageReference Include="InputSimulator" Version="1.0.4" />
-    <PackageReference Include="Microsoft.SemanticKernel" Version="1.40.1" />
-    <PackageReference Include="OpenAI" Version="2.2.0-beta.1" />
+    <PackageReference Include="LangChain" Version="0.17.0" />
     <PackageReference Include="VirtualizingWrapPanel" Version="2.1.2" />
   </ItemGroup>
 

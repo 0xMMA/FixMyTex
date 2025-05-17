@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
+﻿using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 
+using LangChain.Providers;
+
 using WindowsInput;
 using WindowsInput.Native;
-
-using FixMyTex.Features.QuickActions.Views;
-using FixMyTex.Features.QuickActions.Services;
 
 namespace FixMyTex;
 
@@ -84,22 +80,24 @@ public class GlobalHotkeyService
             var hotkeyId = wParam.ToInt32();
             if (hotkeyMap.TryGetValue(hotkeyId, out var hotKeyConfig))
             {
-                _ = HandleQuickActionsWindowAsync(hotKeyConfig);
+                //_ = HandleQuickActionsWindowAsync(hotKeyConfig);
+                _ = HandleHotkeyActionAsync(hotKeyConfig);
+
                 //// Check for double press
                 //var now = DateTime.Now;
                 //bool isDoublePress = false;
-                
+
                 //if (lastHotkeyId == hotkeyId && 
                 //    (now - lastKeyPressTime).TotalMilliseconds < DoublePressThresholdMs)
                 //{
                 //    // This is a double press
                 //    isDoublePress = true;
                 //}
-                
+
                 //// Update last key press time and ID
                 //lastKeyPressTime = now;
                 //lastHotkeyId = hotkeyId;
-                
+
                 //// Handle differently based on single or double press
                 //if (isDoublePress)
                 //{
@@ -109,7 +107,7 @@ public class GlobalHotkeyService
                 //{
                 //    _ = HandleHotkeyActionAsync(hotKeyConfig);
                 //}
-                
+
                 handled = true;
             }
         }
@@ -152,29 +150,36 @@ public class GlobalHotkeyService
             }
 
             // Add format tag prefix to the input text based on the detected format
-            string taggedText;
-            if (finalFormat.Equals("HTML", StringComparison.OrdinalIgnoreCase))
-            {
-                taggedText = "[HTML]\n" + originalText;
-            }
-            else if (finalFormat.Equals("Text", StringComparison.OrdinalIgnoreCase))
-            {
-                taggedText = "[MARKDOWN]\n" + originalText;
-            }
-            else
-            {
-                taggedText = "[PLAIN]\n" + originalText;
-            }
+            //string taggedText;
+            //if (finalFormat.Equals("HTML", StringComparison.OrdinalIgnoreCase))
+            //{
+            //    taggedText = "[HTML]\n" + originalText;
+            //}
+            //else if (finalFormat.Equals("Text", StringComparison.OrdinalIgnoreCase))
+            //{
+            //    taggedText = "[MARKDOWN]\n" + originalText;
+            //}
+            //else
+            //{
+            //    taggedText = "[PLAIN]\n" + originalText;
+            //}
 
             // Use the config's Prompt to process text with the tagged input
             // Create an AI service based on the current default provider
-            var aiService = AiServiceFactory.CreateService(
-                AppConfig.DefaultAiProvider, 
-                null, 
-                AppConfig.DefaultModels[AppConfig.DefaultAiProvider],
-                AppConfig.DefaultSemanticKernelProvider);
-            
-            string correctedText = await aiService.GetCorrectedTextAsync(config.Prompt ?? string.Empty, taggedText);
+            var chatModel = AiServiceFactory.CreateChatModel(
+                AppConfig.DefaultAiProvider,
+                null,
+                AppConfig.DefaultModels[AppConfig.DefaultAiProvider]
+            );
+
+            //OLD: string correctedText = await chatModel.GetCorrectedTextAsync(config.Prompt ?? string.Empty, taggedText);
+            string correctedText = await chatModel.GenerateAsync(
+                                       $"""
+                                        {config.Prompt!}
+                                        
+                                        {originalText}
+                                        """
+                                       );
 
             // Set the updated text to the clipboard with the chosen format
             ClipboardService.SetClipboardText(correctedText, finalFormat);

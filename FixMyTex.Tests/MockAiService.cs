@@ -1,29 +1,48 @@
+using System.Runtime.CompilerServices;
+
+using LangChain.Providers;
+
 namespace FixMyTex.Tests;
 
-/// <summary>
-/// Mock AI service for testing that doesn't make API calls
-/// </summary>
-public class MockAiService : IAiService
+/// <summary> Mock AI service for testing that doesn't make API calls </summary>
+public class MockAiService : ChatModel
 {
-    public async Task<string> GetCorrectedTextAsync(string prompt, string inputText)
+
+    /// <inheritdoc />
+    public MockAiService() : base("test") { }
+
+    /// <inheritdoc />
+    public override async IAsyncEnumerable<ChatResponse> GenerateAsync(
+        ChatRequest                                request,
+        ChatSettings?                              settings          = null,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
+        settings ??= ChatSettings.Default;
+
         // Simulate async operation
-        await Task.Delay(50);
-        
-        // Basic check to see if it includes format tags
+        await Task.Delay(50, cancellationToken);
+
+        string inputText = request.Messages.Last().Content;
+        string result;
+
         if (inputText.Contains("[HTML]"))
         {
-            // Make sure to remove the word "then" entirely to pass the test
-            return "We need to implement the authentication module with the <code>JWT token</code> approach. It's more secure <i>than</i> basic auth as we discussed earlier.";
+            result = "We need to implement the authentication module with the <code>JWT token</code> approach. It's more secure <i>than</i> basic auth as we discussed earlier.";
         }
         else if (inputText.Contains("[MARKDOWN]"))
         {
-            // Make sure to include both ** and _ formatting to pass the test
-            return "The new **React** component doesn't render properly in Safari. I think it's because we're using an _experimental feature_ that's not supported yet.";
+            result = "The new **React** component doesn't render properly in Safari. I think it's because we're using an _experimental feature_ that's not supported yet.";
         }
-        else // Plain or default
+        else
         {
-            return "They're going to the park later, and I might go too if it's not too cold.";
+            result = "They're going to the park later, and I might go too if it's not too cold.";
         }
+
+        yield return new ChatResponse
+        {
+            Messages     = [new(result, MessageRole.Ai)],
+            UsedSettings = settings
+        };
     }
+
 }

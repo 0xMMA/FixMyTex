@@ -1,89 +1,96 @@
+using LangChain.Providers;
+using LangChain.Providers.Anthropic;
+using LangChain.Providers.Azure;
+using LangChain.Providers.Google;
+using LangChain.Providers.HuggingFace;
+using LangChain.Providers.OpenAI;
+
 namespace FixMyTex;
 
-/// <summary>
-/// Factory for creating AI service instances
-/// </summary>
+/// <summary> Factory for creating AI service instances </summary>
 public static class AiServiceFactory
 {
-    /// <summary>
-    /// Supported AI service providers
-    /// </summary>
+
+    public static ChatModel CreateChatModel(
+        ServiceProvider serviceProvider = ServiceProvider.Claude,
+        string?         apiKey          = null,
+        string?         model           = null)
+    {
+        switch (serviceProvider)
+        {
+            case ServiceProvider.Claude:
+                string claudeApiKey = apiKey
+                                      ?? Environment.GetEnvironmentVariable(
+                                          "ANTHROPIC_API_KEY",
+                                          EnvironmentVariableTarget.User
+                                      )
+                                      ?? throw new ArgumentNullException(nameof(apiKey), "API key must be provided or set in environment variables");
+
+                var claudeProvider = new AnthropicProvider(claudeApiKey);
+
+                return new AnthropicChatModel(claudeProvider, model ?? "claude-3-5-haiku-latest");
+
+            case ServiceProvider.OpenAi:
+                string apiKeyToUse = apiKey
+                                     ?? Environment.GetEnvironmentVariable(
+                                         "OPENAI_API_KEY",
+                                         EnvironmentVariableTarget.User
+                                     )
+                                     ?? throw new ArgumentNullException(nameof(apiKey), "API key must be provided or set in environment variables");
+
+                var provider = new OpenAiProvider(apiKeyToUse);
+
+                return new OpenAiChatModel(provider, model ?? "gpt-4o");
+            case ServiceProvider.AzureOpenAi:
+                string azureApiKey = apiKey
+                                     ?? Environment.GetEnvironmentVariable(
+                                         "AZURE_OPENAI_API_KEY",
+                                         EnvironmentVariableTarget.User
+                                     )
+                                     ?? throw new ArgumentNullException(nameof(apiKey), "API key must be provided or set in environment variables");
+                var azureProvider = new AzureOpenAiProvider(azureApiKey, "TODO","TODO");
+                return new AzureOpenAiChatModel(azureProvider, model ?? "gpt-4o");
+
+            case ServiceProvider.HuggingFace:
+                string huggingFaceApiKey = apiKey
+                                           ?? Environment.GetEnvironmentVariable(
+                                               "HUGGINGFACE_API_KEY",
+                                               EnvironmentVariableTarget.User
+                                           )
+                                           ?? throw new ArgumentNullException(nameof(apiKey), "API key must be provided or set in environment variables");
+
+                var huggingFaceProvider = new HuggingFaceProvider(huggingFaceApiKey, new());
+
+                return new HuggingFaceChatModel(huggingFaceProvider, model ?? "meta-llama/Llama-3.1-8B-Instruct");
+
+            case ServiceProvider.Google:
+                string googleApiKey = apiKey
+                                      ?? Environment.GetEnvironmentVariable(
+                                          "GOOGLE_API_KEY",
+                                          EnvironmentVariableTarget.User
+                                      )
+                                      ?? throw new ArgumentNullException(nameof(apiKey), "API key must be provided or set in environment variables");
+
+                var googleProvider = new GoogleProvider(googleApiKey, new());
+
+                return new GoogleChatModel(googleProvider, model ?? "gemini-2.0-flash-lite");
+            case ServiceProvider.Mock:
+            default:
+                throw new ArgumentOutOfRangeException(nameof(serviceProvider), serviceProvider, null);
+        }
+    }
+
+    /// <summary> Supported AI service providers </summary>
     public enum ServiceProvider
     {
-        OpenAI,
+
         Claude,
-        SemanticKernel,
+        OpenAi,
+        AzureOpenAi,
+        HuggingFace,
+        Google,
         Mock // For testing
+
     }
-    
-    /// <summary>
-    /// Supported models for the SemanticKernel provider
-    /// </summary>
-    public enum SemanticKernelProvider
-    {
-        OpenAI,
-        Claude
-    }
-    
-    /// <summary>
-    /// Creates an instance of an AI service
-    /// </summary>
-    /// <param name="provider">The AI service provider to use</param>
-    /// <param name="apiKey">Optional API key</param>
-    /// <param name="model">Optional model name</param>
-    /// <param name="semanticKernelProvider">Optional semantic kernel provider (only applicable when provider is SemanticKernel)</param>
-    /// <returns>An instance of IAiService</returns>
-    public static IAiService CreateService(
-        ServiceProvider provider = ServiceProvider.SemanticKernel, 
-        string? apiKey = null, 
-        string? model = null,
-        SemanticKernelProvider semanticKernelProvider = SemanticKernelProvider.OpenAI)
-    {
-        return provider switch
-        {
-            ServiceProvider.OpenAI => new OpenAiService(apiKey, model ?? "gpt-4o"),
-            ServiceProvider.Claude => new ClaudeService(apiKey, model ?? "claude-3-5-haiku-latest"),
-            ServiceProvider.SemanticKernel => CreateSemanticKernelService(semanticKernelProvider, apiKey, model),
-            ServiceProvider.Mock => CreateMockService(),
-            _ => throw new ArgumentException($"Unsupported AI service provider: {provider}")
-        };
-    }
-    
-    /// <summary>
-    /// Creates a SemanticKernel service with the specified provider
-    /// </summary>
-    private static IAiService CreateSemanticKernelService(
-        SemanticKernelProvider provider, 
-        string? apiKey = null, 
-        string? model = null)
-    {
-        return provider switch
-        {
-            SemanticKernelProvider.OpenAI => new SemanticKernelService(
-                SemanticKernelService.ServiceProvider.OpenAI, 
-                apiKey, 
-                model),
-            SemanticKernelProvider.Claude => new SemanticKernelService(
-                SemanticKernelService.ServiceProvider.Anthropic, 
-                apiKey, 
-                model),
-            _ => throw new ArgumentException($"Unsupported Semantic Kernel provider: {provider}")
-        };
-    }
-    
-    /// <summary>
-    /// Creates a mock service for testing
-    /// </summary>
-    private static IAiService CreateMockService()
-    {
-#if DEBUG
-        var mockServiceType = Type.GetType("FixMyTex.Tests.MockAiService, FixMyTex.Tests");
-        if (mockServiceType != null)
-        {
-            return (IAiService)Activator.CreateInstance(mockServiceType)!;
-        }
-#endif
-        // Fallback to a simple stub if the mock class isn't available
-        return new OpenAiService();
-    }
+
 }

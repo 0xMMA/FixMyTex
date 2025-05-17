@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using FixMyTex.Features.QuickActions.Models;
 
 namespace FixMyTex.Features.QuickActions.Services
