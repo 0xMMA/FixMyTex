@@ -5,7 +5,8 @@ A desktop application that enhances your writing with AI-powered grammar, style,
 ## Features
 
 - **Instant Text Enhancement**: Press Ctrl+G to improve any selected text
-- **Multiple AI Providers**: Supports OpenAI, Claude
+- **LangChain Integration**: Flexible AI abstraction layer for advanced text processing
+- **Multiple AI Providers**: Supports OpenAI, Claude, (untested: Azure OpenAI, HuggingFace, and Google Gemini)
 - **Context-Aware Formatting**: Automatically detects source application and applies appropriate formatting (HTML, Markdown, or Plain text)
 - **Global Hotkeys**: Works across all applications with customizable keyboard shortcuts
 - **Minimal UI**: Runs in the background with minimal interruption to your workflow
@@ -15,7 +16,7 @@ A desktop application that enhances your writing with AI-powered grammar, style,
 ### Prerequisites
 - Windows operating system
 - .NET 9.0 runtime (or later)
-- API key for at least one of the supported AI services (OpenAI, Claude, etc.)
+- API key for at least one of the supported AI services
 
 ### Installation
 
@@ -24,7 +25,11 @@ A desktop application that enhances your writing with AI-powered grammar, style,
 2. Configure API keys:
    > API keys can be managed through the settings window
    - OpenAI: Set `OPENAI_API_KEY` environment variable
-   - Claude: Set `ANTHROPIC_API_KEY` environment variable  
+   - Claude: Set `ANTHROPIC_API_KEY` environment variable
+   (untested)
+   - Azure OpenAI: Set `AZURE_OPENAI_API_KEY` environment variable
+   - HuggingFace: Set `HUGGINGFACE_API_KEY` environment variable
+   - Google: Set `GOOGLE_API_KEY` environment variable
 
 3. Launch the application - it will automatically minimize to the system tray
 
@@ -69,12 +74,13 @@ To create a new release:
 
 ## Roadmap
 
+- [ ] [Pyramidal Structuring](docs/feature%20pyradmidal%20structuring.md) (LangChain-powered advanced processing)
 - [ ] [Quick Actions](docs/feature%20quick%20actions.md) (Radial Menu) -> **Prompt** (change tone, change style)
   - [ ] [Smart Selection](docs/feature%20smart%20selection.md) (screenshots, OCR rectangles + add/remove area)
 - [ ] [Prompt Blocks](docs/prompt%20blocks.md) - modular prompt architecture
 - [X] Interactive UI for configuration changes
 - [X] In-app API key management (instead of environment variables)
-- [ ] Additional AI model support and customization
+- [X] Multiple AI model support and customization
 - [ ] Quick chat functionality
 - [ ] Self-update capability
 - [ ] Installer package
@@ -90,4 +96,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Acknowledgments
 
 - Icons from [icons8.com](https://icons8.com)
-- Built with C# and WPF
+- Built with C#, WPF, and LangChain.NET
