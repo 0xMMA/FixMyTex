@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 
@@ -11,13 +11,14 @@ namespace FixMyTex;
 
 public class GlobalHotkeyService
 {
-    private          HwndSource?                   hwndSource;
-    private readonly Dictionary<int, HotkeyConfig> hotkeyMap = new();
+    private          HwndSource?                   _hwndSource;
+    private readonly Dictionary<int, HotkeyConfig> _hotkeyMap = new();
     
     // Double-press detection
-    private DateTime lastKeyPressTime = DateTime.MinValue;
-    private int lastHotkeyId = -1;
-    private const double DoublePressThresholdMs = 500; // 500ms threshold for double-press
+    private DateTime _lastKeyPressTime = DateTime.MinValue;
+    private int _lastHotkeyId = -1;
+    private readonly TimeSpan _doublePressThresholdMs = TimeSpan.FromMilliseconds(250);
+    private CancellationTokenSource? _singlePressCts;
     
     private const int WM_HOTKEY = 0x0312;
 
@@ -41,15 +42,15 @@ public class GlobalHotkeyService
     public void InitializeHotkeys(Window window, List<HotkeyConfig> hotkeys)
     {
         var helper = new WindowInteropHelper(window);
-        hwndSource = HwndSource.FromHwnd(helper.Handle);
-        hwndSource?.AddHook(WndProc);
+        _hwndSource = HwndSource.FromHwnd(helper.Handle);
+        _hwndSource?.AddHook(wndProc);
 
         foreach (var config in hotkeys)
         {
             if (!config.Enabled || string.IsNullOrWhiteSpace(config.Shortcut))
                 continue;
 
-            if (TryParseShortcut(config.Shortcut, out uint modifier, out uint key))
+            if (tryParseShortcut(config.Shortcut, out uint modifier, out uint key))
             {
                 int currentId = hotkeyCounter++;
                 if (!RegisterHotKey(helper.Handle, currentId, modifier, key))
@@ -57,7 +58,7 @@ public class GlobalHotkeyService
                     // Handle registration error if needed
                     continue;
                 }
-                hotkeyMap.Add(currentId, config);
+                _hotkeyMap.Add(currentId, config);
             }
         }
     }
@@ -65,58 +66,79 @@ public class GlobalHotkeyService
     public void CleanupHotkeys(Window window)
     {
         var helper = new WindowInteropHelper(window);
-        foreach (var kvp in hotkeyMap)
+        foreach (var kvp in _hotkeyMap)
         {
             UnregisterHotKey(helper.Handle, kvp.Key);
         }
-        hotkeyMap.Clear();
+        _hotkeyMap.Clear();
     }
 
     // WndProc to catch hotkey messages
-    private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    private IntPtr wndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
         if (msg == WM_HOTKEY)
         {
             var hotkeyId = wParam.ToInt32();
-            if (hotkeyMap.TryGetValue(hotkeyId, out var hotKeyConfig))
+            if (_hotkeyMap.TryGetValue(hotkeyId, out var hotKeyConfig))
             {
-                //_ = HandleQuickActionsWindowAsync(hotKeyConfig);
-                _ = HandleHotkeyActionAsync(hotKeyConfig);
+                var now = DateTime.Now;
+                var timeSinceLastPress = now - _lastKeyPressTime;
+                bool isDoublePress = false;
 
-                //// Check for double press
-                //var now = DateTime.Now;
-                //bool isDoublePress = false;
+                // Check if the same hotkey was pressed within the threshold
+                if (hotkeyId == _lastHotkeyId && timeSinceLastPress < _doublePressThresholdMs)
+                {
+                    // Cancel any pending single press
+                    _singlePressCts?.Cancel();
+                    _singlePressCts = null;
+                    
+                    isDoublePress = true;
+                    _lastHotkeyId = -1; // Reset to prevent multiple double presses
+                }
+                else
+                {
+                    // Start new press sequence
+                    _lastHotkeyId = hotkeyId;
+                    _lastKeyPressTime = now;
 
-                //if (lastHotkeyId == hotkeyId && 
-                //    (now - lastKeyPressTime).TotalMilliseconds < DoublePressThresholdMs)
-                //{
-                //    // This is a double press
-                //    isDoublePress = true;
-                //}
+                    // Cancel any existing single press
+                    _singlePressCts?.Cancel();
+                    _singlePressCts = new CancellationTokenSource();
+                    var token = _singlePressCts.Token;
 
-                //// Update last key press time and ID
-                //lastKeyPressTime = now;
-                //lastHotkeyId = hotkeyId;
+                    // Start a timer to handle single press if no double press occurs
+                    _ = Task.Delay(_doublePressThresholdMs)
+                            .ContinueWith(
+                                t =>
+                                {
+                                    if (!token.IsCancellationRequested && _lastHotkeyId == hotkeyId)
+                                    {
+                                        _lastHotkeyId = -1;
+                                        _ = handleHotkeyWithSimpleActionAsync(hotKeyConfig);
+                                    }
+                                },
+                                token,
+                                TaskContinuationOptions.None,
+                                TaskScheduler.FromCurrentSynchronizationContext()
+                            );
+                }
 
-                //// Handle differently based on single or double press
-                //if (isDoublePress)
-                //{
-                //    _ = HandleQuickActionsWindowAsync(hotKeyConfig);
-                //}
-                //else
-                //{
-                //    _ = HandleHotkeyActionAsync(hotKeyConfig);
-                //}
+
+                if (isDoublePress)
+                {
+                    _ = handleHotkeyWithWindowActionAsyncs(hotKeyConfig);
+                }
 
                 handled = true;
             }
         }
 
+
         return IntPtr.Zero;
     }
 
     // Example method to handle a hotkey press using the config
-    private async Task HandleHotkeyActionAsync(HotkeyConfig config)
+    private async Task handleHotkeyWithSimpleActionAsync(HotkeyConfig config)
     {
         try
         {
@@ -137,7 +159,7 @@ public class GlobalHotkeyService
             if (finalFormat.Equals("AUTO", StringComparison.OrdinalIgnoreCase))
             {
                 // We do process detection.
-                string activeProc = GetActiveProcessName().ToLower();
+                string activeProc = getActiveProcessName().ToLower();
                 // Hardcode detection for Outlook & Teams.
                 if (activeProc.Contains("outlook") || activeProc.Contains("teams"))
                 {
@@ -195,7 +217,7 @@ public class GlobalHotkeyService
     }
 
     // Method to handle showing the QuickActions window on double press
-    private async Task HandleQuickActionsWindowAsync(HotkeyConfig config)
+    private async Task handleHotkeyWithWindowActionAsyncs(HotkeyConfig config)
     {
         try
         {
@@ -232,7 +254,7 @@ public class GlobalHotkeyService
         }
     }
 
-    private static string GetActiveProcessName()
+    private static string getActiveProcessName()
     {
         IntPtr hwnd = GetForegroundWindow();
         if (hwnd == IntPtr.Zero)
@@ -252,7 +274,7 @@ public class GlobalHotkeyService
     }
 
     // Basic parser for something like "CTRL+SHIFT+G" -> (0x0002 + 0x0004, 0x47)
-    private bool TryParseShortcut(string shortcut, out uint modifier, out uint key)
+    private bool tryParseShortcut(string shortcut, out uint modifier, out uint key)
     {
         // Available mod bits: MOD_ALT=0x1, MOD_CONTROL=0x2, MOD_SHIFT=0x4, MOD_WIN=0x8.
         modifier = 0;
