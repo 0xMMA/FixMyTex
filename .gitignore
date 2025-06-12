@@ -399,4 +399,61 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
+# RustRover (JetBrains Rust IDE)
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Rust
+target/
+Cargo.lock
+**/*.rs.bk
+
+# Tauri
+src-tauri/target/
+src-tauri/WixTools/
+.tauri/
+
+# Angular
+dist/
+tmp/
+out-tsc/
+bazel-out/
+
+# Angular dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Angular environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Angular cache
+.angular/
+.nx/cache/
+
+# Angular build outputs
+*.ngfactory.ts
+*.ngstyle.ts
+
+# TypeScript
+*.tsbuildinfo
+*.tgz
+
+# ESLint cache
+.eslintcache
+
+# Storybook build outputs
+storybook-static/
+
+# Temporary folders
+tmp/
+temp/
+
 .claude/
