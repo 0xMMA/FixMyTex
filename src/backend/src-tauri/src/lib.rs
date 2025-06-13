@@ -1,8 +1,21 @@
 use tauri::{
     menu::{Menu, MenuItem},
     tray::{TrayIconBuilder, TrayIconEvent},
-    Manager,
+    AppHandle, Manager, WebviewWindow,
 };
+
+/// Gets the main application window
+fn get_main_window(app: &AppHandle) -> Option<WebviewWindow> {
+    app.get_webview_window("main")
+}
+
+/// Shows and focuses the main application window
+fn show_main_window(window: &WebviewWindow) {
+    let _ = window.unminimize();
+    let _ = window.show();
+    let _ = window.set_focus();
+    let _ = window.set_skip_taskbar(false);
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -32,11 +45,8 @@ pub fn run() {
                 .icon(app.default_window_icon().unwrap().clone())
                 .on_menu_event(move |app, event| match event.id.as_ref() {
                     "open" => {
-                        if let Some(window) = app.get_webview_window("main") {
-                            let _ = window.unminimize();
-                            let _ = window.show();
-                            let _ = window.set_focus();
-                            let _ = window.set_skip_taskbar(false);
+                        if let Some(window) = get_main_window(app) {
+                            show_main_window(&window);
                         }
                     }
                     "quit" => {
@@ -52,11 +62,8 @@ pub fn run() {
                     } = event
                     {
                         let app = tray.app_handle();
-                        if let Some(window) = app.get_webview_window("main") {
-                            let _ = window.unminimize();
-                            let _ = window.show();
-                            let _ = window.set_focus();
-                            let _ = window.set_skip_taskbar(false);
+                        if let Some(window) = get_main_window(&app) {
+                            show_main_window(&window);
                         }
                     }
                 })
@@ -73,7 +80,7 @@ pub fn run() {
                 }
                 _ => {}
             }
-})
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
