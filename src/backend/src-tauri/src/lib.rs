@@ -1,3 +1,9 @@
+use tauri::{
+    menu::{Menu, MenuItem},
+    tray::{TrayIconBuilder, TrayIconEvent},
+    Manager,
+};
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -14,8 +20,60 @@ pub fn run() {
                         .build(),
                 )?;
             }
+
+            // Create tray menu
+            let open_item = MenuItem::with_id(app, "open", "Open", true, None::<&str>)?;
+            let quit_item = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
+            let menu = Menu::with_items(app, &[&open_item, &quit_item])?;
+
+            // Create system tray
+            let _tray = TrayIconBuilder::with_id("main-tray")
+                .menu(&menu)
+                .icon(app.default_window_icon().unwrap().clone())
+                .on_menu_event(move |app, event| match event.id.as_ref() {
+                    "open" => {
+                        if let Some(window) = app.get_webview_window("main") {
+                            let _ = window.unminimize();
+                            let _ = window.show();
+                            let _ = window.set_focus();
+                            let _ = window.set_skip_taskbar(false);
+                        }
+                    }
+                    "quit" => {
+                        app.exit(0);
+                    }
+                    _ => {}
+                })
+                .on_tray_icon_event(|tray, event| {
+                    if let TrayIconEvent::Click {
+                        button: tauri::tray::MouseButton::Left,
+                        button_state: tauri::tray::MouseButtonState::Up,
+                        ..
+                    } = event
+                    {
+                        let app = tray.app_handle();
+                        if let Some(window) = app.get_webview_window("main") {
+                            let _ = window.unminimize();
+                            let _ = window.show();
+                            let _ = window.set_focus();
+                            let _ = window.set_skip_taskbar(false);
+                        }
+                    }
+                })
+                .build(app)?;
+
             Ok(())
         })
+        .on_window_event(|window, event| {
+            match event {
+                tauri::WindowEvent::CloseRequested { api, .. } => {
+                    // Prevent window from closing, hide it instead
+                    api.prevent_close();
+                    let _ = window.hide();
+                }
+                _ => {}
+            }
+})
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -2,9 +2,9 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "FixMyTex",
   "version": "0.1.0",
-  "identifier": "com.tauri.dev",
+  "identifier": "com.github.0xMMA.FixMyTex",
   "build": {
-    "frontendDist": "../frontend",
+    "frontendDist": "../../frontend/dist/frontend/browser",
     "devUrl": "http://localhost:4200",
     "beforeDevCommand": "cd ../frontend && ng serve",
     "beforeBuildCommand": "cd ../frontend && ng build"
