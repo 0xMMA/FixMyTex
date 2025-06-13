@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { register } from '@tauri-apps/plugin-global-shortcut';
+import { Event } from '@tauri-apps/api/event';
+import { Window } from '@tauri-apps/api/window';
+import { ShortcutManager } from './shortcut-manager';
 
 @Component({
   selector: 'app-root',
@@ -9,20 +11,36 @@ import { register } from '@tauri-apps/plugin-global-shortcut';
   styleUrl: './app.scss'
 })
 export class App implements OnInit {
-  protected title = 'frontend';
+  protected title = 'FixMyText';
+  private shortcutManager: ShortcutManager;
 
-  async ngOnInit() {
-    await this.registerGlobalShortcuts();
+
+  constructor() {
+    this.shortcutManager = new ShortcutManager();
   }
 
-  private async registerGlobalShortcuts() {
+  async ngOnInit() {
+    await this.shortcutManager.registerShortcuts();
+    await this.setupWindowEvents();
+  }
+
+
+  private async setupWindowEvents() {
     try {
-      await register('CommandOrControl+G', () => {
-        alert('Hello World');
+      const appWindow = Window.getCurrent();
+
+      // Listen for the window minimize events
+      await appWindow.listen('tauri://window-event', async (event: Event<any>) => {
+        console.log('Window state changed:', event.payload)
+        // const appWindow = Window.getCurrent();
+        // if (event.payload === 'minimize') {
+        //   // Hide to the tray instead of minimizing
+        //   await appWindow.hide();
+        //   console.log('Window minimized to tray');
+        // }
       });
-      console.log('Global shortcut Ctrl+G registered successfully');
     } catch (error) {
-      console.error('Failed to register global shortcut:', error);
+      console.error('Failed to setup window events:', error);
     }
   }
 }
