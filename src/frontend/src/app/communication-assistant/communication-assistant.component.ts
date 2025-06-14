@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MaterialModule } from '../shared/material.module';
 
 @Component({
   selector: 'app-communication-assistant',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MaterialModule],
   templateUrl: './communication-assistant.component.html',
   styleUrls: ['./communication-assistant.component.scss']
 })
@@ -54,8 +55,12 @@ export class CommunicationAssistantComponent {
     // In a real implementation, this would trigger text processing
   }
 
-  onTabChange(tab: string): void {
-    this.activeTab = tab;
+  onTabChange(tabIndex: number | string): void {
+    if (typeof tabIndex === 'number') {
+      this.activeTab = tabIndex === 0 ? 'draft' : 'original';
+    } else {
+      this.activeTab = tabIndex;
+    }
   }
 
   onTextChange(): void {

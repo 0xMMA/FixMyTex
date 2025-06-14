@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
+import { MaterialModule } from '../shared/material.module';
 import { CommunicationAssistantComponent } from './communication-assistant.component';
 
 @NgModule({
@@ -10,6 +11,7 @@ import { CommunicationAssistantComponent } from './communication-assistant.compo
     CommonModule,
     RouterModule,
     FormsModule,
+    MaterialModule,
     CommunicationAssistantComponent,
     RouterModule.forChild([
       {
