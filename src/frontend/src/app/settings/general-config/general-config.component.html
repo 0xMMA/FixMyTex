@@ -1,0 +1,49 @@
+<div class="settings-page">
+  <h1>General Settings</h1>
+  
+  <div class="settings-section">
+    <h2>Application</h2>
+    
+    <div class="setting-item">
+      <label class="setting-label">
+        <input type="checkbox" [(ngModel)]="autostart" (change)="onAutostartChange()">
+        Start application automatically at system startup
+      </label>
+      <p class="setting-description">
+        When enabled, FixMyTex will launch automatically when you log in to your computer.
+      </p>
+    </div>
+  </div>
+  
+  <div class="settings-section">
+    <h2>Keyboard Shortcuts</h2>
+    
+    <div class="setting-item">
+      <label class="setting-label" for="silentFixShortcut">Silent Fix Shortcut</label>
+      <input 
+        type="text" 
+        id="silentFixShortcut" 
+        [(ngModel)]="silentFixShortcut" 
+        (change)="onShortcutChange('Silent Fix', silentFixShortcut)"
+        class="shortcut-input"
+      >
+      <p class="setting-description">
+        Shortcut to quickly fix text without opening the UI.
+      </p>
+    </div>
+    
+    <div class="setting-item">
+      <label class="setting-label" for="uiAssistantShortcut">UI Assistant Shortcut</label>
+      <input 
+        type="text" 
+        id="uiAssistantShortcut" 
+        [(ngModel)]="uiAssistantShortcut" 
+        (change)="onShortcutChange('UI Assistant', uiAssistantShortcut)"
+        class="shortcut-input"
+      >
+      <p class="setting-description">
+        Shortcut to open the Communication Assistant UI.
+      </p>
+    </div>
+  </div>
+</div>

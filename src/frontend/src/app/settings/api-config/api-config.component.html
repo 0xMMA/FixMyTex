@@ -1,0 +1,62 @@
+<div class="settings-page">
+  <h1>API Configuration</h1>
+  
+  <div class="settings-section">
+    <h2>Provider Settings</h2>
+    
+    <div class="setting-item">
+      <label class="setting-label" for="provider">AI Provider</label>
+      <select 
+        id="provider" 
+        [(ngModel)]="selectedProvider" 
+        (change)="onProviderChange()"
+        class="select-input"
+      >
+        @for (provider of providers; track provider.id) {
+          <option [value]="provider.id">{{ provider.name }}</option>
+        }
+      </select>
+      <p class="setting-description">
+        Select the AI provider you want to use for text processing.
+      </p>
+    </div>
+    
+    <div class="setting-item">
+      <label class="setting-label" for="model">Model</label>
+      <select 
+        id="model" 
+        [(ngModel)]="selectedModel" 
+        (change)="onModelChange()"
+        class="select-input"
+      >
+        @for (model of availableModels; track model.id) {
+          <option [value]="model.id">{{ model.name }}</option>
+        }
+      </select>
+      <p class="setting-description">
+        <ng-container *ngIf="selectedModel">
+          {{ getModelDescription() }}
+        </ng-container>
+      </p>
+    </div>
+  </div>
+  
+  <div class="settings-section">
+    <h2>API Key</h2>
+    
+    <div class="setting-item">
+      <label class="setting-label" for="apiKey">API Key</label>
+      <input 
+        type="password" 
+        id="apiKey" 
+        [(ngModel)]="apiKey" 
+        (change)="onApiKeyChange()"
+        class="text-input"
+        placeholder="Enter your API key"
+      >
+      <p class="setting-description">
+        Your API key will be stored securely and used for all requests to the selected provider.
+      </p>
+    </div>
+  </div>
+</div>
