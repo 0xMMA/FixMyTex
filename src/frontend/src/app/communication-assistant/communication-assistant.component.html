@@ -1,0 +1,108 @@
+<div class="communication-assistant">
+  <!-- Left panel: Settings controls -->
+  <div class="settings-panel">
+    <h2>Settings</h2>
+
+    <div class="setting-group">
+      <label for="communicationStyle">Communication Style</label>
+      <select 
+        id="communicationStyle" 
+        [(ngModel)]="selectedStyle" 
+        (change)="onStyleChange()"
+        class="select-input"
+      >
+        @for (style of communicationStyles; track style.id) {
+          <option [value]="style.id">{{ style.name }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="setting-group">
+      <label for="relationshipLevel">Relationship Level</label>
+      <select 
+        id="relationshipLevel" 
+        [(ngModel)]="selectedRelationship" 
+        (change)="onRelationshipChange()"
+        class="select-input"
+      >
+        @for (level of relationshipLevels; track level.id) {
+          <option [value]="level.id">{{ level.name }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="setting-group checkbox-group">
+      <label class="checkbox-label">
+        <input 
+          type="checkbox" 
+          [(ngModel)]="enablePyramidalStructuring" 
+          (change)="onPyramidalStructuringChange()"
+        >
+        Enable Pyramidal Structuring
+      </label>
+      <p class="setting-description">
+        Organizes content in a hierarchical structure for better readability
+      </p>
+    </div>
+  </div>
+
+  <!-- Middle panel: Text display and actions -->
+  <div class="text-panel">
+    <!-- Tabs for Draft/Original -->
+    <div class="text-tabs">
+      <button 
+        class="tab-button" 
+        [class.active]="activeTab === 'draft'"
+        (click)="onTabChange('draft')"
+      >
+        Draft
+      </button>
+      <button 
+        class="tab-button" 
+        [class.active]="activeTab === 'original'"
+        (click)="onTabChange('original')"
+      >
+        Original
+      </button>
+    </div>
+
+    <!-- Text area -->
+    <div class="text-content">
+      @if (activeTab === 'draft') {
+        <textarea 
+          class="text-area" 
+          [(ngModel)]="draftText" 
+          (input)="onTextChange()"
+          placeholder="Your processed text will appear here..."
+        ></textarea>
+      } @else {
+        <textarea 
+          class="text-area" 
+          [(ngModel)]="originalText" 
+          (input)="onTextChange()"
+          placeholder="Enter or paste your text here..."
+        ></textarea>
+      }
+    </div>
+
+    <!-- Action buttons -->
+    <div class="action-buttons">
+      <button class="action-button" (click)="processText('concise')">Make Concise</button>
+      <button class="action-button" (click)="processText('expand')">Add Detail</button>
+      <button class="action-button" (click)="processText('persuasive')">Make Persuasive</button>
+      <button class="action-button" (click)="processText('neutral')">Make Neutral</button>
+      <button class="action-button" (click)="processText('diplomatic')">Make Diplomatic</button>
+      <button class="action-button" (click)="processText('direct')">Make Direct</button>
+      <button class="action-button" (click)="processText('casual')">Make Casual</button>
+      <button class="action-button" (click)="processText('professional')">Make Professional</button>
+    </div>
+  </div>
+
+  <!-- Right panel: History -->
+  <div class="history-panel">
+    <h2>History</h2>
+    <div class="history-view">
+      <p>History view will be implemented in a future update.</p>
+    </div>
+  </div>
+</div>
