@@ -1,17 +1,19 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { Event } from '@tauri-apps/api/event';
 import { Window } from '@tauri-apps/api/window';
 import { ShortcutManager } from './shortcut-manager';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  standalone: true,
+  imports: [RouterOutlet, CommonModule],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
 export class App implements OnInit {
-  protected title = 'FixMyText';
+  protected title = 'FixMyTex';
   private shortcutManager: ShortcutManager;
 
 
