@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
-import { Location } from '@angular/common';
+import { RouterOutlet, Router, NavigationEnd, Event as RouterEvent } from '@angular/router';
+//import { Location } from '@angular/common';
 import { CommonModule } from '@angular/common';
-import { Event } from '@tauri-apps/api/event';
+import { Event as TauriEvent } from '@tauri-apps/api/event';
 import { Window } from '@tauri-apps/api/window';
-import { MessageBusService } from './services/message-bus.service';
+//import { MessageBusService } from './services/message-bus.service';
 import { SingleClickHandler } from './handlers/single-click-handler';
-import { ShortcutManagerService } from './services/shortcut-manager.service';
+//import { ShortcutManagerService } from './services/shortcut-manager.service';
 import { filter } from 'rxjs/operators';
 
 @Component({
@@ -22,11 +22,11 @@ export class App implements OnInit {
 
 
   constructor(
-    private messageBus: MessageBusService,
+    //private messageBus: MessageBusService,
     private singleClickHandler: SingleClickHandler,
-    private shortcutManagerService: ShortcutManagerService,
-    private router: Router,
-    private location: Location
+    //private shortcutManagerService: ShortcutManagerService,
+    private router: Router
+    //private location: Location
   ) {}
 
   async ngOnInit() {
@@ -38,13 +38,13 @@ export class App implements OnInit {
 
     // Subscribe to router events to track when we're on the main page
     this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
+      filter((event: RouterEvent) => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
       // Check if we're on the main page (assistant route)
       this.isMainPage = event.url === '/assistant' || event.url === '/';
     });
 
-    // Check initial route
+    // Check the initial route
     const currentUrl = this.router.url;
     this.isMainPage = currentUrl === '/assistant' || currentUrl === '/';
 
@@ -61,13 +61,13 @@ export class App implements OnInit {
       const appWindow = Window.getCurrent();
 
       // Listen for the window minimize events
-      await appWindow.listen('tauri://window-event', async (event: Event<any>) => {
+      await appWindow.listen('tauri://window-event', async (event: TauriEvent<any>) => {
         console.log('Window state changed:', event.payload)
         // const appWindow = Window.getCurrent();
         // if (event.payload === 'minimize') {
         //   // Hide to the tray instead of minimizing
         //   await appWindow.hide();
-        //   console.log('Window minimized to tray');
+        //   console.log('Window minimized to the tray');
         // }
       });
     } catch (error) {
@@ -79,13 +79,17 @@ export class App implements OnInit {
    * Navigate to the settings page
    */
   navigateToSettings(): void {
-    this.router.navigate(['/settings']);
-  }
+    this.router.navigate(['/settings']).catch(error => {
+        console.error('Failed to navigate to settings:', error);
+    });
+}
 
   /**
    * Navigate back to the previous page
    */
   navigateToMain(): void {
-    this.router.navigate(['/assistant']);
+     this.router.navigate(['/assistant']).catch(error => {
+       console.error('Failed to navigate to assistant page:', error);
+     })
   }
 }
