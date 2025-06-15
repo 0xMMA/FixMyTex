@@ -87,8 +87,8 @@ mod internal {
     #[cfg(target_os = "windows")]
     pub fn send_keyboard_shortcut_windows(shortcut: KeyboardShortcut) -> Result<(), io::Error> {
         use ::windows::Win32::UI::Input::KeyboardAndMouse::{
-            INPUT, INPUT_0, INPUT_KEYBOARD, KEYBDINPUT, KEYBD_EVENT_FLAGS, KEYEVENTF_KEYUP, 
-            VK_CONTROL, VK_C, VK_V, SendInput,
+            SendInput, INPUT, INPUT_0, INPUT_KEYBOARD, KEYBDINPUT, KEYBD_EVENT_FLAGS,
+            KEYEVENTF_KEYUP, VK_C, VK_CONTROL, VK_V,
         };
 
         let key = match shortcut {
