@@ -8,7 +8,9 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "tauri": "tauri",
-    "tauri build": "tauri build"
+    "tauri build": "tauri build",
+    "tauri dev": "tauri dev",
+    "init": "echo 'Tauri project already initialized'"
   },
   "private": true,
   "dependencies": {
