@@ -58,14 +58,14 @@ jobs:
         TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY || '' }}
         TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD || '' }}
       with:
-        projectPath: './src/backend'
+        projectPath: './src/backend/src-tauri'
         tauriScript: 'cargo'
         args: '--release'
         tagName: v${{ steps.get_version.outputs.VERSION }}
         releaseName: FixMyTex v${{ steps.get_version.outputs.VERSION }}
         releaseBody: |
           ## FixMyTex Release v${{ steps.get_version.outputs.VERSION }}
-          
+
           ## INFRASTRUCTURE UPDATE
           - Switched from .NET WPF to Rust (Tauri + Angular + Material)
 
