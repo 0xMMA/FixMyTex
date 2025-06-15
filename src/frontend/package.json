@@ -6,11 +6,7 @@
     "start": "ng serve",
     "build": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "tauri": "tauri",
-    "tauri build": "tauri build",
-    "tauri dev": "tauri dev",
-    "init": "echo 'Tauri project already initialized'"
+    "test": "ng test"
   },
   "private": true,
   "dependencies": {

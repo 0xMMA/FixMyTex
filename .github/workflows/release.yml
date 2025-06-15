@@ -46,6 +46,16 @@ jobs:
         cd src/frontend
         npm ci
 
+    - name: Install backend dependencies
+      run: |
+        cd src/backend
+        npm ci
+
+    - name: Build frontend
+      run: |
+        cd src/frontend
+        npm run build
+
     - name: Build and release Tauri app
       uses: tauri-apps/tauri-action@v0
       env:
@@ -53,9 +63,9 @@ jobs:
         TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY || '' }}
         TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD || '' }}
       with:
-        projectPath: './src/frontend'
-        tauriScript: 'npm'
-        args: 'run tauri build'
+        projectPath: './src/backend/src-tauri'
+        tauriScript: 'cargo'
+        args: '--release'
         tagName: v${{ steps.get_version.outputs.VERSION }}
         releaseName: FixMyTex v${{ steps.get_version.outputs.VERSION }}
         releaseBody: |
