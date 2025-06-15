@@ -41,6 +41,9 @@
       "endpoints": [
         "https://github.com/0xMMA/FixMyTex/releases/latest/download/latest.json"
       ]
-    }
+    },
+    "process": {
+      "relaunch": true
     }
   }
+}
