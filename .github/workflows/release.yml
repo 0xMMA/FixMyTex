@@ -36,6 +36,9 @@ jobs:
         cache: 'npm'
         cache-dependency-path: './src/frontend/package-lock.json'
 
+    - name: Install Angular CLI globally
+      run: npm install -g @angular/cli
+
     - name: Setup Rust
       uses: dtolnay/rust-toolchain@stable
       with:
