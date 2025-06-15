@@ -16,8 +16,7 @@ A desktop application that enhances your writing with AI-powered grammar, style,
 
 ### Prerequisites
 - Windows operating system
-- .NET 9.0 runtime (or later)
-- API key for at least one of the supported AI services
+- API key for at least one of the supported AI services (Anthropic, OpenAI)
 
 ### Installation
 
@@ -83,7 +82,7 @@ To create a new release:
 - [X] Multiple AI model support and customization
 - [ ] Quick chat functionality
 - [X] Self-update capability
-- [ ] Installer package
+- [X] Installer package
 
 ## Contributing
 
