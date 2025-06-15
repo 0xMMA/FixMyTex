@@ -128,7 +128,7 @@ export class ShortcutManager {
     this.recentClicks = [];
     this.clearPendingTimeout();
 
-    // Re-register shortcuts with new configuration
+    // Re-register shortcuts with the new configuration
     await this.registerShortcuts();
   }
 }

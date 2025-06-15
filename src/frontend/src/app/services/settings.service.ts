@@ -199,8 +199,6 @@ export class SettingsService {
 
       await shortcutManager.updateConfig(shortcutConfig);
 
-      // TODO: Update the Silent Fix shortcut
-      // This would typically call a Tauri command to register the silent fix shortcut
     } catch (error) {
       console.error('Error updating shortcuts:', error);
     }

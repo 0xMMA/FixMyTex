@@ -57,4 +57,5 @@ export class GeneralConfigComponent implements OnInit, OnDestroy {
       });
     }
   }
+
 }

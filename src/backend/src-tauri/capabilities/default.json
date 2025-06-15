@@ -27,6 +27,8 @@
     "global-shortcut:allow-unregister",
     "clipboard-manager:allow-read-text",
     "clipboard-manager:allow-write-text",
-    "clipboard-manager:allow-write-html"
+    "clipboard-manager:allow-write-html",
+    "updater:default",
+    "opener:default"
   ]
 }

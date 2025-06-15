@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "FixMyTex",
-  "version": "0.1.0",
-  "identifier": "com.github.0xMMA.FixMyTex",
+  "version": "2.0.0",
+  "identifier": "dev.michael-martin.FixMyTex",
   "build": {
     "frontendDist": "../../frontend/dist/frontend/browser",
     "devUrl": "http://localhost:4200",
@@ -26,12 +26,21 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "createUpdaterArtifacts": true,
     "icon": [
-      "icons/32x32.png",
-      "icons/128x128.png",
-      "icons/128x128@2x.png",
-      "icons/icon.icns",
-      "icons/icon.ico"
+      "icons/icons8-mutig-ai-32.png",
+      "icons/icons8-mutig-ai-32.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "windows": {
+        "installMode": "passive"
+      },
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDFFNjdCODRCNTNBQjM1Q0MKUldUTU5hdFRTN2huSGxCMmJOdTZzL01FQjNVREQ3b2RFSmJlS1QvR3NjRHExeTkyd0dsKy9BeVYK",
+      "endpoints": [
+        "https://github.com/0xMMA/FixMyTex/releases/latest/download/latest.json"
+      ]
+    }
+    }
   }
-}

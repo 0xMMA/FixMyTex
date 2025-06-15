@@ -4,6 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { SettingsContainerComponent } from './settings-container/settings-container.component';
 import { GeneralConfigComponent } from './general-config/general-config.component';
 import { ApiConfigComponent } from './api-config/api-config.component';
+import { AboutComponent } from './about/about.component';
 
 const routes: Routes = [
   {
@@ -22,6 +23,10 @@ const routes: Routes = [
       {
         path: 'api',
         component: ApiConfigComponent
+      },
+      {
+        path: 'about',
+        component: AboutComponent
       }
     ]
   }
