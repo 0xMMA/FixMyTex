@@ -94,8 +94,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Acknowledgments
 
-- Icons from [icons8.com](https://icons8.com)
-- Built with Angular, Tauri, and LangChain
+- App Logo from [icons8.com](https://icons8.com)
+- Built with Tauri, Angular, Material, and LangChain
 
 ## Version Information
 
