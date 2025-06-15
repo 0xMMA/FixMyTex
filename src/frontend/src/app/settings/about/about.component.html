@@ -6,9 +6,36 @@
       FixMyTex is a tool for enhancing text using AI language models.
     </p>
 
+    <div class="version-container">
+      <p class="version-info">Version: {{ appVersion }}</p>
+
+      <div class="update-controls">
+        <button class="update-button" (click)="checkForUpdate()" [disabled]="checkingForUpdate">
+          {{ checkingForUpdate ? 'Checking...' : 'Check for Updates' }}
+        </button>
+
+        @if (updateAvailable) {
+          <div class="update-available">
+            <p>Update available: v{{ updateVersion }}</p>
+            <button class="install-button" (click)="installAvailableUpdate()">Install Update</button>
+          </div>
+        }
+
+        @if (updateError) {
+          <p class="update-error">{{ updateError }}</p>
+        }
+
+        @if (!updateAvailable && !updateError && !checkingForUpdate && appVersion) {
+          <p class="up-to-date">
+            You are running the latest version.
+          </p>
+        }
+      </div>
+    </div>
+
     <div class="links-container">
       <a href="#" (click)="openUrl('https://github.com/0xMMA/FixMyTex'); $event.preventDefault()">GitHub</a>
-      <a href="#" (click)="openUrl('https://www.linkedin.com/in/michael-martin-dev/'); $event.preventDefault()">LinkedIn michael-martin-dev</a>
+      <a href="#" (click)="openUrl('https://www.linkedin.com/in/michael-martin-dev/'); $event.preventDefault()">LinkedIn</a>
       <a href="#" (click)="openUrl('https://icons8.com'); $event.preventDefault()">App Logo by icons8.com</a>
     </div>
   </div>

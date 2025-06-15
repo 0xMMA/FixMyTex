@@ -29,6 +29,7 @@
     "clipboard-manager:allow-write-text",
     "clipboard-manager:allow-write-html",
     "updater:default",
-    "opener:default"
+    "opener:default",
+    "process:default"
   ]
 }

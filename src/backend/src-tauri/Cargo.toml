@@ -26,6 +26,7 @@ tauri-plugin-log = "2.0.0-rc"
 tauri-plugin-clipboard-manager = "2"
 keyring = { version = "3", features = ["apple-native", "windows-native", "sync-secret-service"] }
 tauri-plugin-opener = "2"
+tauri-plugin-process = "2"
 
 # Windows API for system utilities
 [target.'cfg(target_os = "windows")'.dependencies]
