@@ -42,21 +42,14 @@ jobs:
         cd src/frontend
         npm ci
 
-    - name: Build frontend
+    - name: Build Tauri app
       run: |
         cd src/frontend
-        npm run build
-
-    - name: Build Tauri app
-      uses: tauri-apps/tauri-action@v0
+        npm run tauri build
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY || '' }}
         TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD || '' }}
-      with:
-        projectPath: './src/backend/src-tauri'
-        tauriScript: 'cargo'
-        args: '--release'
 
     - name: Upload build artifacts
       if: success() && github.event_name != 'pull_request'
@@ -97,15 +90,10 @@ jobs:
         cd src/frontend
         npm ci
 
-    - name: Build frontend
+    - name: Build Tauri app
       run: |
         cd src/frontend
-        npm run build
-
-    - name: Build Rust code
-      run: |
-        cd src/backend/src-tauri
-        cargo build --release
+        npm run tauri build
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
