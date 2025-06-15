@@ -63,7 +63,7 @@ mod internal {
 
         unsafe {
             let hwnd = GetForegroundWindow();
-            if hwnd.0 == 0 {
+            if hwnd.0 == std::ptr::null_mut() {
                 return Err(io::Error::new(
                     io::ErrorKind::Other,
                     "No foreground window found",

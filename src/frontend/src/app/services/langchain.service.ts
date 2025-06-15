@@ -5,6 +5,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import { ChatAnthropic } from "@langchain/anthropic";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
+import { invoke } from '@tauri-apps/api/core';
 
 /**
  * Service for interacting with LangChain
@@ -28,7 +29,9 @@ export class LangChainService {
 
   constructor() {
     // Load saved configuration from storage if available
-    this.loadConfig();
+    this.loadConfig().catch(error => {
+      console.error('Error in loadConfig during initialization:', error);
+    });
   }
 
   /**
@@ -42,11 +45,34 @@ export class LangChainService {
    * Update the LangChain configuration
    * @param config The new configuration
    */
-  public updateConfig(config: Partial<LangChainConfig>): void {
+  public async updateConfig(config: Partial<LangChainConfig>): Promise<void> {
     const currentConfig = this.configSubject.getValue();
     const newConfig = { ...currentConfig, ...config };
+
+    // If API key is being cleared, delete it from the keyring
+    if (config.hasOwnProperty('apiKey') && !config.apiKey && currentConfig.provider) {
+      await this.deleteApiKey(currentConfig.provider).catch(error => {
+        console.warn('Failed to delete API key from keyring:', error);
+      });
+    }
+
     this.configSubject.next(newConfig);
-    this.saveConfig(newConfig);
+    await this.saveConfig(newConfig).catch(error => {
+      console.error('Error saving configuration:', error);
+    });
+  }
+
+  /**
+   * Delete an API key from the keyring
+   * @param provider The provider whose API key should be deleted
+   */
+  private async deleteApiKey(provider: string): Promise<void> {
+    try {
+      await invoke('delete_api_key', { provider });
+    } catch (error) {
+      console.error(`Failed to delete API key for provider ${provider}:`, error);
+      throw error;
+    }
   }
 
   /**
@@ -138,15 +164,73 @@ Text to fix: {text}`
   /**
    * Load the LangChain configuration from storage
    */
-  private loadConfig(): void {
+  private async loadConfig(): Promise<void> {
     try {
-      const savedConfig = localStorage.getItem('langchain_config');
+      // Check for old config format in localStorage (for migration)
+      const oldConfig = localStorage.getItem('langchain_config');
+
+      // Load non-sensitive config from localStorage
+      const savedConfig = localStorage.getItem('langchain_config_nonsensitive');
+      let config = DEFAULT_CONFIG;
+
       if (savedConfig) {
-        const config = JSON.parse(savedConfig);
-        this.configSubject.next(config);
+        const parsedConfig = JSON.parse(savedConfig);
+        config = { ...config, ...parsedConfig };
+      } else if (oldConfig) {
+        // Migrate from old format
+        try {
+          const parsedOldConfig = JSON.parse(oldConfig);
+          config = { ...config, ...parsedOldConfig };
+
+          // Store API key in keyring if available
+          if (parsedOldConfig.provider && parsedOldConfig.apiKey) {
+            await this.migrateApiKey(parsedOldConfig.provider, parsedOldConfig.apiKey);
+          }
+
+          // Save non-sensitive config in new format
+          const nonsensitiveConfig = { ...parsedOldConfig };
+          // Use type assertion to allow setting apiKey to undefined
+          (nonsensitiveConfig as Partial<LangChainConfig>).apiKey = undefined;
+          localStorage.setItem('langchain_config_nonsensitive', JSON.stringify(nonsensitiveConfig));
+
+          // Remove old config
+          localStorage.removeItem('langchain_config');
+        } catch (migrationError) {
+          console.error('Error migrating from old config format:', migrationError);
+        }
       }
+
+      // Load API key from keyring if provider is set
+      if (config.provider) {
+        try {
+          const apiKey = await invoke<string>('get_api_key', { provider: config.provider });
+          if (apiKey) {
+            config.apiKey = apiKey;
+          }
+        } catch (keyringError) {
+          console.warn('Could not load API key from keyring:', keyringError);
+          // Continue without API key
+        }
+      }
+
+      this.configSubject.next(config);
     } catch (error) {
       console.error('Error loading LangChain configuration', error);
+    }
+  }
+
+  /**
+   * Migrate an API key from localStorage to keyring
+   * @param provider The provider
+   * @param apiKey The API key to migrate
+   */
+  private async migrateApiKey(provider: string, apiKey: string): Promise<void> {
+    try {
+      await invoke('store_api_key', { provider, apiKey });
+      console.log(`Successfully migrated API key for ${provider} to keyring`);
+    } catch (error) {
+      console.error(`Failed to migrate API key for ${provider} to keyring:`, error);
+      throw error;
     }
   }
 
@@ -154,9 +238,26 @@ Text to fix: {text}`
    * Save the LangChain configuration to storage
    * @param config The configuration to save
    */
-  private saveConfig(config: LangChainConfig): void {
+  private async saveConfig(config: LangChainConfig): Promise<void> {
     try {
-      localStorage.setItem('langchain_config', JSON.stringify(config));
+      // Store API key in keyring if provider and key are set
+      if (config.provider && config.apiKey) {
+        try {
+          await invoke('store_api_key', { 
+            provider: config.provider, 
+            apiKey: config.apiKey 
+          });
+        } catch (keyringError) {
+          console.error('Failed to store API key in keyring:', keyringError);
+        }
+      }
+
+      // Store non-sensitive config in localStorage (without API key)
+      const nonsensitiveConfig = { ...config };
+      // Use type assertion to allow deleting the apiKey property
+      (nonsensitiveConfig as Partial<LangChainConfig>).apiKey = undefined;
+
+      localStorage.setItem('langchain_config_nonsensitive', JSON.stringify(nonsensitiveConfig));
     } catch (error) {
       console.error('Error saving LangChain configuration', error);
     }
