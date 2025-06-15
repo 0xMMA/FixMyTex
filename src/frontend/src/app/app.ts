@@ -4,9 +4,9 @@ import { Location } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { Event } from '@tauri-apps/api/event';
 import { Window } from '@tauri-apps/api/window';
-import { ShortcutManager } from './shortcut-manager';
 import { MessageBusService } from './services/message-bus.service';
 import { SingleClickHandler } from './handlers/single-click-handler';
+import { ShortcutManagerService } from './services/shortcut-manager.service';
 import { filter } from 'rxjs/operators';
 
 @Component({
@@ -18,26 +18,22 @@ import { filter } from 'rxjs/operators';
 })
 export class App implements OnInit {
   protected title = 'FixMyTex';
-  private shortcutManager: ShortcutManager;
   isMainPage = false; // Track if we're on the main page
 
 
   constructor(
     private messageBus: MessageBusService,
     private singleClickHandler: SingleClickHandler,
+    private shortcutManagerService: ShortcutManagerService,
     private router: Router,
     private location: Location
-  ) {
-    // Pass the message bus to the shortcut manager
-    this.shortcutManager = new ShortcutManager(this.messageBus);
-  }
+  ) {}
 
   async ngOnInit() {
     // Initialize the single click handler
     this.singleClickHandler.initialize();
 
-    // Register shortcuts
-    await this.shortcutManager.registerShortcuts();
+    // ShortcutManager is initialized in the ShortcutManagerService
     await this.setupWindowEvents();
 
     // Subscribe to router events to track when we're on the main page
@@ -89,7 +85,7 @@ export class App implements OnInit {
   /**
    * Navigate back to the previous page
    */
-  goBack(): void {
-    this.location.back();
+  navigateToMain(): void {
+    this.router.navigate(['/assistant']);
   }
 }
