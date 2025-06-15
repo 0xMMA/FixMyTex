@@ -96,14 +96,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 - App Logo from [icons8.com](https://icons8.com)
 - Built with Tauri, Angular, Material, and LangChain
-
-## Version Information
-
-Current version: 2.0.0
-
-### Update Functionality
-
-FixMyTex now includes automatic update functionality:
-- Check for updates from the About page
-- Download and install updates with a single click
-- Automatic application restart after update installation
