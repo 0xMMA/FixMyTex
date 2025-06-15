@@ -36,8 +36,9 @@ pub fn run() {
 
             // Create tray menu
             let open_item = MenuItem::with_id(app, "open", "Open", true, None::<&str>)?;
+            let settings_item = MenuItem::with_id(app, "settings", "Settings", true, None::<&str>)?;
             let quit_item = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
-            let menu = Menu::with_items(app, &[&open_item, &quit_item])?;
+            let menu = Menu::with_items(app, &[&open_item, &settings_item, &quit_item])?;
 
             // Create system tray
             let _tray = TrayIconBuilder::with_id("main-tray")
@@ -47,6 +48,17 @@ pub fn run() {
                     "open" => {
                         if let Some(window) = get_main_window(app) {
                             show_main_window(&window);
+                        }
+                    }
+                    "settings" => {
+                        if let Some(window) = get_main_window(app) {
+                            show_main_window(&window);
+                            // Navigate to settings page
+                            // Use a custom event to trigger navigation
+                            let _ = window.eval("
+                                // Dispatch a custom event that the Angular app can listen for
+                                window.dispatchEvent(new CustomEvent('navigate-to-settings'));
+                            ");
                         }
                     }
                     "quit" => {
