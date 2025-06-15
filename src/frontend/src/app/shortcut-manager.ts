@@ -1,5 +1,7 @@
 import {register, ShortcutEvent} from '@tauri-apps/plugin-global-shortcut';
 import {Window} from '@tauri-apps/api/window';
+import { MessageBusService } from './services/message-bus.service';
+import { ShortcutEventType } from './handlers/single-click-handler';
 
 export interface ShortcutConfig {
   actionShortcut: string;
@@ -16,6 +18,7 @@ export class ShortcutManager {
   private pendingClickTimeout: number | null = null;
 
   constructor(
+      private messageBus?: MessageBusService,
       private config: ShortcutConfig = {
         actionShortcut: 'CommandOrControl+G',
         doubleClickThreshold: 200
@@ -80,7 +83,14 @@ export class ShortcutManager {
   }
 
   private async handleSingleClick(): Promise<void> {
-    // single click implementation
+    if (this.messageBus) {
+      // Publish a single click event to the message bus
+      this.messageBus.publish(ShortcutEventType.SINGLE_CLICK);
+    } else {
+      // Fallback for backward compatibility
+      console.log('MessageBus not available, single click event not published');
+      // Add any legacy single click implementation here if needed
+    }
   }
 
   private async handleDoubleClick(): Promise<void> {
