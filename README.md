@@ -10,6 +10,7 @@ A desktop application that enhances your writing with AI-powered grammar, style,
 - **Context-Aware Formatting**: Automatically detects source application and applies appropriate formatting (HTML, Markdown, or Plain text)
 - **Global Hotkeys**: Works across all applications with customizable keyboard shortcuts
 - **Minimal UI**: Runs in the background with minimal interruption to your workflow
+- **Automatic Updates**: Check for and install updates directly from the application
 
 ## Getting Started
 
@@ -22,16 +23,8 @@ A desktop application that enhances your writing with AI-powered grammar, style,
 
 1. Download the latest release from the [Releases](https://github.com/0xMMA/FixMyTex/releases) page
    - Or build from source (see [Build Instructions](#build-instructions))
-2. Configure API keys:
-   > API keys can be managed through the settings window
-   - OpenAI: Set `OPENAI_API_KEY` environment variable
-   - Claude: Set `ANTHROPIC_API_KEY` environment variable
-   (untested)
-   - Azure OpenAI: Set `AZURE_OPENAI_API_KEY` environment variable
-   - HuggingFace: Set `HUGGINGFACE_API_KEY` environment variable
-   - Google: Set `GOOGLE_API_KEY` environment variable
-
-3. Launch the application - it will automatically minimize to the system tray
+2. Launch the application 
+3. Configure API keys, models and providers
 
 ### Usage
 
@@ -40,22 +33,29 @@ A desktop application that enhances your writing with AI-powered grammar, style,
 3. Wait a moment for the AI to process
 4. Your text will be replaced with the improved version
 
-The application intelligently detects context:
-- MS Teams/Outlook: Uses HTML formatting tags
-- Other applications: Uses Markdown formatting
-
 ## Build Instructions
 
-```
-# Build the project
-dotnet build
+```bash
+# Clone the repository
+git clone https://github.com/0xMMA/FixMyTex.git
+cd FixMyTex
 
-# Run the application
-dotnet run --project FixMyTex
+# Install frontend dependencies
+cd src/frontend
+npm install
 
-# Create self-contained executable
-dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o ./bin/Release/SelfContained/
+# Install backend dependencies
+cd ../backend
+npm install
+
+# Run in development mode
+npm run tauri:dev
+
+# Build for production
+npm run tauri:build
 ```
+
+The build output will be located in `src/backend/src-tauri/target/release`.
 
 ### CI/CD Pipeline
 
@@ -82,7 +82,7 @@ To create a new release:
 - [X] In-app API key management (instead of environment variables)
 - [X] Multiple AI model support and customization
 - [ ] Quick chat functionality
-- [ ] Self-update capability
+- [X] Self-update capability
 - [ ] Installer package
 
 ## Contributing
@@ -96,4 +96,15 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Acknowledgments
 
 - Icons from [icons8.com](https://icons8.com)
-- Built with C#, WPF, and LangChain.NET
+- Built with Angular, Tauri, and LangChain
+
+## Version Information
+
+Current version: 2.0.0
+
+### Update Functionality
+
+FixMyTex now includes automatic update functionality:
+- Check for updates from the About page
+- Download and install updates with a single click
+- Automatic application restart after update installation
