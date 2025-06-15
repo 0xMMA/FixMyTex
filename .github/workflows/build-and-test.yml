@@ -7,14 +7,14 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
-env:
-  DOTNET_VERSION: '9.0.x'
-  DOTNET_CLI_TELEMETRY_OPTOUT: true
-  DOTNET_NOLOGO: true
-
 jobs:
   build:
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [windows-latest]
+
+    runs-on: ${{ matrix.platform }}
     permissions:
       contents: read
       packages: read
@@ -25,32 +25,45 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
       with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
+        node-version: 'lts/*'
+        cache: 'npm'
+        cache-dependency-path: './src/frontend/package-lock.json'
 
-    - name: Restore dependencies
-      run: dotnet restore
+    - name: Setup Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: x86_64-pc-windows-msvc
 
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
-
-    - name: Test
-      run: dotnet test --configuration Release --no-build --verbosity normal
-      env:
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY || 'not-set' }}
-
-    - name: Publish Windows application
+    - name: Install frontend dependencies
       run: |
-        dotnet publish FixMyTex/FixMyTex.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o ./publish/win-x64
-        
+        cd src/frontend
+        npm ci
+
+    - name: Build frontend
+      run: |
+        cd src/frontend
+        npm run build
+
+    - name: Build Tauri app
+      uses: tauri-apps/tauri-action@v0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY || '' }}
+        TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD || '' }}
+      with:
+        projectPath: './src/backend'
+        tauriScript: 'cargo'
+        args: '--release'
+
     - name: Upload build artifacts
       if: success() && github.event_name != 'pull_request'
       uses: actions/upload-artifact@v4
       with:
         name: FixMyTex-win-x64
-        path: ./publish/win-x64
+        path: './src/backend/src-tauri/target/release/bundle/msi/*.msi'
         retention-days: 7
 
   codeql:
@@ -58,22 +71,41 @@ jobs:
     runs-on: windows-latest
     permissions:
       security-events: write
-      
+
     steps:
     - uses: actions/checkout@v4
-      
+
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
       with:
-        languages: 'csharp'
-        
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+        languages: 'javascript, typescript, rust'
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
       with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-        
-    - name: Build
-      run: dotnet build --configuration Release
-      
+        node-version: 'lts/*'
+        cache: 'npm'
+        cache-dependency-path: './src/frontend/package-lock.json'
+
+    - name: Setup Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: x86_64-pc-windows-msvc
+
+    - name: Install frontend dependencies
+      run: |
+        cd src/frontend
+        npm ci
+
+    - name: Build frontend
+      run: |
+        cd src/frontend
+        npm run build
+
+    - name: Build Rust code
+      run: |
+        cd src/backend/src-tauri
+        cargo build --release
+
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3

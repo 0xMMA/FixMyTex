@@ -11,6 +11,7 @@ import { RouterModule } from '@angular/router';
 export class SettingsContainerComponent {
   navItems = [
     { path: 'general', label: 'General Settings' },
-    { path: 'api', label: 'API Configuration' }
+    { path: 'api', label: 'API Configuration' },
+    { path: 'about', label: 'About' }
   ];
 }

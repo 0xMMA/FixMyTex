@@ -113,7 +113,7 @@ export class LangChainService {
 
       // Load the prompt from SilentFix.md
       const promptTemplate = ChatPromptTemplate.fromTemplate(
-        `You are a grammar and spelling correction assistant. Your task is to fix grammatical errors, spelling mistakes, and improve clarity in text while preserving the original meaning, tone, and intent.
+`You are a grammar and spelling correction assistant. Your task is to fix grammatical errors, spelling mistakes, and improve clarity in text while preserving the original meaning, tone, and intent.
 
 Rules:
 1. Correct all grammar and spelling errors
