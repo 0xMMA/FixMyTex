@@ -4,6 +4,9 @@ use tauri::{
     AppHandle, Manager, WebviewWindow,
 };
 
+// Import the system utilities module
+mod system_utils;
+
 /// Gets the main application window
 fn get_main_window(app: &AppHandle) -> Option<WebviewWindow> {
     app.get_webview_window("main")
@@ -20,11 +23,18 @@ fn show_main_window(window: &WebviewWindow) {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_autostart::init(
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             None,
         ))
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+        // Register the system utilities commands
+        .invoke_handler(tauri::generate_handler![
+            system_utils::get_focused_app_name,
+            system_utils::send_copy_command,
+            system_utils::send_paste_command,
+        ])
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(
@@ -55,10 +65,12 @@ pub fn run() {
                             show_main_window(&window);
                             // Navigate to settings page
                             // Use a custom event to trigger navigation
-                            let _ = window.eval("
+                            let _ = window.eval(
+                                "
                                 // Dispatch a custom event that the Angular app can listen for
                                 window.dispatchEvent(new CustomEvent('navigate-to-settings'));
-                            ");
+                            ",
+                            );
                         }
                     }
                     "quit" => {

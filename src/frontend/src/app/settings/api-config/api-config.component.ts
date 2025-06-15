@@ -1,18 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-
-interface Provider {
-  id: string;
-  name: string;
-  models: Model[];
-}
-
-interface Model {
-  id: string;
-  name: string;
-  description: string;
-}
+import { Subscription } from 'rxjs';
+import { LangChainService } from '../../services/langchain.service';
+import { ProviderConfig, ModelConfig, LLMProvider } from '../../models/langchain-config';
 
 @Component({
   selector: 'app-api-config',
@@ -21,36 +12,45 @@ interface Model {
   templateUrl: './api-config.component.html',
   styleUrls: ['./api-config.component.scss']
 })
-export class ApiConfigComponent {
+export class ApiConfigComponent implements OnInit, OnDestroy {
   // Available providers and models
-  providers: Provider[] = [
-    {
-      id: 'openai',
-      name: 'OpenAI',
-      models: [
-        { id: 'gpt-4', name: 'GPT-4', description: 'Most capable model for complex tasks' },
-        { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', description: 'Fast and efficient for most tasks' }
-      ]
-    },
-    {
-      id: 'anthropic',
-      name: 'Anthropic Claude',
-      models: [
-        { id: 'claude-2', name: 'Claude 2', description: 'Advanced reasoning and conversation' },
-        { id: 'claude-instant', name: 'Claude Instant', description: 'Faster, more economical option' }
-      ]
-    }
-  ];
+  providers: ProviderConfig[] = [];
 
   // Selected values
-  selectedProvider = 'openai';
-  selectedModel = 'gpt-4';
-  apiKey = '';
+  selectedProvider: LLMProvider = LLMProvider.OPENAI;
+  selectedModel: string = '';
+  apiKey: string = '';
+
+  private subscriptions: Subscription[] = [];
+
+  constructor(private langChainService: LangChainService) {}
+
+  ngOnInit(): void {
+    // Subscribe to providers
+    this.subscriptions.push(
+      this.langChainService.providers$.subscribe(providers => {
+        this.providers = providers;
+      })
+    );
+
+    // Subscribe to config
+    this.subscriptions.push(
+      this.langChainService.config$.subscribe(config => {
+        this.selectedProvider = config.provider;
+        this.selectedModel = config.model;
+        this.apiKey = config.apiKey;
+      })
+    );
+  }
+
+  ngOnDestroy(): void {
+    // Unsubscribe to prevent memory leaks
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+  }
 
   // Get available models for the selected provider
-  get availableModels(): Model[] {
-    const provider = this.providers.find(p => p.id === this.selectedProvider);
-    return provider ? provider.models : [];
+  get availableModels(): ModelConfig[] {
+    return this.langChainService.getModelsForProvider(this.selectedProvider);
   }
 
   // Methods to handle settings changes
@@ -59,18 +59,32 @@ export class ApiConfigComponent {
     if (this.availableModels.length > 0) {
       this.selectedModel = this.availableModels[0].id;
     }
+
+    // Update the configuration
+    this.langChainService.updateConfig({
+      provider: this.selectedProvider,
+      model: this.selectedModel
+    });
+
     console.log('Provider changed to:', this.selectedProvider);
-    // In a real implementation, this would call a service to save the setting
   }
 
   onModelChange(): void {
+    // Update the configuration
+    this.langChainService.updateConfig({
+      model: this.selectedModel
+    });
+
     console.log('Model changed to:', this.selectedModel);
-    // In a real implementation, this would call a service to save the setting
   }
 
   onApiKeyChange(): void {
+    // Update the configuration
+    this.langChainService.updateConfig({
+      apiKey: this.apiKey
+    });
+
     console.log('API key changed');
-    // In a real implementation, this would securely store the API key
   }
 
   getModelDescription(): string {

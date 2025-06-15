@@ -1,9 +1,9 @@
 <div class="settings-page">
   <h1>API Configuration</h1>
-  
+
   <div class="settings-section">
     <h2>Provider Settings</h2>
-    
+
     <div class="setting-item">
       <label class="setting-label" for="provider">AI Provider</label>
       <select 
@@ -20,7 +20,7 @@
         Select the AI provider you want to use for text processing.
       </p>
     </div>
-    
+
     <div class="setting-item">
       <label class="setting-label" for="model">Model</label>
       <select 
@@ -34,16 +34,16 @@
         }
       </select>
       <p class="setting-description">
-        <ng-container *ngIf="selectedModel">
+        @if (selectedModel) {
           {{ getModelDescription() }}
-        </ng-container>
+        }
       </p>
     </div>
   </div>
-  
+
   <div class="settings-section">
     <h2>API Key</h2>
-    
+
     <div class="setting-item">
       <label class="setting-label" for="apiKey">API Key</label>
       <input 
