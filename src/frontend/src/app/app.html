@@ -1,11 +1,24 @@
 <div class="app-container">
-  <header class="app-header">
-    <h1>FixMyTex</h1>
-    <p class="app-subtitle">Communication Assistant</p>
-  </header>
+    <header class="app-header">
+        <div class="header-left">
 
-  <main class="app-content">
-    <!-- Router outlet for navigation between components -->
-    <router-outlet />
-  </main>
+            <h1>FixMyTex</h1>
+            <p class="app-subtitle">Communication Assistant</p>
+        </div>
+        <div class="header-right">
+            @if (!isMainPage) {
+                <button class="nav-button back-button" (click)="goBack()">
+                    <span class="material-icons">arrow_back</span>
+                </button>
+            }
+            <button class="nav-button settings-button" (click)="navigateToSettings()">
+                <span class="material-icons">settings</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="app-content">
+        <!-- Router outlet for navigation between components -->
+        <router-outlet/>
+    </main>
 </div>
