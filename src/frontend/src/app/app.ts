@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { Event } from '@tauri-apps/api/event';
 import { Window } from '@tauri-apps/api/window';
 import { ShortcutManager } from './shortcut-manager';
+import { MessageBusService } from './services/message-bus.service';
+import { SingleClickHandler } from './handlers/single-click-handler';
 
 @Component({
   selector: 'app-root',
@@ -17,11 +19,19 @@ export class App implements OnInit {
   private shortcutManager: ShortcutManager;
 
 
-  constructor() {
-    this.shortcutManager = new ShortcutManager();
+  constructor(
+    private messageBus: MessageBusService,
+    private singleClickHandler: SingleClickHandler
+  ) {
+    // Pass the message bus to the shortcut manager
+    this.shortcutManager = new ShortcutManager(this.messageBus);
   }
 
   async ngOnInit() {
+    // Initialize the single click handler
+    this.singleClickHandler.initialize();
+
+    // Register shortcuts
     await this.shortcutManager.registerShortcuts();
     await this.setupWindowEvents();
   }
