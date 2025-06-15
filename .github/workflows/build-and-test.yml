@@ -79,6 +79,8 @@ jobs:
       uses: github/codeql-action/init@v3
       with:
         languages: 'javascript, typescript, rust'
+      env:
+        CODEQL_ENABLE_EXPERIMENTAL_FEATURES: true
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
