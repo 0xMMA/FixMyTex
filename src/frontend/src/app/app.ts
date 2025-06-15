@@ -51,6 +51,12 @@ export class App implements OnInit {
     // Check initial route
     const currentUrl = this.router.url;
     this.isMainPage = currentUrl === '/assistant' || currentUrl === '/';
+
+    // Listen for the custom navigation event from the tray menu
+    window.addEventListener('navigate-to-settings', () => {
+      console.log('Received navigate-to-settings event');
+      this.navigateToSettings();
+    });
   }
 
 
