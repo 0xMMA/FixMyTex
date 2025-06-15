@@ -61,6 +61,50 @@ jobs:
         TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY || '' }}
         TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD || '' }}
 
+    - name: Debug - Check if build directory exists
+      run: |
+        echo "Checking if build directory exists..."
+        if (Test-Path -Path "src\backend\src-tauri\target\release\bundle") {
+            echo "Build directory exists"
+        } else {
+            echo "Build directory does not exist"
+            echo "Checking parent directories..."
+            if (Test-Path -Path "src\backend\src-tauri\target\release") {
+                echo "Release directory exists"
+                dir src\backend\src-tauri\target\release
+            } else {
+                echo "Release directory does not exist"
+                if (Test-Path -Path "src\backend\src-tauri\target") {
+                    echo "Target directory exists"
+                    dir src\backend\src-tauri\target
+                } else {
+                    echo "Target directory does not exist"
+                }
+            }
+        }
+
+    - name: Debug - List build directory structure
+      if: always()
+      run: |
+        echo "Listing build directory structure..."
+        if (Test-Path -Path "src\backend\src-tauri\target\release\bundle") {
+            dir src\backend\src-tauri\target\release\bundle /s
+        } else {
+            echo "Build directory does not exist, cannot list structure"
+        }
+
+    - name: Debug - Check MSI files
+      run: |
+        echo "Checking for MSI files..."
+        dir src\backend\src-tauri\target\release\bundle\msi /b
+        echo "Checking for NSIS files..."
+        dir src\backend\src-tauri\target\release\bundle\nsis /b
+
+    - name: Debug - Show environment variables
+      run: |
+        echo "GITHUB_WORKSPACE: $env:GITHUB_WORKSPACE"
+        echo "Current directory: $pwd"
+
     - name: Upload build artifacts
       if: success() && github.event_name != 'pull_request'
       uses: actions/upload-artifact@v4

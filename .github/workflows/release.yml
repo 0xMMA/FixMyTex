@@ -66,6 +66,26 @@ jobs:
         projectPath: './src/backend/src-tauri'
         tauriScript: 'cargo'
         args: '--release'
+
+    - name: Debug - List build directory structure
+      if: always()
+      run: |
+        echo "Listing build directory structure..."
+        dir src\backend\src-tauri\target\release\bundle /s
+
+    - name: Debug - Check MSI files
+      if: always()
+      run: |
+        echo "Checking for MSI files..."
+        dir src\backend\src-tauri\target\release\bundle\msi /b
+        echo "Checking for NSIS files..."
+        dir src\backend\src-tauri\target\release\bundle\nsis /b
+
+    - name: Debug - Show environment variables
+      if: always()
+      run: |
+        echo "GITHUB_WORKSPACE: $env:GITHUB_WORKSPACE"
+        echo "Current directory: $pwd"
         tagName: v${{ steps.get_version.outputs.VERSION }}
         releaseName: FixMyTex v${{ steps.get_version.outputs.VERSION }}
         releaseBody: |
@@ -89,3 +109,23 @@ jobs:
         releaseCommitish: ${{ github.sha }}
         releaseDraft: true
         prerelease: false
+
+    - name: Debug - List build directory structure
+      if: always()
+      run: |
+        echo "Listing build directory structure..."
+        dir src\backend\src-tauri\target\release\bundle /s
+
+    - name: Debug - Check MSI files
+      if: always()
+      run: |
+        echo "Checking for MSI files..."
+        dir src\backend\src-tauri\target\release\bundle\msi /b
+        echo "Checking for NSIS files..."
+        dir src\backend\src-tauri\target\release\bundle\nsis /b
+
+    - name: Debug - Show environment variables
+      if: always()
+      run: |
+        echo "GITHUB_WORKSPACE: $env:GITHUB_WORKSPACE"
+        echo "Current directory: $pwd"
