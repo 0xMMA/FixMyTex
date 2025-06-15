@@ -66,26 +66,6 @@ jobs:
         projectPath: './src/backend/src-tauri'
         tauriScript: 'cargo'
         args: '--release'
-
-    - name: Debug - List build directory structure
-      if: always()
-      run: |
-        echo "Listing build directory structure..."
-        dir src\backend\src-tauri\target\release\bundle /s
-
-    - name: Debug - Check MSI files
-      if: always()
-      run: |
-        echo "Checking for MSI files..."
-        dir src\backend\src-tauri\target\release\bundle\msi /b
-        echo "Checking for NSIS files..."
-        dir src\backend\src-tauri\target\release\bundle\nsis /b
-
-    - name: Debug - Show environment variables
-      if: always()
-      run: |
-        echo "GITHUB_WORKSPACE: $env:GITHUB_WORKSPACE"
-        echo "Current directory: $pwd"
         tagName: v${{ steps.get_version.outputs.VERSION }}
         releaseName: FixMyTex v${{ steps.get_version.outputs.VERSION }}
         releaseBody: |
@@ -110,19 +90,54 @@ jobs:
         releaseDraft: true
         prerelease: false
 
+    - name: Debug - Check if build directory exists
+      if: always()
+      run: |
+        echo "Checking if build directory exists..."
+        if (Test-Path -Path "src\backend\src-tauri\target\release\bundle") {
+            echo "Build directory exists"
+        } else {
+            echo "Build directory does not exist"
+            echo "Checking parent directories..."
+            if (Test-Path -Path "src\backend\src-tauri\target\release") {
+                echo "Release directory exists"
+                dir src\backend\src-tauri\target\release
+            } else {
+                echo "Release directory does not exist"
+                if (Test-Path -Path "src\backend\src-tauri\target") {
+                    echo "Target directory exists"
+                    dir src\backend\src-tauri\target
+                } else {
+                    echo "Target directory does not exist"
+                }
+            }
+        }
+
     - name: Debug - List build directory structure
       if: always()
       run: |
         echo "Listing build directory structure..."
-        dir src\backend\src-tauri\target\release\bundle /s
+        if (Test-Path -Path "src\backend\src-tauri\target\release\bundle") {
+            dir src\backend\src-tauri\target\release\bundle /s
+        } else {
+            echo "Build directory does not exist, cannot list structure"
+        }
 
     - name: Debug - Check MSI files
       if: always()
       run: |
         echo "Checking for MSI files..."
-        dir src\backend\src-tauri\target\release\bundle\msi /b
+        if (Test-Path -Path "src\backend\src-tauri\target\release\bundle\msi") {
+            dir src\backend\src-tauri\target\release\bundle\msi /b
+        } else {
+            echo "MSI directory does not exist"
+        }
         echo "Checking for NSIS files..."
-        dir src\backend\src-tauri\target\release\bundle\nsis /b
+        if (Test-Path -Path "src\backend\src-tauri\target\release\bundle\nsis") {
+            dir src\backend\src-tauri\target\release\bundle\nsis /b
+        } else {
+            echo "NSIS directory does not exist"
+        }
 
     - name: Debug - Show environment variables
       if: always()

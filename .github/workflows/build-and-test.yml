@@ -94,11 +94,20 @@ jobs:
         }
 
     - name: Debug - Check MSI files
+      if: always()
       run: |
         echo "Checking for MSI files..."
-        dir src\backend\src-tauri\target\release\bundle\msi /b
+        if (Test-Path -Path "src\backend\src-tauri\target\release\bundle\msi") {
+            dir src\backend\src-tauri\target\release\bundle\msi /b
+        } else {
+            echo "MSI directory does not exist"
+        }
         echo "Checking for NSIS files..."
-        dir src\backend\src-tauri\target\release\bundle\nsis /b
+        if (Test-Path -Path "src\backend\src-tauri\target\release\bundle\nsis") {
+            dir src\backend\src-tauri\target\release\bundle\nsis /b
+        } else {
+            echo "NSIS directory does not exist"
+        }
 
     - name: Debug - Show environment variables
       run: |
