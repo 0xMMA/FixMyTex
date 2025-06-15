@@ -19,8 +19,12 @@
     "@angular/material": "^20.0.3",
     "@angular/platform-browser": "^20.0.0",
     "@angular/router": "^20.0.0",
+    "@langchain/anthropic": "^0.3.22",
+    "@langchain/openai": "^0.5.13",
     "@tauri-apps/api": "^2.5.0",
+    "@tauri-apps/plugin-clipboard-manager": "^2.2.2",
     "@tauri-apps/plugin-global-shortcut": "^2.2.1",
+    "langchain": "^0.3.28",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
