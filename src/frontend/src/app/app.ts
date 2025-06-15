@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
+import { Location } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { Event } from '@tauri-apps/api/event';
 import { Window } from '@tauri-apps/api/window';
 import { ShortcutManager } from './shortcut-manager';
 import { MessageBusService } from './services/message-bus.service';
 import { SingleClickHandler } from './handlers/single-click-handler';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -17,11 +19,14 @@ import { SingleClickHandler } from './handlers/single-click-handler';
 export class App implements OnInit {
   protected title = 'FixMyTex';
   private shortcutManager: ShortcutManager;
+  isMainPage = false; // Track if we're on the main page
 
 
   constructor(
     private messageBus: MessageBusService,
-    private singleClickHandler: SingleClickHandler
+    private singleClickHandler: SingleClickHandler,
+    private router: Router,
+    private location: Location
   ) {
     // Pass the message bus to the shortcut manager
     this.shortcutManager = new ShortcutManager(this.messageBus);
@@ -34,6 +39,18 @@ export class App implements OnInit {
     // Register shortcuts
     await this.shortcutManager.registerShortcuts();
     await this.setupWindowEvents();
+
+    // Subscribe to router events to track when we're on the main page
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: NavigationEnd) => {
+      // Check if we're on the main page (assistant route)
+      this.isMainPage = event.url === '/assistant' || event.url === '/';
+    });
+
+    // Check initial route
+    const currentUrl = this.router.url;
+    this.isMainPage = currentUrl === '/assistant' || currentUrl === '/';
   }
 
 
@@ -54,5 +71,19 @@ export class App implements OnInit {
     } catch (error) {
       console.error('Failed to setup window events:', error);
     }
+  }
+
+  /**
+   * Navigate to the settings page
+   */
+  navigateToSettings(): void {
+    this.router.navigate(['/settings']);
+  }
+
+  /**
+   * Navigate back to the previous page
+   */
+  goBack(): void {
+    this.location.back();
   }
 }
