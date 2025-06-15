@@ -7,6 +7,9 @@ use tauri::{
 // Import the system utilities module
 mod system_utils;
 
+// Import the keyring utilities module
+mod keyring_utils;
+
 /// Gets the main application window
 fn get_main_window(app: &AppHandle) -> Option<WebviewWindow> {
     app.get_webview_window("main")
@@ -29,11 +32,14 @@ pub fn run() {
             None,
         ))
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
-        // Register the system utilities commands
+        // Register the system utilities and keyring commands
         .invoke_handler(tauri::generate_handler![
             system_utils::get_focused_app_name,
             system_utils::send_copy_command,
             system_utils::send_paste_command,
+            keyring_utils::store_api_key,
+            keyring_utils::get_api_key,
+            keyring_utils::delete_api_key,
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {
