@@ -32,13 +32,15 @@ jobs:
         cache: 'npm'
         cache-dependency-path: './src/frontend/package-lock.json'
 
-    - name: Install Angular CLI globally
-      run: npm install -g @angular/cli
-
     - name: Setup Rust
       uses: dtolnay/rust-toolchain@stable
       with:
         targets: x86_64-pc-windows-msvc
+
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: "./src/backend/src-tauri -> target"
 
     - name: Install frontend dependencies
       run: |
@@ -56,66 +58,15 @@ jobs:
         npm run build
 
     - name: Build Tauri app
-      run: |
-        cd src/backend
-        npm run tauri:build
+      uses: tauri-apps/tauri-action@v0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY || '' }}
         TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD || '' }}
-
-    - name: Debug - Check if build directory exists
-      run: |
-        echo "Checking if build directory exists..."
-        if (Test-Path -Path "src\backend\src-tauri\target\release\bundle") {
-            echo "Build directory exists"
-        } else {
-            echo "Build directory does not exist"
-            echo "Checking parent directories..."
-            if (Test-Path -Path "src\backend\src-tauri\target\release") {
-                echo "Release directory exists"
-                dir src\backend\src-tauri\target\release
-            } else {
-                echo "Release directory does not exist"
-                if (Test-Path -Path "src\backend\src-tauri\target") {
-                    echo "Target directory exists"
-                    dir src\backend\src-tauri\target
-                } else {
-                    echo "Target directory does not exist"
-                }
-            }
-        }
-
-    - name: Debug - List build directory structure
-      if: always()
-      run: |
-        echo "Listing build directory structure..."
-        if (Test-Path -Path "src\backend\src-tauri\target\release\bundle") {
-            dir src\backend\src-tauri\target\release\bundle /s
-        } else {
-            echo "Build directory does not exist, cannot list structure"
-        }
-
-    - name: Debug - Check MSI files
-      if: always()
-      run: |
-        echo "Checking for MSI files..."
-        if (Test-Path -Path "src\backend\src-tauri\target\release\bundle\msi") {
-            dir src\backend\src-tauri\target\release\bundle\msi /b
-        } else {
-            echo "MSI directory does not exist"
-        }
-        echo "Checking for NSIS files..."
-        if (Test-Path -Path "src\backend\src-tauri\target\release\bundle\nsis") {
-            dir src\backend\src-tauri\target\release\bundle\nsis /b
-        } else {
-            echo "NSIS directory does not exist"
-        }
-
-    - name: Debug - Show environment variables
-      run: |
-        echo "GITHUB_WORKSPACE: $env:GITHUB_WORKSPACE"
-        echo "Current directory: $pwd"
+      with:
+        projectPath: './src/backend'
+        tauriScript: 'npm run'
+        args: 'tauri:build'
 
     - name: Upload build artifacts
       if: success() && github.event_name != 'pull_request'
@@ -146,13 +97,15 @@ jobs:
         cache: 'npm'
         cache-dependency-path: './src/frontend/package-lock.json'
 
-    - name: Install Angular CLI globally
-      run: npm install -g @angular/cli
-
     - name: Setup Rust
       uses: dtolnay/rust-toolchain@stable
       with:
         targets: x86_64-pc-windows-msvc
+
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: "./src/backend/src-tauri -> target"
 
     - name: Install frontend dependencies
       run: |
@@ -170,9 +123,11 @@ jobs:
         npm run build
 
     - name: Build Tauri app
-      run: |
-        cd src/backend
-        npm run tauri:build
+      uses: tauri-apps/tauri-action@v0
+      with:
+        projectPath: './src/backend'
+        tauriScript: 'npm run'
+        args: 'tauri:build'
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
