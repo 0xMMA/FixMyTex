@@ -7,7 +7,6 @@
     "frontendDist": "../../frontend/dist/frontend/browser",
     "devUrl": "http://localhost:4200",
     "beforeDevCommand": "cd ../frontend && ng serve",
-    "beforeBuildCommand": "cd ../frontend && ng build"
   },
   "app": {
     "windows": [
