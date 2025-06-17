@@ -36,7 +36,7 @@
       "windows": {
         "installMode": "passive"
       },
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDFFNjdCODRCNTNBQjM1Q0MKUldUTU5hdFRTN2huSGxCMmJOdTZzL01FQjNVREQ3b2RFSmJlS1QvR3NjRHExeTkyd0dsKy9BeVYK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDM5MTY5RDM2NDJBMzAyRDYKUldUV0FxTkNOcDBXT1daNS9pMEJ5KzdxRDdQVzRaeEdkVmJ0dUNzYXpRTWNVb3dIZXpsL2lTcFgK",
       "endpoints": [
         "https://github.com/0xMMA/FixMyTex/releases/latest/download/latest.json"
       ]
