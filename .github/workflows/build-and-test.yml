@@ -79,6 +79,8 @@ jobs:
   codeql:
     name: CodeQL Analysis
     runs-on: windows-latest
+    # Run code analysis after the build job completes
+    needs: build
     permissions:
       security-events: write
 
@@ -90,44 +92,9 @@ jobs:
       with:
         languages: 'javascript, typescript'
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 'lts/*'
-        cache: 'npm'
-        cache-dependency-path: './src/frontend/package-lock.json'
-
-    - name: Setup Rust
-      uses: dtolnay/rust-toolchain@stable
-      with:
-        targets: x86_64-pc-windows-msvc
-
-    - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@v2
-      with:
-        workspaces: "./src/backend/src-tauri -> target"
-
-    - name: Install frontend dependencies
-      run: |
-        cd src/frontend
-        npm ci
-
-    - name: Install backend dependencies
-      run: |
-        cd src/backend
-        npm ci
-
-    - name: Build frontend
-      run: |
-        cd src/frontend
-        npm run build
-
-    - name: Build Tauri app
-      uses: tauri-apps/tauri-action@v0
-      with:
-        projectPath: './src/backend'
-        tauriScript: 'npm run'
-        args: 'tauri:build'
+    # Use CodeQL's autobuild feature instead of duplicating the build process
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v3
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
