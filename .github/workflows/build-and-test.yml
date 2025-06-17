@@ -65,7 +65,6 @@ jobs:
         TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD || '' }}
       with:
         projectPath: './src/backend'
-        tauriScript: 'npm run build'
 
     - name: Upload build artifacts
       if: success() && github.event_name != 'pull_request'
