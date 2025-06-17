@@ -8,6 +8,9 @@ import { Window } from '@tauri-apps/api/window';
 import { SingleClickHandler } from './handlers/single-click-handler';
 //import { ShortcutManagerService } from './services/shortcut-manager.service';
 import { filter } from 'rxjs/operators';
+import { LangChainService } from './services/langchain.service';
+import { SettingsService } from './services/settings.service';
+import { invoke } from '@tauri-apps/api/core';
 
 @Component({
   selector: 'app-root',
@@ -25,8 +28,10 @@ export class App implements OnInit {
     //private messageBus: MessageBusService,
     private singleClickHandler: SingleClickHandler,
     //private shortcutManagerService: ShortcutManagerService,
-    private router: Router
+    private router: Router,
     //private location: Location
+    private langChainService: LangChainService,
+    private settingsService: SettingsService
   ) {}
 
   async ngOnInit() {
@@ -53,6 +58,9 @@ export class App implements OnInit {
       console.log('Received navigate-to-settings event');
       this.navigateToSettings();
     });
+
+    // Check if we should start minimized or show settings
+    await this.checkStartupConditions();
   }
 
 
@@ -77,12 +85,57 @@ export class App implements OnInit {
 
   /**
    * Navigate to the settings page
+   * @param section Optional section to show (e.g., 'api')
    */
-  navigateToSettings(): void {
-    this.router.navigate(['/settings']).catch(error => {
-        console.error('Failed to navigate to settings:', error);
+  navigateToSettings(section?: string): void {
+    const route = section ? `/settings/${section}` : '/settings';
+    this.router.navigate([route]).catch(error => {
+        console.error(`Failed to navigate to ${route}:`, error);
     });
-}
+  }
+
+  /**
+   * Check startup conditions to determine if we should show the window or start minimized
+   */
+  private async checkStartupConditions(): Promise<void> {
+    try {
+      // Get the current settings
+      const settings = this.settingsService.getSettings();
+
+      // Check if startMinimized is enabled
+      if (settings.startMinimized) {
+        // Check if API key is set
+        const config = this.langChainService.getConfig();
+        let apiKeySet = false;
+
+        if (config.provider) {
+          try {
+            // Try to get the API key from the keyring
+            const apiKey = await invoke<string>('get_api_key', { provider: config.provider });
+            apiKeySet = !!apiKey; // Convert to boolean
+          } catch (error) {
+            console.warn('Could not check API key:', error);
+            apiKeySet = false;
+          }
+        }
+
+        if (!apiKeySet) {
+          console.log('No API key set, showing settings page');
+          // No API key set, show the settings page with API config section
+          const appWindow = Window.getCurrent();
+          await appWindow.show();
+          this.navigateToSettings('api');
+        } else {
+          console.log('API key is set, starting minimized');
+          // API key is set, start minimized if enabled
+          const appWindow = Window.getCurrent();
+          await appWindow.hide();
+        }
+      }
+    } catch (error) {
+      console.error('Error checking startup conditions:', error);
+    }
+  }
 
   /**
    * Navigate back to the previous page

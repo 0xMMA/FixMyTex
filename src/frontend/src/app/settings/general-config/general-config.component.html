@@ -13,6 +13,16 @@
         When enabled, FixMyTex will launch automatically when you log in to your computer.
       </p>
     </div>
+
+    <div class="setting-item">
+      <label class="setting-label">
+        <input type="checkbox" [(ngModel)]="startMinimized" (change)="onStartMinimizedChange()">
+        Start minimized to system tray
+      </label>
+      <p class="setting-description">
+        When enabled, FixMyTex will start minimized to the system tray instead of showing the main window.
+      </p>
+    </div>
   </div>
 
   <div class="settings-section">

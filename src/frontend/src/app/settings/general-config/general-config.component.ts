@@ -14,6 +14,7 @@ import { Subscription } from 'rxjs';
 export class GeneralConfigComponent implements OnInit, OnDestroy {
   // Settings values
   autostart = false;
+  startMinimized = true;
   silentFixShortcut = 'CommandOrControl+Shift+F';
   uiAssistantShortcut = 'CommandOrControl+G';
 
@@ -26,6 +27,7 @@ export class GeneralConfigComponent implements OnInit, OnDestroy {
     this.subscription.add(
       this.settingsService.settings$.subscribe(settings => {
         this.autostart = settings.autostart;
+        this.startMinimized = settings.startMinimized;
         this.silentFixShortcut = settings.shortcuts.silentFix;
         this.uiAssistantShortcut = settings.shortcuts.uiAssistant;
       })
@@ -42,6 +44,13 @@ export class GeneralConfigComponent implements OnInit, OnDestroy {
     // Save autostart setting using the settings service
     this.settingsService.updateAutostart(this.autostart).catch(error => {
       console.error('Error updating autostart setting:', error);
+    });
+  }
+
+  onStartMinimizedChange(): void {
+    // Save startMinimized setting using the settings service
+    this.settingsService.updateStartMinimized(this.startMinimized).catch(error => {
+      console.error('Error updating start minimized setting:', error);
     });
   }
 

@@ -9,6 +9,7 @@ import { enable, isEnabled, disable } from '@tauri-apps/plugin-autostart';
  */
 export interface AppSettings {
   autostart: boolean;
+  startMinimized: boolean;
   shortcuts: {
     silentFix: string;
     uiAssistant: string;
@@ -20,6 +21,7 @@ export interface AppSettings {
  */
 export const DEFAULT_SETTINGS: AppSettings = {
   autostart: false,
+  startMinimized: true,
   shortcuts: {
     silentFix: 'CommandOrControl+Shift+F',
     uiAssistant: 'CommandOrControl+G'
@@ -137,6 +139,23 @@ export class SettingsService {
     } catch (error) {
       console.error('Error updating autostart setting:', error);
     }
+  }
+
+  /**
+   * Update the startMinimized setting
+   * @param value The new startMinimized value
+   */
+  public async updateStartMinimized(value: boolean): Promise<void> {
+    const currentSettings = this.settingsSubject.getValue();
+    const newSettings = { ...currentSettings, startMinimized: value };
+
+    // Update the settings subject
+    this.settingsSubject.next(newSettings);
+
+    // Save the settings to storage
+    await this.saveSettings(newSettings).catch(error => {
+      console.error('Error saving settings:', error);
+    });
   }
 
   /**
