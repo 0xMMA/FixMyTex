@@ -15,7 +15,7 @@ export class GeneralConfigComponent implements OnInit, OnDestroy {
   // Settings values
   autostart = false;
   startMinimized = true;
-  silentFixShortcut = 'CommandOrControl+Shift+F';
+  silentFixShortcut = 'CommandOrControl+G';
   uiAssistantShortcut = 'CommandOrControl+G';
 
   private subscription: Subscription = new Subscription();
