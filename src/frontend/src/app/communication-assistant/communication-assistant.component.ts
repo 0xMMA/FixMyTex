@@ -169,4 +169,7 @@ export class CommunicationAssistantComponent implements OnInit, OnDestroy {
         console.error('Error sending text back to source application:', error);
       });
   }
+
+  protected readonly Math = Math;
+  protected readonly window = window;
 }

@@ -62,7 +62,9 @@
                   [(ngModel)]="draftText" 
                   (input)="onTextChange()"
                   placeholder="Your processed text will appear here..."
-                  rows="10"
+                  [cdkTextareaAutosize]="true"
+                  [cdkAutosizeMinRows]="11"
+                  [cdkAutosizeMaxRows]="Math.floor((window.innerHeight - (444)) / 26)"
                 ></textarea>
               </mat-form-field>
             </mat-tab>
@@ -73,8 +75,10 @@
                   [(ngModel)]="originalText" 
                   (input)="onTextChange()"
                   placeholder="Enter or paste your text here..."
-                  rows="10"
-                ></textarea>
+                  [cdkTextareaAutosize]="true"
+                  [cdkAutosizeMinRows]="11"
+                  [cdkAutosizeMaxRows]="Math.floor((window.innerHeight - (444)) / 26)"
+                  ></textarea>
               </mat-form-field>
             </mat-tab>
           </mat-tab-group>
@@ -151,15 +155,15 @@
             </div>
 
           <!-- Processing result display -->
-          @if (processingResult) {
-            <div class="processing-result">
-              <mat-divider class="result-divider"></mat-divider>
-              <h3>Processing Result</h3>
-              <div class="subject-line">
-                <strong>Subject:</strong> {{ processingResult.subject }}
-              </div>
-            </div>
-          }
+<!--          @if (processingResult) {-->
+<!--            <div class="processing-result">-->
+<!--              <mat-divider class="result-divider"></mat-divider>-->
+<!--              <h3>Processing Result</h3>-->
+<!--              <div class="subject-line">-->
+<!--                <strong>Subject:</strong> {{ processingResult.subject }}-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          }-->
         </mat-card-content>
       </mat-card>
     </div>
