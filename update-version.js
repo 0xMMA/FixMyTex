@@ -29,4 +29,11 @@ tauriConfig.version = version;
 fs.writeFileSync(tauriConfigFile, JSON.stringify(tauriConfig, null, 2) + '\n');
 console.log(`Updated tauri.conf.json to version ${version}`);
 
+// Update root package.json
+const rootPackageFile = path.join(__dirname, 'package.json');
+const rootPackage = JSON.parse(fs.readFileSync(rootPackageFile, 'utf8'));
+rootPackage.version = version;
+fs.writeFileSync(rootPackageFile, JSON.stringify(rootPackage, null, 2) + '\n');
+console.log(`Updated root package.json to version ${version}`);
+
 console.log('All version references updated successfully!');
