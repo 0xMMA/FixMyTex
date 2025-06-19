@@ -1,0 +1,19 @@
+{
+  "name": "fixmytex",
+  "version": "2.0.0",
+  "description": "FixMyTex application",
+  "scripts": {
+    "update-version": "node update-version.js",
+    "version:patch": "node -e \"const fs=require('fs');const v=require('./version.json');const [major,minor,patch]=v.version.split('.');v.version=`${major}.${minor}.${parseInt(patch)+1}`;fs.writeFileSync('./version.json',JSON.stringify(v,null,2));\" && npm run update-version",
+    "version:minor": "node -e \"const fs=require('fs');const v=require('./version.json');const [major,minor]=v.version.split('.');v.version=`${major}.${parseInt(minor)+1}.0`;fs.writeFileSync('./version.json',JSON.stringify(v,null,2));\" && npm run update-version",
+    "version:major": "node -e \"const fs=require('fs');const v=require('./version.json');const [major]=v.version.split('.');v.version=`${parseInt(major)+1}.0.0`;fs.writeFileSync('./version.json',JSON.stringify(v,null,2));\" && npm run update-version",
+    "build": "npm run update-version && cd src/frontend && npm run build && cd ../backend && npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/fixmytex.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

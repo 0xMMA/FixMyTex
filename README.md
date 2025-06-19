@@ -56,6 +56,40 @@ npm run tauri:build
 
 The build output will be located in `src/backend/src-tauri/target/release`.
 
+### Versioning
+
+This project uses a centralized versioning system with a single source of truth:
+
+1. The `version.json` file in the root directory contains the current version number
+2. The `update-version.js` script automatically updates all version references in the project
+3. NPM scripts are provided for easy version management:
+
+```bash
+# Update all version references from version.json
+npm run update-version
+
+# Increment patch version (e.g., 2.0.0 -> 2.0.1)
+npm run version:patch
+
+# Increment minor version (e.g., 2.0.0 -> 2.1.0)
+npm run version:minor
+
+# Increment major version (e.g., 2.0.0 -> 3.0.0)
+npm run version:major
+
+# Build with automatic version synchronization
+npm run build
+```
+
+When creating a new release, simply run one of the version increment commands and then build:
+
+```bash
+npm run version:patch  # or version:minor or version:major
+npm run build
+```
+
+This ensures that all version references in the project (frontend, backend, and Tauri configuration) are synchronized automatically.
+
 ### CI/CD Pipeline
 
 This project uses GitHub Actions for continuous integration and deployment:
@@ -67,9 +101,18 @@ This project uses GitHub Actions for continuous integration and deployment:
 > **Note:** Update the repository URL in the README badges after forking this repository
 
 To create a new release:
-1. Push a tag with the format `v*` (e.g., `v1.0.0`)
-2. The release workflow will create a draft release with Windows binaries
-3. Review and publish the release
+1. Update the version using one of the version commands:
+   ```bash
+   npm run version:patch  # or version:minor or version:major
+   ```
+2. Commit the changes to version.json and other updated files
+3. Push a tag with the format `v*` matching the new version (e.g., `v2.0.1`)
+   ```bash
+   git tag v2.0.1
+   git push origin v2.0.1
+   ```
+4. The release workflow will create a draft release with Windows binaries
+5. Review and publish the release
 
 ## Roadmap
 
