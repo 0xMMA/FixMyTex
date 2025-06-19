@@ -86,9 +86,9 @@
     <!-- Controls panel: Make/Send/Instructions -->
     <div class="controls-panel">
       <mat-card>
-        <mat-card-header>
-          <mat-card-title>Controls</mat-card-title>
-        </mat-card-header>
+<!--        <mat-card-header>-->
+<!--          <mat-card-title>Modification</mat-card-title>-->
+<!--        </mat-card-header>-->
         <mat-card-content>
           <!-- Action buttons -->
           <div class="action-buttons">
@@ -136,18 +136,19 @@
             </button>
           </div>
 
-          <!-- Instructions input -->
-          <div class="instructions-input">
-            <mat-form-field appearance="fill" class="full-width">
-              <mat-label>Instructions</mat-label>
-              <input 
-                matInput 
-                [(ngModel)]="instructionsText" 
-                (input)="onInstructionsChange()"
-                placeholder="Enter custom instructions for text processing..."
-              >
-            </mat-form-field>
-          </div>
+            <!-- Instructions input -->
+            <div class="instructions-input">
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Follow-up Instructions</mat-label>
+                    <textarea
+                            matInput
+                            [(ngModel)]="instructionsText"
+                            (input)="onInstructionsChange()"
+                            placeholder="Enter custom instructions for text processing..."
+                            rows="3"
+                    ></textarea>
+                </mat-form-field>
+            </div>
 
           <!-- Processing result display -->
           @if (processingResult) {

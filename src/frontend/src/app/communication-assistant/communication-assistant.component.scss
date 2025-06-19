@@ -19,11 +19,34 @@
   gap: 0.5rem;
 }
 
-// Text panel and controls panel styles
-.text-panel, .controls-panel {
+// Text panel styles
+.text-panel {
   display: flex;
   flex-direction: column;
   width: 100%;
+  flex: 1;
+  //make the direct descendant and all of its descendants and all of their descendants use the full available height
+  > mat-card {
+    flex: 1;
+    > mat-card-content {
+      flex: 1;
+      > mat-tab-group {
+        flex: 1;
+        height: 100%;
+      }
+    }
+  }
+}
+
+// Controls panel styles
+.controls-panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  // remove mat-card bottom margin
+  > mat-card {
+    margin-bottom: 0rem;
+  }
 }
 
 // Setting styles
@@ -42,9 +65,12 @@
   width: 100%;
 }
 
+
+
 .text-area-container {
-  margin-top: 1rem;
+  height: calc(100% - 1rem);
   min-height: 300px;
+  margin-top: 1rem;
 }
 
 // History view
