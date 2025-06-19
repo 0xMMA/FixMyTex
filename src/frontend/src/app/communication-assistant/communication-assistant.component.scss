@@ -11,11 +11,19 @@
   margin: 0;
 }
 
-// Text panel styles
-.text-panel {
+// Middle column wrapper
+.middle-column {
   flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
+}
+
+// Text panel and controls panel styles
+.text-panel, .controls-panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 // Setting styles
@@ -56,6 +64,31 @@
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 0.75rem;
   margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+// Processing result styles
+.processing-result {
+  margin-top: 1.5rem;
+
+  .result-divider {
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+    color: #333;
+  }
+
+  .subject-line {
+    background-color: #f5f5f5;
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    line-height: 1.4;
+  }
 }
 
 // Material card customization

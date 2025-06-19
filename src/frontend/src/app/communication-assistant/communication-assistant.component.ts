@@ -1,7 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MaterialModule } from '../shared/material.module';
+import { MessageBusService } from '../services/message-bus.service';
+import { UIAssistedActionData, UIAssistedActionHandler } from '../handlers/ui-assisted-action-handler';
+import { PyramidalAgentService, PyramidalAgentResult } from '../services/pyramidal-agent.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-communication-assistant',
@@ -10,7 +14,9 @@ import { MaterialModule } from '../shared/material.module';
   templateUrl: './communication-assistant.component.html',
   styleUrls: ['./communication-assistant.component.scss']
 })
-export class CommunicationAssistantComponent {
+export class CommunicationAssistantComponent implements OnInit, OnDestroy {
+  private textReadySubscription: Subscription | null = null;
+  sourceApp: string = '';
   // Settings panel properties
   communicationStyles = [
     { id: 'concise', name: 'Concise' },
@@ -37,7 +43,38 @@ export class CommunicationAssistantComponent {
   // Text panel properties
   originalText = '';
   draftText = '';
+  instructionsText = ''; // New property for instructions input
   activeTab = 'draft'; // 'draft', 'original'
+
+  // Pyramidal agent properties
+  processingResult: PyramidalAgentResult | null = null;
+  isProcessing = false;
+
+  constructor(
+    private messageBus: MessageBusService,
+    private uiAssistedActionHandler: UIAssistedActionHandler,
+    private pyramidalAgentService: PyramidalAgentService
+  ) {}
+
+  ngOnInit(): void {
+    // Subscribe to the ui-assisted:text-ready event
+    this.textReadySubscription = this.messageBus.on<UIAssistedActionData>('ui-assisted:text-ready')
+      .subscribe(data => {
+        console.log('Received text-ready event with data:', data);
+        this.originalText = data.text;
+        this.sourceApp = data.sourceApp;
+        // Switch to the original tab to show the text
+        this.activeTab = 'original';
+      });
+  }
+
+  ngOnDestroy(): void {
+    // Clean up subscription when component is destroyed
+    if (this.textReadySubscription) {
+      this.textReadySubscription.unsubscribe();
+      this.textReadySubscription = null;
+    }
+  }
 
   // Methods for handling user interactions
   onStyleChange(): void {
@@ -68,8 +105,68 @@ export class CommunicationAssistantComponent {
     // In a real implementation, this would update the text state
   }
 
-  processText(action: string): void {
+  onInstructionsChange(): void {
+    console.log('Instructions changed:', this.instructionsText);
+    // In a real implementation, this would update the instructions state
+  }
+
+  /**
+   * Process text using the pyramidal agent flow
+   * @param action The action to perform (not used in pyramidal flow)
+   */
+  async processText(action: string): Promise<void> {
     console.log('Processing text with action:', action);
-    // In a real implementation, this would call the AI service to process the text
+
+    if (!this.originalText) {
+      console.warn('No text to process');
+      return;
+    }
+
+    try {
+      this.isProcessing = true;
+
+      // Process the text using the pyramidal agent flow
+      this.processingResult = await this.pyramidalAgentService.processEmail(
+        this.originalText, 
+        this.instructionsText
+      );
+
+      console.log('Pyramidal agent processing result:', this.processingResult);
+
+      // Update the draft text with the final email
+      this.draftText = this.processingResult.finalEmail;
+
+      // Switch to the draft tab to show the result
+      this.activeTab = 'draft';
+    } catch (error) {
+      console.error('Error processing text with pyramidal agent flow:', error);
+    } finally {
+      this.isProcessing = false;
+    }
+  }
+
+  /**
+   * Send the processed text back to the source application
+   * @param text The text to send back (defaults to the draft text)
+   */
+  sendBackToSourceApp(text: string = this.draftText): void {
+    if (!this.sourceApp) {
+      console.warn('No source application to send text back to');
+      return;
+    }
+
+    if (!text) {
+      console.warn('No text to send back');
+      return;
+    }
+
+    console.log('Sending text back to source application:', this.sourceApp);
+    this.uiAssistedActionHandler.pasteBackToSourceApp(text)
+      .then(() => {
+        console.log('Text successfully sent back to source application');
+      })
+      .catch(error => {
+        console.error('Error sending text back to source application:', error);
+      });
   }
 }

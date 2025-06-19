@@ -5,7 +5,8 @@ import { CommonModule } from '@angular/common';
 import { Event as TauriEvent } from '@tauri-apps/api/event';
 import { Window } from '@tauri-apps/api/window';
 //import { MessageBusService } from './services/message-bus.service';
-import { SingleClickHandler } from './handlers/single-click-handler';
+import { SilentFixActionHandler } from './handlers/silent-fix-action-handler';
+import { UIAssistedActionHandler } from './handlers/ui-assisted-action-handler';
 //import { ShortcutManagerService } from './services/shortcut-manager.service';
 import { filter } from 'rxjs/operators';
 import { LangChainService } from './services/langchain.service';
@@ -26,7 +27,8 @@ export class App implements OnInit {
 
   constructor(
     //private messageBus: MessageBusService,
-    private singleClickHandler: SingleClickHandler,
+    private silentFixActionHandler: SilentFixActionHandler,
+    private uiAssistedActionHandler: UIAssistedActionHandler,
     //private shortcutManagerService: ShortcutManagerService,
     private router: Router,
     //private location: Location
@@ -35,8 +37,9 @@ export class App implements OnInit {
   ) {}
 
   async ngOnInit() {
-    // Initialize the single click handler
-    this.singleClickHandler.initialize();
+    // Initialize the action handlers
+    this.silentFixActionHandler.initialize();
+    this.uiAssistedActionHandler.initialize();
 
     // ShortcutManager is initialized in the ShortcutManagerService
     await this.setupWindowEvents();

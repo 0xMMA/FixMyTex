@@ -47,49 +47,121 @@
     </mat-card-content>
   </mat-card>
 
-  <!-- Middle panel: Text display and actions -->
-  <div class="text-panel">
-    <mat-card>
-      <mat-card-content>
-        <!-- Tabs for Draft/Original -->
-        <mat-tab-group [selectedIndex]="activeTab === 'draft' ? 0 : 1" (selectedIndexChange)="onTabChange($event === 0 ? 'draft' : 'original')">
-          <mat-tab label="Draft">
-            <mat-form-field appearance="fill" class="full-width text-area-container">
-              <textarea 
-                matInput
-                [(ngModel)]="draftText" 
-                (input)="onTextChange()"
-                placeholder="Your processed text will appear here..."
-                rows="10"
-              ></textarea>
-            </mat-form-field>
-          </mat-tab>
-          <mat-tab label="Original">
-            <mat-form-field appearance="fill" class="full-width text-area-container">
-              <textarea 
-                matInput
-                [(ngModel)]="originalText" 
-                (input)="onTextChange()"
-                placeholder="Enter or paste your text here..."
-                rows="10"
-              ></textarea>
-            </mat-form-field>
-          </mat-tab>
-        </mat-tab-group>
+  <!-- Middle column containing text panel and controls panel -->
+  <div class="middle-column">
+    <!-- Text panel -->
+    <div class="text-panel">
+      <mat-card>
+        <mat-card-content>
+          <!-- Tabs for Draft/Original -->
+          <mat-tab-group [selectedIndex]="activeTab === 'draft' ? 0 : 1" (selectedIndexChange)="onTabChange($event === 0 ? 'draft' : 'original')">
+            <mat-tab label="Draft">
+              <mat-form-field appearance="fill" class="full-width text-area-container">
+                <textarea 
+                  matInput
+                  [(ngModel)]="draftText" 
+                  (input)="onTextChange()"
+                  placeholder="Your processed text will appear here..."
+                  rows="10"
+                ></textarea>
+              </mat-form-field>
+            </mat-tab>
+            <mat-tab label="Original">
+              <mat-form-field appearance="fill" class="full-width text-area-container">
+                <textarea 
+                  matInput
+                  [(ngModel)]="originalText" 
+                  (input)="onTextChange()"
+                  placeholder="Enter or paste your text here..."
+                  rows="10"
+                ></textarea>
+              </mat-form-field>
+            </mat-tab>
+          </mat-tab-group>
 
-        <!-- Action buttons -->
-        <div class="action-buttons">
-          <button mat-raised-button color="primary" (click)="processText('concise')">Make Concise</button>
-          <button mat-raised-button color="primary" (click)="processText('expand')">Add Detail</button>
-          <button mat-raised-button color="primary" (click)="processText('persuasive')">Make Persuasive</button>
-          <button mat-raised-button color="primary" (click)="processText('neutral')">Make Neutral</button>
-          <button mat-raised-button color="primary" (click)="processText('diplomatic')">Make Diplomatic</button>
-          <button mat-raised-button color="primary" (click)="processText('direct')">Make Direct</button>
-          <button mat-raised-button color="primary" (click)="processText('casual')">Make Casual</button>
-          <button mat-raised-button color="primary" (click)="processText('professional')">Make Professional</button>
-        </div>
-      </mat-card-content>
-    </mat-card>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Controls panel: Make/Send/Instructions -->
+    <div class="controls-panel">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Controls</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <!-- Action buttons -->
+          <div class="action-buttons">
+            <!-- Process button with loading indicator -->
+            <button 
+              mat-raised-button 
+              color="primary" 
+              (click)="processText('pyramidal')" 
+              [disabled]="isProcessing || !originalText"
+            >
+              @if (!isProcessing) {
+                <span>Process with Pyramidal Agent</span>
+              } @else {
+                <span>
+                  <mat-spinner diameter="20" style="display: inline-block; margin-right: 8px;"></mat-spinner>
+                  Processing...
+                </span>
+              }
+            </button>
+
+            <!-- Legacy dropdown menu (can be removed if not needed) -->
+            <button mat-raised-button color="primary" [matMenuTriggerFor]="makeMenu" [disabled]="isProcessing">
+              More Options
+              <mat-icon>arrow_drop_down</mat-icon>
+            </button>
+            <mat-menu #makeMenu="matMenu">
+              <button mat-menu-item (click)="processText('concise')">Concise</button>
+              <button mat-menu-item (click)="processText('expand')">Detail</button>
+              <button mat-menu-item (click)="processText('persuasive')">Persuasive</button>
+              <button mat-menu-item (click)="processText('neutral')">Neutral</button>
+              <button mat-menu-item (click)="processText('diplomatic')">Diplomatic</button>
+              <button mat-menu-item (click)="processText('direct')">Direct</button>
+              <button mat-menu-item (click)="processText('casual')">Casual</button>
+              <button mat-menu-item (click)="processText('professional')">Professional</button>
+            </mat-menu>
+
+            <!-- Send back button - only enabled when there's a source app -->
+            <button 
+              mat-raised-button 
+              color="accent" 
+              (click)="sendBackToSourceApp()" 
+              [disabled]="!sourceApp"
+              matTooltip="Send the processed text back to the source application">
+              Send Back to {{ sourceApp || 'Source App' }}
+            </button>
+          </div>
+
+          <!-- Instructions input -->
+          <div class="instructions-input">
+            <mat-form-field appearance="fill" class="full-width">
+              <mat-label>Instructions</mat-label>
+              <input 
+                matInput 
+                [(ngModel)]="instructionsText" 
+                (input)="onInstructionsChange()"
+                placeholder="Enter custom instructions for text processing..."
+              >
+            </mat-form-field>
+          </div>
+
+          <!-- Processing result display -->
+          @if (processingResult) {
+            <div class="processing-result">
+              <mat-divider class="result-divider"></mat-divider>
+              <h3>Processing Result</h3>
+              <div class="subject-line">
+                <strong>Subject:</strong> {{ processingResult.subject }}
+              </div>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
   </div>
 
   <!-- Right panel: History -->

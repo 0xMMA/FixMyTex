@@ -8,23 +8,24 @@ import { invoke } from '@tauri-apps/api/core';
  * Message types for shortcut events
  */
 export enum ShortcutEventType {
-  SINGLE_CLICK = 'shortcut:single-click',
+  SILENT_FIX = 'shortcut:silent-fix',
+  UI_ASSISTED = 'shortcut:ui-assisted',
 }
 
 /**
- * Handler for single click shortcut events
+ * Handler for silent fix action events
  */
 @Injectable({
   providedIn: 'root'
 })
-export class SingleClickHandler {
+export class SilentFixActionHandler {
   constructor(
     private messageBus: MessageBusService,
     private langChainService: LangChainService
   ) {
-    // Subscribe to single-click events
-    this.messageBus.on<void>(ShortcutEventType.SINGLE_CLICK)
-      .subscribe(() => this.handleSingleClick());
+    // Subscribe to silent-fix events
+    this.messageBus.on<void>(ShortcutEventType.SILENT_FIX)
+      .subscribe(() => this.handleSilentFix());
   }
 
   /**
@@ -32,16 +33,16 @@ export class SingleClickHandler {
    * This method should be called once during application startup
    */
   initialize(): void {
-    console.log('SingleClickHandler initialized');
+    console.log('SilentFixActionHandler initialized');
   }
 
   /**
-   * Handle a single click event
-   * This method contains the implementation that was previously in ShortcutManager.handleSingleClick
+   * Handle a silent fix event
+   * This method contains the implementation that was previously in SingleClickHandler.handleSingleClick
    */
-  private async handleSingleClick(): Promise<void> {
+  private async handleSilentFix(): Promise<void> {
     try {
-      console.log('Single click detected');
+      console.log('Silent fix action detected');
 
       // Get the current focused application name via the operating system
       const focusedApp = await invoke<string>('get_focused_app_name');
@@ -81,24 +82,24 @@ export class SingleClickHandler {
 
       console.log('Text processed and copied to clipboard');
     } catch (error) {
-      console.error('Error handling single click:', error);
+      console.error('Error handling silent fix action:', error);
     }
   }
 
-private async getClipboardText(): Promise<string> {
-  try {
-    return await readText();
-  } catch (error) {
-    console.error('Error reading from clipboard:', error);
-    return '';
+  private async getClipboardText(): Promise<string> {
+    try {
+      return await readText();
+    } catch (error) {
+      console.error('Error reading from clipboard:', error);
+      return '';
+    }
   }
-}
 
-private async setClipboardText(text: string): Promise<void> {
-  try {
-    await writeText(text);
-  } catch (error) {
-    console.error('Error writing to clipboard:', error);
+  private async setClipboardText(text: string): Promise<void> {
+    try {
+      await writeText(text);
+    } catch (error) {
+      console.error('Error writing to clipboard:', error);
+    }
   }
-}
 }

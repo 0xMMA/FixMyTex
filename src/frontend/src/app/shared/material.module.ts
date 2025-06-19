@@ -12,6 +12,8 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @NgModule({
   exports: [
@@ -27,7 +29,9 @@ import { MatDividerModule } from '@angular/material/divider';
     MatSidenavModule,
     MatListModule,
     MatGridListModule,
-    MatDividerModule
+    MatDividerModule,
+    MatMenuModule,
+    MatProgressSpinnerModule
   ]
 })
 export class MaterialModule { }

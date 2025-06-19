@@ -1,7 +1,7 @@
 import {register, ShortcutEvent} from '@tauri-apps/plugin-global-shortcut';
 import {Window} from '@tauri-apps/api/window';
 import { MessageBusService } from './services/message-bus.service';
-import { ShortcutEventType } from './handlers/single-click-handler';
+import { ShortcutEventType } from './handlers/silent-fix-action-handler';
 
 export interface ShortcutConfig {
   actionShortcut: string;
@@ -84,26 +84,21 @@ export class ShortcutManager {
 
   private async handleSingleClick(): Promise<void> {
     if (this.messageBus) {
-      // Publish a single click event to the message bus
-      this.messageBus.publish(ShortcutEventType.SINGLE_CLICK);
+      // Publish a silent fix event to the message bus
+      this.messageBus.publish(ShortcutEventType.SILENT_FIX);
     } else {
       // Fallback for backward compatibility
-      console.log('MessageBus not available, single click event not published');
+      console.log('MessageBus not available, silent fix event not published');
       // Add any legacy single click implementation here if needed
     }
   }
 
   private async handleDoubleClick(): Promise<void> {
-    try {
-      const appWindow = Window.getCurrent();
-      if (await appWindow.isMinimized()) {
-        await appWindow.unminimize();
-      }
-      await appWindow.show();
-      await appWindow.setFocus();
-      await appWindow.setSkipTaskbar(false);
-    } catch (error) {
-      console.error('Failed to show window:', error);
+    if (this.messageBus) {
+      // Publish a UI assisted event to the message bus
+      this.messageBus.publish(ShortcutEventType.UI_ASSISTED);
+    } else {
+      console.log('MessageBus not available, UI assisted event not published');
     }
   }
 
