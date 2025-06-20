@@ -1,6 +1,6 @@
 {
   "name": "fixmytex",
-  "version": "2.2.2",
+  "version": "3.0.0",
   "description": "FixMyTex application",
   "scripts": {
     "update-version": "node update-version.js",
