@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MaterialModule } from '../shared/material.module';
@@ -62,7 +62,8 @@ export class CommunicationAssistantComponent implements OnInit, OnDestroy {
   constructor(
     private messageBus: MessageBusService,
     private uiAssistedActionHandler: UIAssistedActionHandler,
-    private pyramidalAgentService: PyramidalAgentService
+    private pyramidalAgentService: PyramidalAgentService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -74,6 +75,8 @@ export class CommunicationAssistantComponent implements OnInit, OnDestroy {
         this.sourceApp = data.sourceApp;
         // Switch to the original tab to show the text
         this.activeTab = 'original';
+        // Manually trigger change detection to update the UI
+        this.cdr.detectChanges();
       });
   }
 

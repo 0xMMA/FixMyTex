@@ -152,7 +152,9 @@ export class PyramidalAgentService {
   constructor(private langChainService: LangChainService) {}
 
   async processDocument(text: string, documentType: DocumentType = DocumentType.AUTO, sourceApp?: string, instructions?: string): Promise<PyramidalAgentResult> {
+    const startTime = new Date();
     try {
+      console.log(`[processDocument] Starting at ${startTime.toISOString()}`);
       console.log('Processing document with pyramidal agent flow', { text, documentType, sourceApp, instructions });
 
       const model = await this.getModel();
@@ -164,6 +166,10 @@ export class PyramidalAgentService {
         sourceApp,
         instructions
       });
+
+      const endTime = new Date();
+      const duration = endTime.getTime() - startTime.getTime();
+      console.log(`[processDocument] Completed at ${endTime.toISOString()}, total duration: ${duration}ms`);
 
       return {
         documentType: result.analysis.documentType,
@@ -178,6 +184,9 @@ export class PyramidalAgentService {
         }
       };
     } catch (error) {
+      const endTime = new Date();
+      const duration = endTime.getTime() - startTime.getTime();
+      console.error(`[processDocument] Failed at ${endTime.toISOString()}, duration: ${duration}ms`);
       console.error('Error processing document with pyramidal agent flow', error);
       throw error;
     }
@@ -518,7 +527,7 @@ export class PyramidalAgentService {
           EXAMPLES:
           - "Project Alpha delayed | Resource conflict | Team meeting Tue | @Sarah feedback by Thu"
           - "Q1 budget exceeded | System failure cause | @Michael approval needed"
-          
+
           RETURN ONLY THE SUBJECT LINE:
         `);
 
@@ -637,14 +646,35 @@ export class PyramidalAgentService {
       };
     });
 
-    // Chain everything together
+    // Helper function to wrap a step with timing logs
+    const withTiming = <I, O>(name: string, step: RunnableLambda<I, O>): RunnableLambda<I, O> => {
+      return RunnableLambda.from<I, O>(async (input: I): Promise<O> => {
+        const startTime = new Date();
+        console.log(`[${name}] Starting at ${startTime.toISOString()}`);
+
+        try {
+          const result = await step.invoke(input);
+          const endTime = new Date();
+          const duration = endTime.getTime() - startTime.getTime();
+          console.log(`[${name}] Completed at ${endTime.toISOString()}, duration: ${duration}ms`);
+          return result;
+        } catch (error) {
+          const endTime = new Date();
+          const duration = endTime.getTime() - startTime.getTime();
+          console.error(`[${name}] Failed at ${endTime.toISOString()}, duration: ${duration}ms`, error);
+          throw error;
+        }
+      });
+    };
+
+    // Chain everything together with timing logs
     return RunnableSequence.from<DocumentInput, CompleteDocument>([
-      analyzeDocument,
-      extractCoreMessages,
-      extractInformation,
-      generateStructure,
-      generateFormatElements,
-      formatDocument
+      withTiming('analyzeDocument', analyzeDocument),
+      withTiming('extractCoreMessages', extractCoreMessages),
+      withTiming('extractInformation', extractInformation),
+      withTiming('generateStructure', generateStructure),
+      withTiming('generateFormatElements', generateFormatElements),
+      withTiming('formatDocument', formatDocument)
     ]);
   }
 }
