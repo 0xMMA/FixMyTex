@@ -4,247 +4,375 @@ import { ChatOpenAI } from "@langchain/openai";
 import { ChatAnthropic } from "@langchain/anthropic";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
-import { RunnableLambda, RunnableSequence } from "@langchain/core/runnables";
+import { RunnableLambda, RunnableSequence, RunnableBranch } from "@langchain/core/runnables";
 import { LLMProvider } from '../models/langchain-config';
 import dedent from "dedent";
 
 /**
- * Email analysis structure
+ * Document types for different output formats
  */
-export interface EmailAnalysis {
+export enum DocumentType {
+  EMAIL = 'email',
+  WIKI = 'wiki',
+  POWERPOINT = 'powerpoint',
+  MEMO = 'memo',
+  AUTO = 'auto' // Let the system detect
+}
+
+/**
+ * Core message structure
+ */
+export interface CoreMessage {
+  message: string;
+  businessImpact: 'high' | 'medium' | 'low';
+  type: 'outcome' | 'action' | 'status' | 'decision';
+  confidence: number;
+}
+
+/**
+ * Document analysis structure
+ */
+export interface DocumentAnalysis {
+  documentType: DocumentType;
   language: string;
-  hauptbotschaften: string[];
-  personen: string[];
+  coreMessages: CoreMessage[];
+  people: string[];
   deadlines: string[];
-  aktionen: string[];
+  actions: string[];
   details: string[];
+  confidence: number;
   error?: string;
   raw?: string;
 }
 
 /**
- * Email structure
+ * Information extraction (separate from core messages)
  */
-export interface EmailStructure {
+export interface InformationExtraction {
+  people: string[];
+  deadlines: string[];
+  actions: string[];
+  details: string[];
+  technicalDetails: string[];
+  error?: string;
+  raw?: string;
+}
+
+/**
+ * Document structure
+ */
+export interface DocumentStructure {
   headlines: Array<{
     title: string;
     details: string[];
+    priority: 'high' | 'medium' | 'low';
   }>;
   error?: string;
   raw?: string;
 }
 
 /**
- * Result of the pyramidal agent processing
+ * Format-specific elements (varies by document type)
+ */
+export interface FormatElements {
+  subject?: string; // For emails
+  title?: string; // For wikis, memos
+  slideTitle?: string; // For PowerPoint
+  summary?: string; // For all types
+  error?: string;
+  raw?: string;
+}
+
+/**
+ * Quality assurance check
+ */
+export interface QualityCheck {
+  informationLoss: string[];
+  accuracyIssues: string[];
+  missingElements: string[];
+  overallScore: number;
+  passed: boolean;
+}
+
+/**
+ * Complete result
  */
 export interface PyramidalAgentResult {
-  subject: string;
-  finalEmail: string;
-  analysis: EmailAnalysis;
-  structure: EmailStructure;
+  documentType: DocumentType;
+  formatElements: FormatElements;
+  finalDocument: string;
+  coreMessages: CoreMessage[];
+  structure: DocumentStructure;
+  qualityCheck: QualityCheck;
+  intermediateSteps?: {
+    analysis?: DocumentAnalysis;
+    information?: InformationExtraction;
+  };
 }
 
 /**
- * Input for the email processing chain
+ * Input interfaces for the chain
  */
-interface EmailInput {
-  email: string;
+interface DocumentInput {
+  text: string;
+  documentType?: DocumentType;
+  sourceApp?: string;
+  instructions?: string;
 }
 
-/**
- * Input with analysis
- */
-interface EmailWithAnalysis extends EmailInput {
-  analysis: EmailAnalysis;
+interface DocumentWithAnalysis extends DocumentInput {
+  analysis: DocumentAnalysis;
 }
 
-/**
- * Input with analysis and structure
- */
-interface EmailWithStructure extends EmailWithAnalysis {
-  structure: EmailStructure;
+interface DocumentWithCoreMessages extends DocumentWithAnalysis {
+  coreMessages: CoreMessage[];
 }
 
-/**
- * Input with analysis, structure, and subject
- */
-interface EmailWithSubject extends EmailWithStructure {
-  subject: string;
+interface DocumentWithInformation extends DocumentWithCoreMessages {
+  information: InformationExtraction;
 }
 
-/**
- * Complete email result
- */
-interface CompleteEmailResult extends EmailWithSubject {
-  finalEmail: string;
+interface DocumentWithStructure extends DocumentWithInformation {
+  structure: DocumentStructure;
 }
 
-/**
- * Service for processing text using a pyramidal agent flow
- */
+interface DocumentWithFormat extends DocumentWithStructure {
+  formatElements: FormatElements;
+}
+
+interface CompleteDocument extends DocumentWithFormat {
+  finalDocument: string;
+  qualityCheck: QualityCheck;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class PyramidalAgentService {
   constructor(private langChainService: LangChainService) {}
 
-  /**
-   * Process text using the pyramidal agent flow
-   * @param email The email text to process
-   * @param instructions Optional instructions for processing
-   * @returns The processed text result
-   */
-  async processEmail(email: string, instructions?: string): Promise<PyramidalAgentResult> {
+  async processDocument(text: string, documentType: DocumentType = DocumentType.AUTO, sourceApp?: string, instructions?: string): Promise<PyramidalAgentResult> {
     try {
-      console.log('Processing email with pyramidal agent flow', { email, instructions });
+      console.log('Processing document with pyramidal agent flow', { text, documentType, sourceApp, instructions });
 
-      // Get the model from LangChainService
       const model = await this.getModel();
+      const processingChain = this.createProcessingChain(model, instructions);
 
-      // Create the email processing chain
-      const emailProcessingChain = this.createEmailProcessingChain(model, instructions);
-
-      // Process the email
-      const result = await emailProcessingChain.invoke({ email });
+      const result = await processingChain.invoke({
+        text,
+        documentType: documentType === DocumentType.AUTO ? undefined : documentType,
+        sourceApp,
+        instructions
+      });
 
       return {
-        subject: result.subject,
-        finalEmail: result.finalEmail,
-        analysis: result.analysis,
-        structure: result.structure
+        documentType: result.analysis.documentType,
+        formatElements: result.formatElements,
+        finalDocument: result.finalDocument,
+        coreMessages: result.coreMessages,
+        structure: result.structure,
+        qualityCheck: result.qualityCheck,
+        intermediateSteps: {
+          analysis: result.analysis,
+          information: result.information
+        }
       };
     } catch (error) {
-      console.error('Error processing email with pyramidal agent flow', error);
+      console.error('Error processing document with pyramidal agent flow', error);
       throw error;
     }
   }
 
-  /**
-   * Get the model from LangChainService
-   * @returns The configured model
-   */
   private async getModel(): Promise<ChatOpenAI | ChatAnthropic> {
     const config = this.langChainService.getConfig();
-
     if (!config.apiKey) {
       throw new Error('API key is not set');
     }
 
-    // Create the model based on the provider
     if (config.provider === LLMProvider.OPENAI) {
       return new ChatOpenAI({
         modelName: config.model,
         openAIApiKey: config.apiKey,
-        temperature: 0.1, // Low temperature for more deterministic outputs
+        temperature: 0.1,
       });
     } else if (config.provider === LLMProvider.ANTHROPIC) {
       return new ChatAnthropic({
         modelName: config.model,
         anthropicApiKey: config.apiKey,
-        temperature: 0.1, // Low temperature for more deterministic outputs
+        temperature: 0.1,
       });
     } else {
       throw new Error(`Unsupported provider: ${config.provider}`);
     }
   }
 
-  /**
-   * Create the email processing chain
-   * @param model The model to use
-   * @param instructions Optional instructions for processing
-   * @returns The email processing chain
-   * 
-   * Note on dedent and indent:
-   * - dedent removes common leading whitespace from multiline strings
-   * - indent adds indentation to a multiline string
-   * 
-   * Example of using indent to add indentation to a specific section:
-   * ```
-   * const jsonExample = indent(`
-   * {
-   *   "key": "value",
-   *   "nested": {
-   *     "array": [1, 2, 3]
-   *   }
-   * }
-   * `, 4); // Indent with 4 spaces
-   * 
-   * const prompt = PromptTemplate.fromTemplate(dedent`
-   *   Here is a JSON example:
-   *   
-   *   ${jsonExample}
-   *   
-   *   Please parse this JSON.
-   * `);
-   * ```
-   */
-  private createEmailProcessingChain(model: ChatOpenAI | ChatAnthropic, instructions?: string): RunnableSequence {
-    // Step 1: Analyze Email
-    const analyzeEmail = RunnableLambda.from<EmailInput, EmailWithAnalysis>(async (input) => {
-      // Use dedent to remove common leading whitespace
-      const prompt = PromptTemplate.fromTemplate(dedent`
-        Analysiere diese E-Mail und extrahiere alle wichtigen Informationen. KEINE Inhalte verlieren!
+  private createProcessingChain(model: ChatOpenAI | ChatAnthropic, instructions?: string): RunnableSequence {
 
-        E-Mail: {email}
-        ${instructions ? `Zusätzliche Anweisungen: ${instructions}` : ''}
+    // Step 1: Document Type Detection & Basic Analysis
+    const analyzeDocument = RunnableLambda.from<DocumentInput, DocumentWithAnalysis>(async (input) => {
+      // Check if the document type is specified or 'auto'
+      const isAutoDetection = !input.documentType || input.documentType === 'auto';
 
-        Extrahiere als JSON:
-        - language: "de" oder "en"
-        - hauptbotschaften: [Array der Kernaussagen]
-        - personen: [Array aller erwähnten Personen]
-        - deadlines: [Array mit Terminen/Fristen]
-        - aktionen: [Array erforderlicher Handlungen]
-        - details: [Array sonstiger wichtiger Details]
+      if (isAutoDetection) {
+        // Use auto-detection prompt when the document type is not specified or is 'auto'
+        const autoDetectionPrompt = PromptTemplate.fromTemplate(dedent`
+          Analyze this text and determine the document type and base language.
 
-        Nur JSON zurückgeben:
-      `);
+          Text: {text}
+          Source Application: {sourceApp}
+          ${instructions ? `Additional Instructions: ${instructions}` : ''}
 
-      const chain = prompt.pipe(model).pipe(new StringOutputParser());
-      const result = await chain.invoke({ email: input.email });
+          Determine:
+          1. documentType: "email", "wiki", "powerpoint", "memo" (based on content/context)
+          2. language: "de", "en", etc.
+          3. confidence: 0-1 (confidence in the analysis)
 
-      try {
-        const analysis = JSON.parse(result) as EmailAnalysis;
-        return { ...input, analysis };
-      } catch (e) {
-        return { 
-          ...input, 
-          analysis: { 
-            language: 'de', 
-            hauptbotschaften: [], 
-            personen: [], 
-            deadlines: [], 
-            aktionen: [], 
+          Document Type Indicators:
+          - Email: Greetings, sign-offs, direct communication, @ mentions
+          - Wiki: Explanatory, informative, structured, impersonal
+          - PowerPoint: Bullet points, presentation-oriented, visually structured
+          - Memo: Brief, factual, internal, status-oriented
+
+          Return JSON:
+          {{
+            "documentType": "email|wiki|powerpoint|memo",
+            "language": "de|en|etc",
+            "confidence": 0.8
+          }}
+        `);
+
+        const chain = autoDetectionPrompt.pipe(model).pipe(new StringOutputParser());
+        const result = await chain.invoke({
+          text: input.text,
+          sourceApp: input.sourceApp || ''
+        });
+
+        try {
+          const analysisData = JSON.parse(result);
+          const analysis: DocumentAnalysis = {
+            documentType: analysisData.documentType as DocumentType,
+            language: analysisData.language,
+            coreMessages: [], // Will be filled in next step
+            people: [],
+            deadlines: [],
+            actions: [],
             details: [],
-            error: "Parse failed", 
-            raw: result 
-          } 
-        };
+            confidence: analysisData.confidence
+          };
+          return { ...input, analysis };
+        } catch (e) {
+          return {
+            ...input,
+            analysis: {
+              documentType: DocumentType.MEMO,
+              language: 'de',
+              coreMessages: [],
+              people: [],
+              deadlines: [],
+              actions: [],
+              details: [],
+              confidence: 0,
+              error: "Parse failed",
+              raw: result
+            }
+          };
+        }
+      } else {
+        // Use specified type prompt when the document type is provided
+        const specifiedTypePrompt = PromptTemplate.fromTemplate(dedent`
+          Analyze this text and determine the base language.
+
+          Text: {text}
+          Document Type: {documentType}
+          Source Application: {sourceApp}
+          ${instructions ? `Additional Instructions: ${instructions}` : ''}
+
+          Determine:
+          1. language: "de", "en", etc.
+          2. confidence: 0-1 (confidence in the analysis)
+
+          Return JSON:
+          {{
+            "language": "de|en|etc",
+            "confidence": 0.9
+          }}
+        `);
+
+        const chain = specifiedTypePrompt.pipe(model).pipe(new StringOutputParser());
+        const result = await chain.invoke({
+          text: input.text,
+          documentType: input.documentType,
+          sourceApp: input.sourceApp || ''
+        });
+
+        try {
+          const analysisData = JSON.parse(result);
+          const analysis: DocumentAnalysis = {
+            documentType: input.documentType as DocumentType, // Use the provided document type
+            language: analysisData.language,
+            coreMessages: [], // Will be filled in the next step
+            people: [],
+            deadlines: [],
+            actions: [],
+            details: [],
+            confidence: analysisData.confidence || 0.9
+          };
+          return { ...input, analysis };
+        } catch (e) {
+          return {
+            ...input,
+            analysis: {
+              documentType: input.documentType as DocumentType, // Use the provided document type
+              language: 'de',
+              coreMessages: [],
+              people: [],
+              deadlines: [],
+              actions: [],
+              details: [],
+              confidence: 0,
+              error: "Parse failed",
+              raw: result
+            }
+          };
+        }
       }
     });
 
-    // Step 2: Structure with MECE + Pyramidal
-    const structureEmail = RunnableLambda.from<EmailWithAnalysis, EmailWithStructure>(async (input) => {
-      // Use dedent to remove common leading whitespace
+    // Step 2: Core Message Extraction (DEDICATED STEP)
+    const extractCoreMessages = RunnableLambda.from<DocumentWithAnalysis, DocumentWithCoreMessages>(async (input) => {
       const prompt = PromptTemplate.fromTemplate(dedent`
-        Erstelle pyramidale Struktur mit MECE-Prinzip für diese E-Mail.
+        Extract the CORE MESSAGES from this text. Focus EXCLUSIVELY on the most important statements.
 
-        Analyse: {analysis}
-        Original: {email}
-        ${instructions ? `Zusätzliche Anweisungen: ${instructions}` : ''}
+        Text: {text}
+        Document Type: {documentType}
+        Language: {language}
+        ${instructions ? `Additional Instructions: ${instructions}` : ''}
 
-        REGELN:
-        - Jede Überschrift ist eine substantielle Kernaussage (NICHT "Nächste Schritte")
-        - Jede Überschrift bezeichnet gleichgewichtigen, abgeschlossenen Inhalt
-        - Überschriften schließen sich gegenseitig aus (MECE)
-        - Geschäftsauswirkung VOR technischen Details
-        - Sprache: {language}
+        CORE MESSAGE RULES:
+        - Each core message is a standalone, understandable statement
+        - Focus on BUSINESS IMPACT, not on processes
+        - Outcome- or action-oriented
+        - No technical details (those come later)
+        - Maximum 3-5 core messages per text
 
-        Erstelle JSON:
+        EXAMPLES OF GOOD CORE MESSAGES:
+        ✅ "Project Alpha delayed by 3 days"
+        ✅ "Q1 budget exceeded by 15%"
+        ✅ "Sarah takes over team leadership next week"
+
+        EXAMPLES OF BAD CORE MESSAGES:
+        ❌ "Next steps discussed"
+        ❌ "Meeting took place"
+        ❌ "Server was restarted"
+
+        Return JSON:
         {{
-          "headlines": [
+          "coreMessages": [
             {{
-              "title": "Substantielle Kernaussage als Überschrift",
-              "details": ["Detailpunkt 1", "Detailpunkt 2"]
+              "message": "Clear, standalone core statement",
+              "businessImpact": "high|medium|low",
+              "type": "outcome|action|status|decision",
+              "confidence": 0.9
             }}
           ]
         }}
@@ -252,97 +380,263 @@ export class PyramidalAgentService {
 
       const chain = prompt.pipe(model).pipe(new StringOutputParser());
       const result = await chain.invoke({
-        analysis: JSON.stringify(input.analysis),
-        email: input.email,
-        language: input.analysis.language || 'de'
+        text: input.text,
+        documentType: input.analysis.documentType,
+        language: input.analysis.language
       });
 
       try {
-        const structure = JSON.parse(result) as EmailStructure;
-        return { ...input, structure };
+        const data = JSON.parse(result);
+        const coreMessages: CoreMessage[] = data.coreMessages || [];
+        return { ...input, coreMessages };
       } catch (e) {
-        return { 
-          ...input, 
-          structure: { 
-            headlines: [],
-            error: "Parse failed", 
-            raw: result 
-          } 
+        return { ...input, coreMessages: [] };
+      }
+    });
+
+    // Step 3: Information Extraction (People, Deadlines, Actions, Details)
+    const extractInformation = RunnableLambda.from<DocumentWithCoreMessages, DocumentWithInformation>(async (input) => {
+      const prompt = PromptTemplate.fromTemplate(dedent`
+        Extract DETAIL INFORMATION from this text (NOT the core messages).
+
+        Text: {text}
+        Core Messages: {coreMessages}
+        ${instructions ? `Additional Instructions: ${instructions}` : ''}
+
+        Extract:
+        - people: All mentioned persons (names, @mentions, roles)
+        - deadlines: Dates, deadlines, time constraints
+        - actions: Concrete actions/todos (not the core messages!)
+        - details: Important details that support the core messages
+        - technicalDetails: Technical information, system details
+
+        Return JSON:
+        {{
+          "people": ["Person 1", "Person 2"],
+          "deadlines": ["Friday", "End of Q1"],
+          "actions": ["Organize meeting", "Approve budget"],
+          "details": ["Supportive details"],
+          "technicalDetails": ["Server X", "System Y"]
+        }}
+      `);
+
+      const chain = prompt.pipe(model).pipe(new StringOutputParser());
+      const result = await chain.invoke({
+        text: input.text,
+        coreMessages: JSON.stringify(input.coreMessages)
+      });
+
+      try {
+        const information = JSON.parse(result) as InformationExtraction;
+        return { ...input, information };
+      } catch (e) {
+        return {
+          ...input,
+          information: {
+            people: [],
+            deadlines: [],
+            actions: [],
+            details: [],
+            technicalDetails: [],
+            error: "Parse failed",
+            raw: result
+          }
         };
       }
     });
 
-    // Step 3: Generate Subject Line
-    const generateSubject = RunnableLambda.from<EmailWithStructure, EmailWithSubject>(async (input) => {
-      // Use dedent to remove common leading whitespace
+    // Step 4: Structure Generation (MECE + Pyramidal)
+    const generateStructure = RunnableLambda.from<DocumentWithInformation, DocumentWithStructure>(async (input) => {
       const prompt = PromptTemplate.fromTemplate(dedent`
-        Erstelle informativen Betreff nach diesem exakten Format:
-        [Hauptbotschaft] | [Details/Status] | [Erforderliche Aktionen/Deadlines] | [@Personen bei Bedarf]
+        Create pyramidal MECE structure based on the core messages.
 
-        Analyse: {analysis}
-        Struktur: {structure}
-        Sprache: {language}
-        ${instructions ? `Zusätzliche Anweisungen: ${instructions}` : ''}
+        Core Messages: {coreMessages}
+        Detail Information: {information}
+        Document Type: {documentType}
+        ${instructions ? `Additional Instructions: ${instructions}` : ''}
 
-        BEISPIELE:
-        - "Projekt Alpha verzögert sich | Ressourcenkonflikt mit Schulungen | Team-Meeting Di erforderlich | @Sarah Feedback bis Do"
-        - "Status Update: Budget Q1 | System-Ausfall behoben | @Michael Freigabe nötig | @Lisa Input zu Metriken gewünscht"
+        MECE RULES:
+        - Each heading = one core message or logical grouping
+        - Headlines are mutually exclusive
+        - Headlines are standalone understandable
+        - NO process headings ("Next Steps")
+        - Business impact before technical details
 
-        WICHTIG: Informationsdichte über Kürze stellen!
-
-        Nur den Betreff zurückgeben:
+        Return JSON:
+        {{
+          "headlines": [
+            {{
+              "title": "Core message as substantial heading",
+              "details": ["Detail 1", "Detail 2"],
+              "priority": "high|medium|low"
+            }}
+          ]
+        }}
       `);
 
       const chain = prompt.pipe(model).pipe(new StringOutputParser());
-      const subject = await chain.invoke({
-        analysis: JSON.stringify(input.analysis),
-        structure: JSON.stringify(input.structure),
-        language: input.analysis.language || 'de'
+      const result = await chain.invoke({
+        coreMessages: JSON.stringify(input.coreMessages),
+        information: JSON.stringify(input.information),
+        documentType: input.analysis.documentType
       });
 
-      return { ...input, subject: subject.trim() };
+      try {
+        const structure = JSON.parse(result) as DocumentStructure;
+        return { ...input, structure };
+      } catch (e) {
+        return {
+          ...input,
+          structure: {
+            headlines: [],
+            error: "Parse failed",
+            raw: result
+          }
+        };
+      }
     });
 
-    // Step 4: Format Final Email
-    const formatEmail = RunnableLambda.from<EmailWithSubject, CompleteEmailResult>(async (input) => {
-      // Use dedent to remove common leading whitespace
+    // Step 5: Format-Specific Elements (BRANCHING)
+    const generateFormatElements = RunnableLambda.from<DocumentWithStructure, DocumentWithFormat>(async (input) => {
+      const documentType = input.analysis.documentType;
+
+      if (documentType === DocumentType.EMAIL) {
+        // Generate email subject
+        const prompt = PromptTemplate.fromTemplate(dedent`
+          Create informative email subject line following the format:
+          [Main Message] | [Details/Status] | [Actions/Deadlines] | [@People]
+
+          Core Messages: {coreMessages}
+          Information: {information}
+          ${instructions ? `Additional Instructions: ${instructions}` : ''}
+
+          EXAMPLES:
+          - "Project Alpha delayed | Resource conflict | Team meeting Tue | @Sarah feedback by Thu"
+          - "Q1 budget exceeded | System failure cause | @Michael approval needed"
+
+          Return only the subject line:
+        `);
+
+        const chain = prompt.pipe(model).pipe(new StringOutputParser());
+        const subject = await chain.invoke({
+          coreMessages: JSON.stringify(input.coreMessages),
+          information: JSON.stringify(input.information)
+        });
+
+        return {
+          ...input,
+          formatElements: { subject: subject.trim() }
+        };
+      } else {
+        // For wiki, memo, powerpoint - generate title and summary
+        const prompt = PromptTemplate.fromTemplate(dedent`
+          Create title and summary for {documentType}.
+
+          Core Messages: {coreMessages}
+          ${instructions ? `Additional Instructions: ${instructions}` : ''}
+
+          Return JSON:
+          {{
+            "title": "Concise title",
+            "summary": "Brief summary"
+          }}
+        `);
+
+        const chain = prompt.pipe(model).pipe(new StringOutputParser());
+        const result = await chain.invoke({
+          documentType,
+          coreMessages: JSON.stringify(input.coreMessages)
+        });
+
+        try {
+          const elements = JSON.parse(result);
+          return {
+            ...input,
+            formatElements: {
+              title: elements.title,
+              summary: elements.summary
+            }
+          };
+        } catch (e) {
+          return {
+            ...input,
+            formatElements: {
+              title: "Unknown Title",
+              summary: "Summary not available"
+            }
+          };
+        }
+      }
+    });
+
+    // Step 6: Final Formatting
+    const formatDocument = RunnableLambda.from<DocumentWithFormat, CompleteDocument>(async (input) => {
+      const documentType = input.analysis.documentType;
+
       const prompt = PromptTemplate.fromTemplate(dedent`
-        Formatiere die finale E-Mail nach pyramidaler Struktur:
+        Format the final ${documentType} document.
 
-        Betreff: {subject}
-        Struktur: {structure}
-        Original Kontext: {email}
-        Sprache: {language}
-        ${instructions ? `Zusätzliche Anweisungen: ${instructions}` : ''}
+        Document Type: {documentType}
+        Format Elements: {formatElements}
+        Structure: {structure}
+        Original Text Context: {text}
+        Language: {language}
+        ${instructions ? `Additional Instructions: ${instructions}` : ''}
 
-        FORMAT:
-        - Kurze Begrüßung
-        - **Fette Überschriften** mit Bullet Points
-        - Extrem kompakt aber vollständig
-        - Keine Höflichkeitsfloskeln
-        - Professioneller Abschluss
-        - Sprache: {language}
+        FORMAT for ${documentType}:
+        ${documentType === 'email' ? `
+        - Brief greeting
+        - **Bold headings** with bullet points
+        - Compact but complete
+        - Professional closing
+        ` : documentType === 'wiki' ? `
+        - Title as H1
+        - Structured sections
+        - Informative and objective
+        - Bullet points for details
+        ` : `
+        - Title/heading
+        - Structured sections
+        - Bullet points
+        - Concise and clear
+        `}
 
-        Vollständige formatierte E-Mail:
+        Complete formatted ${documentType}:
       `);
 
       const chain = prompt.pipe(model).pipe(new StringOutputParser());
-      const finalEmail = await chain.invoke({
-        subject: input.subject,
+      const finalDocument = await chain.invoke({
+        documentType,
+        formatElements: JSON.stringify(input.formatElements),
         structure: JSON.stringify(input.structure),
-        email: input.email,
-        language: input.analysis.language || 'de'
+        text: input.text,
+        language: input.analysis.language
       });
 
-      return { ...input, finalEmail: finalEmail.trim() };
+      // Mock quality check for now - this could be another LLM call
+      const qualityCheck: QualityCheck = {
+        informationLoss: [],
+        accuracyIssues: [],
+        missingElements: [],
+        overallScore: 0.85,
+        passed: true
+      };
+
+      return {
+        ...input,
+        finalDocument: finalDocument.trim(),
+        qualityCheck
+      };
     });
 
     // Chain everything together
-    return RunnableSequence.from<EmailInput, CompleteEmailResult>([
-      analyzeEmail,
-      structureEmail, 
-      generateSubject,
-      formatEmail
+    return RunnableSequence.from<DocumentInput, CompleteDocument>([
+      analyzeDocument,
+      extractCoreMessages,
+      extractInformation,
+      generateStructure,
+      generateFormatElements,
+      formatDocument
     ]);
   }
 }

@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MaterialModule } from '../shared/material.module';
 import { MessageBusService } from '../services/message-bus.service';
 import { UIAssistedActionData, UIAssistedActionHandler } from '../handlers/ui-assisted-action-handler';
-import { PyramidalAgentService, PyramidalAgentResult } from '../services/pyramidal-agent.service';
+import { PyramidalAgentService, PyramidalAgentResult, DocumentType } from '../services/pyramidal-agent.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -36,15 +36,24 @@ export class CommunicationAssistantComponent implements OnInit, OnDestroy {
     { id: 'friendly', name: 'Friendly' }
   ];
 
+  documentTypeOptions = [
+    { id: DocumentType.AUTO, name: 'Auto-detect' },
+    { id: DocumentType.EMAIL, name: 'Email' },
+    { id: DocumentType.WIKI, name: 'Wiki' },
+    { id: DocumentType.POWERPOINT, name: 'PowerPoint' },
+    { id: DocumentType.MEMO, name: 'Memo' }
+  ];
+
   selectedStyle = 'professional';
   selectedRelationship = 'professional';
+  selectedDocumentType = DocumentType.AUTO;
   enablePyramidalStructuring = true;
 
   // Text panel properties
   originalText = '';
   draftText = '';
   instructionsText = ''; // New property for instructions input
-  activeTab = 'draft'; // 'draft', 'original'
+  activeTab = 'original'; // 'draft', 'original'
 
   // Pyramidal agent properties
   processingResult: PyramidalAgentResult | null = null;
@@ -69,7 +78,7 @@ export class CommunicationAssistantComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Clean up subscription when component is destroyed
+    // Clean up subscription when the component is destroyed
     if (this.textReadySubscription) {
       this.textReadySubscription.unsubscribe();
       this.textReadySubscription = null;
@@ -92,6 +101,11 @@ export class CommunicationAssistantComponent implements OnInit, OnDestroy {
     // In a real implementation, this would trigger text processing
   }
 
+  onDocumentTypeChange(): void {
+    console.log('Document type changed to:', this.selectedDocumentType);
+    // In a real implementation, this would trigger text processing
+  }
+
   onTabChange(tabIndex: number | string): void {
     if (typeof tabIndex === 'number') {
       this.activeTab = tabIndex === 0 ? 'draft' : 'original';
@@ -107,7 +121,7 @@ export class CommunicationAssistantComponent implements OnInit, OnDestroy {
 
   onInstructionsChange(): void {
     console.log('Instructions changed:', this.instructionsText);
-    // In a real implementation, this would update the instructions state
+    // In a real implementation, this would update the instruction state
   }
 
   /**
@@ -126,15 +140,17 @@ export class CommunicationAssistantComponent implements OnInit, OnDestroy {
       this.isProcessing = true;
 
       // Process the text using the pyramidal agent flow
-      this.processingResult = await this.pyramidalAgentService.processEmail(
-        this.originalText, 
-        this.instructionsText
+      this.processingResult = await this.pyramidalAgentService.processDocument(
+        this.originalText,
+        this.selectedDocumentType,
+        this.sourceApp,
+        this.instructionsText,
       );
 
       console.log('Pyramidal agent processing result:', this.processingResult);
 
       // Update the draft text with the final email
-      this.draftText = this.processingResult.finalEmail;
+      this.draftText = this.processingResult.finalDocument;
 
       // Switch to the draft tab to show the result
       this.activeTab = 'draft';

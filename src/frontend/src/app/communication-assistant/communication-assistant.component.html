@@ -34,6 +34,20 @@
       </div>
 
       <div class="setting-group">
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Desired Output</mat-label>
+          <mat-select 
+            [(ngModel)]="selectedDocumentType" 
+            (selectionChange)="onDocumentTypeChange()"
+          >
+            @for (option of documentTypeOptions; track option.id) {
+              <mat-option [value]="option.id">{{ option.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="setting-group">
         <mat-checkbox 
           [(ngModel)]="enablePyramidalStructuring" 
           (change)="onPyramidalStructuringChange()"
@@ -54,7 +68,7 @@
       <mat-card>
         <mat-card-content>
           <!-- Tabs for Draft/Original -->
-          <mat-tab-group [selectedIndex]="activeTab === 'draft' ? 0 : 1" (selectedIndexChange)="onTabChange($event === 0 ? 'draft' : 'original')">
+          <mat-tab-group [selectedIndex]="activeTab === 'draft' ? 0 : 1" (selectedIndexChange)="onTabChange($event === 0 ? 'draft' : 'original')" >
             <mat-tab label="Draft">
               <mat-form-field appearance="fill" class="full-width text-area-container">
                 <textarea 
