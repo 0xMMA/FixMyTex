@@ -7,6 +7,7 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { invoke } from '@tauri-apps/api/core';
 import { BedrockChat } from "@langchain/community/chat_models/bedrock/web";
+import dedent from "dedent";
 
 /**
  * Service for interacting with LangChain
@@ -177,19 +178,21 @@ export class LangChainService {
       }
 
       // Load the prompt from SilentFix.md
-      const promptTemplate = ChatPromptTemplate.fromTemplate(
-`You are a grammar and spelling correction assistant. Your task is to fix grammatical errors, spelling mistakes, and improve clarity in text while preserving the original meaning, tone, and intent.
-
-Rules:
-1. Correct all grammar and spelling errors
-2. Preserve the original meaning and factual content exactly
-3. Maintain the author's voice, tone, and perspective
-4. Keep the original language - never translate
-5. Improve sentence structure only when necessary for clarity
-6. Make direct corrections without explanations, comments, or questions
-7. Focus on making the text more professional and readable while keeping it authentic
-
-Text to fix: {text}`
+      const promptTemplate = ChatPromptTemplate.fromTemplate(dedent`          
+          You are a grammar and spelling correction assistant. 
+          Your task is to fix grammatical errors, spelling mistakes, and improve clarity in text while preserving the original meaning, tone, and intent.
+          
+          Rules:
+          1. Correct all grammar and spelling errors
+          2. Preserve the original meaning and factual content exactly
+          3. Maintain the author's voice, tone, and perspective
+          4. Keep the original language - never translate
+          5. Improve sentence structure only when necessary for clarity or semantic improvement
+          6. Make direct corrections without explanations, comments, or questions
+          7. Focus on making the text more professional and readable while keeping it authentic
+          8. RETURN ONLY THE FIXED TEXT
+      
+          Text to fix: {text}`
       );
 
       // Get the model based on the provider
