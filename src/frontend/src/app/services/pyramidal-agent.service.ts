@@ -3,8 +3,8 @@ import { LangChainService } from './langchain.service';
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatAnthropic } from "@langchain/anthropic";
 import { PromptTemplate } from "@langchain/core/prompts";
-import { StringOutputParser } from "@langchain/core/output_parsers";
-import { RunnableLambda, RunnableSequence, RunnableBranch } from "@langchain/core/runnables";
+import {JsonOutputParser, StringOutputParser } from "@langchain/core/output_parsers";
+import { RunnableLambda, RunnableSequence } from "@langchain/core/runnables";
 import { LLMProvider } from '../models/langchain-config';
 import dedent from "dedent";
 
@@ -191,13 +191,13 @@ export class PyramidalAgentService {
 
     if (config.provider === LLMProvider.OPENAI) {
       return new ChatOpenAI({
-        modelName: config.model,
+        model: config.model,
         openAIApiKey: config.apiKey,
         temperature: 0.1,
       });
     } else if (config.provider === LLMProvider.ANTHROPIC) {
       return new ChatAnthropic({
-        modelName: config.model,
+        model: config.model,
         anthropicApiKey: config.apiKey,
         temperature: 0.1,
       });
@@ -227,32 +227,32 @@ export class PyramidalAgentService {
           2. language: "de", "en", etc.
           3. confidence: 0-1 (confidence in the analysis)
 
-          Document Type Indicators:
-          - Email: Greetings, sign-offs, direct communication, @ mentions
+          Document Type Indicators by priority:
+          - Email: GREETINGS, SIGN-OFFS, direct communication, @ mentions
           - Wiki: Explanatory, informative, structured, impersonal
-          - PowerPoint: Bullet points, presentation-oriented, visually structured
           - Memo: Brief, factual, internal, status-oriented
+          - PowerPoint: Bullet points, presentation-oriented, visually structured          
 
-          Return JSON:
+          RETURN ONLY JSON:
           {{
-            "documentType": "email|wiki|powerpoint|memo",
+            "documentType": "email|wiki|memo|powerpoint",
             "language": "de|en|etc",
-            "confidence": 0.8
+            confidence": 0.9|0.8|0.7|0.6|0.5|0.4|0.3|0.2|0.1
           }}
         `);
 
-        const chain = autoDetectionPrompt.pipe(model).pipe(new StringOutputParser());
+        const chain = autoDetectionPrompt.pipe(model).pipe(new JsonOutputParser());
         const result = await chain.invoke({
           text: input.text,
           sourceApp: input.sourceApp || ''
         });
 
         try {
-          const analysisData = JSON.parse(result);
+          const analysisData: { documentType: string; language: string; confidence: number } = result;
           const analysis: DocumentAnalysis = {
             documentType: analysisData.documentType as DocumentType,
             language: analysisData.language,
-            coreMessages: [], // Will be filled in next step
+            coreMessages: [], // Will be filled in the next step
             people: [],
             deadlines: [],
             actions: [],
@@ -291,14 +291,14 @@ export class PyramidalAgentService {
           1. language: "de", "en", etc.
           2. confidence: 0-1 (confidence in the analysis)
 
-          Return JSON:
+          RETURN ONLY JSON:
           {{
             "language": "de|en|etc",
-            "confidence": 0.9
+            "confidence": 0.9|0.8|0.7|0.6|0.5|0.4|0.3|0.2|0.1
           }}
         `);
 
-        const chain = specifiedTypePrompt.pipe(model).pipe(new StringOutputParser());
+        const chain = specifiedTypePrompt.pipe(model).pipe(new JsonOutputParser());
         const result = await chain.invoke({
           text: input.text,
           documentType: input.documentType,
@@ -306,7 +306,7 @@ export class PyramidalAgentService {
         });
 
         try {
-          const analysisData = JSON.parse(result);
+          const analysisData: { language: string; confidence: number } = result;
           const analysis: DocumentAnalysis = {
             documentType: input.documentType as DocumentType, // Use the provided document type
             language: analysisData.language,
@@ -365,20 +365,20 @@ export class PyramidalAgentService {
         ❌ "Meeting took place"
         ❌ "Server was restarted"
 
-        Return JSON:
+        RETURN ONLY JSON:
         {{
           "coreMessages": [
             {{
               "message": "Clear, standalone core statement",
               "businessImpact": "high|medium|low",
               "type": "outcome|action|status|decision",
-              "confidence": 0.9
+              "confidence": 0.9|0.8|0.7|0.6|0.5|0.4|0.3|0.2|0.1
             }}
           ]
         }}
       `);
 
-      const chain = prompt.pipe(model).pipe(new StringOutputParser());
+      const chain = prompt.pipe(model).pipe(new JsonOutputParser());
       const result = await chain.invoke({
         text: input.text,
         documentType: input.analysis.documentType,
@@ -386,7 +386,7 @@ export class PyramidalAgentService {
       });
 
       try {
-        const data = JSON.parse(result);
+        const data: { coreMessages: CoreMessage[] } = result;
         const coreMessages: CoreMessage[] = data.coreMessages || [];
         return { ...input, coreMessages };
       } catch (e) {
@@ -401,6 +401,7 @@ export class PyramidalAgentService {
 
         Text: {text}
         Core Messages: {coreMessages}
+        Language: {language}
         ${instructions ? `Additional Instructions: ${instructions}` : ''}
 
         Extract:
@@ -410,7 +411,7 @@ export class PyramidalAgentService {
         - details: Important details that support the core messages
         - technicalDetails: Technical information, system details
 
-        Return JSON:
+        RETURN ONLY JSON:
         {{
           "people": ["Person 1", "Person 2"],
           "deadlines": ["Friday", "End of Q1"],
@@ -420,14 +421,15 @@ export class PyramidalAgentService {
         }}
       `);
 
-      const chain = prompt.pipe(model).pipe(new StringOutputParser());
+      const chain = prompt.pipe(model).pipe(new JsonOutputParser());
       const result = await chain.invoke({
         text: input.text,
-        coreMessages: JSON.stringify(input.coreMessages)
+        coreMessages: JSON.stringify(input.coreMessages),
+        language: input.analysis.language
       });
 
       try {
-        const information = JSON.parse(result) as InformationExtraction;
+        const information: InformationExtraction = result;
         return { ...input, information };
       } catch (e) {
         return {
@@ -453,6 +455,7 @@ export class PyramidalAgentService {
         Core Messages: {coreMessages}
         Detail Information: {information}
         Document Type: {documentType}
+        Language: {language}
         ${instructions ? `Additional Instructions: ${instructions}` : ''}
 
         MECE RULES:
@@ -462,7 +465,7 @@ export class PyramidalAgentService {
         - NO process headings ("Next Steps")
         - Business impact before technical details
 
-        Return JSON:
+        RETURN ONLY JSON:
         {{
           "headlines": [
             {{
@@ -474,15 +477,16 @@ export class PyramidalAgentService {
         }}
       `);
 
-      const chain = prompt.pipe(model).pipe(new StringOutputParser());
+      const chain = prompt.pipe(model).pipe(new JsonOutputParser());
       const result = await chain.invoke({
         coreMessages: JSON.stringify(input.coreMessages),
         information: JSON.stringify(input.information),
-        documentType: input.analysis.documentType
+        documentType: input.analysis.documentType,
+        language: input.analysis.language
       });
 
       try {
-        const structure = JSON.parse(result) as DocumentStructure;
+        const structure: DocumentStructure = result;
         return { ...input, structure };
       } catch (e) {
         return {
@@ -504,23 +508,25 @@ export class PyramidalAgentService {
         // Generate email subject
         const prompt = PromptTemplate.fromTemplate(dedent`
           Create informative email subject line following the format:
-          [Main Message] | [Details/Status] | [Actions/Deadlines] | [@People]
+          Main Message | Details/Status | Actions/Deadlines | @People who we need action or active attention from
 
           Core Messages: {coreMessages}
           Information: {information}
+          Language: {language}
           ${instructions ? `Additional Instructions: ${instructions}` : ''}
 
           EXAMPLES:
           - "Project Alpha delayed | Resource conflict | Team meeting Tue | @Sarah feedback by Thu"
           - "Q1 budget exceeded | System failure cause | @Michael approval needed"
-
-          Return only the subject line:
+          
+          RETURN ONLY THE SUBJECT LINE:
         `);
 
         const chain = prompt.pipe(model).pipe(new StringOutputParser());
         const subject = await chain.invoke({
           coreMessages: JSON.stringify(input.coreMessages),
-          information: JSON.stringify(input.information)
+          information: JSON.stringify(input.information),
+          language: input.analysis.language
         });
 
         return {
@@ -533,23 +539,25 @@ export class PyramidalAgentService {
           Create title and summary for {documentType}.
 
           Core Messages: {coreMessages}
+          Language: {language}
           ${instructions ? `Additional Instructions: ${instructions}` : ''}
 
-          Return JSON:
+          RETURN ONLY JSON:
           {{
             "title": "Concise title",
             "summary": "Brief summary"
           }}
         `);
 
-        const chain = prompt.pipe(model).pipe(new StringOutputParser());
+        const chain = prompt.pipe(model).pipe(new JsonOutputParser());
         const result = await chain.invoke({
           documentType,
-          coreMessages: JSON.stringify(input.coreMessages)
+          coreMessages: JSON.stringify(input.coreMessages),
+          language: input.analysis.language
         });
 
         try {
-          const elements = JSON.parse(result);
+          const elements: { title: string; summary: string } = result;
           return {
             ...input,
             formatElements: {
