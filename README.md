@@ -1,6 +1,7 @@
 # FixMyTex ![icon](./src/backend/src-tauri/icons/icons8-mutig-ai-32.png) [![Build and Test](https://github.com/0xMMA/FixMyTex/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/0xMMA/FixMyTex/actions/workflows/build-and-test.yml) [![GitHub release (latest by date)](https://img.shields.io/github/v/release/0xMMA/FixMyTex)](https://github.com/0xMMA/FixMyTex/releases) [![GitHub all releases](https://img.shields.io/github/downloads/0xMMA/FixMyTex/total)](https://github.com/0xMMA/FixMyTex/releases) [![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/0xMMA/FixMyTex?include_prereleases&label=pre-release)](https://github.com/0xMMA/FixMyTex/releases)
 
 A desktop application that enhances your writing with AI-powered grammar, style, and text improvements - just a keyboard shortcut away.
+Tired of writing professional emails? Look no further.
 
 ## Features
 
