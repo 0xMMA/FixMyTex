@@ -3,7 +3,12 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { LangChainService } from '../../services/langchain.service';
-import { ProviderConfig, ModelConfig, LLMProvider } from '../../models/langchain-config';
+import { 
+  ProviderConfig, 
+  ModelConfig, 
+  LLMProvider, 
+  AwsBedrockConfig 
+} from '../../models/langchain-config';
 
 @Component({
   selector: 'app-api-config',
@@ -20,6 +25,16 @@ export class ApiConfigComponent implements OnInit, OnDestroy {
   selectedProvider: LLMProvider = LLMProvider.OPENAI;
   selectedModel: string = '';
   apiKey: string = '';
+
+  // AWS Bedrock configuration
+  awsBedrockConfig: AwsBedrockConfig = {
+    aws_access_key_id: '',
+    aws_secret_access_key: '',
+    aws_session_token: '',
+    region: '',
+    cache: false,
+    inferenceProfile: ''
+  };
 
   private subscriptions: Subscription[] = [];
 
@@ -39,6 +54,14 @@ export class ApiConfigComponent implements OnInit, OnDestroy {
         this.selectedProvider = config.provider;
         this.selectedModel = config.model;
         this.apiKey = config.apiKey;
+
+        // Load AWS Bedrock configuration if available
+        if (config.provider === LLMProvider.AWS_BEDROCK && config.providerConfig?.awsBedrock) {
+          this.awsBedrockConfig = {
+            ...this.awsBedrockConfig,
+            ...config.providerConfig.awsBedrock
+          };
+        }
       })
     );
   }
@@ -60,11 +83,21 @@ export class ApiConfigComponent implements OnInit, OnDestroy {
       this.selectedModel = this.availableModels[0].id;
     }
 
-    // Update the configuration
-    this.langChainService.updateConfig({
+    // Prepare the configuration update
+    const configUpdate: any = {
       provider: this.selectedProvider,
       model: this.selectedModel
-    });
+    };
+
+    // If switching to AWS Bedrock, include the AWS Bedrock configuration
+    if (this.selectedProvider === LLMProvider.AWS_BEDROCK) {
+      configUpdate.providerConfig = {
+        awsBedrock: this.awsBedrockConfig
+      };
+    }
+
+    // Update the configuration
+    this.langChainService.updateConfig(configUpdate);
 
     console.log('Provider changed to:', this.selectedProvider);
   }
@@ -90,5 +123,45 @@ export class ApiConfigComponent implements OnInit, OnDestroy {
   getModelDescription(): string {
     const model = this.availableModels.find(m => m.id === this.selectedModel);
     return model ? model.description : '';
+  }
+
+  // Methods to handle AWS Bedrock configuration changes
+  onAwsAccessKeyIdChange(): void {
+    this.updateAwsBedrockConfig();
+  }
+
+  onAwsSecretAccessKeyChange(): void {
+    this.updateAwsBedrockConfig();
+  }
+
+  onAwsSessionTokenChange(): void {
+    this.updateAwsBedrockConfig();
+  }
+
+  onAwsRegionChange(): void {
+    this.updateAwsBedrockConfig();
+  }
+
+  onAwsCacheChange(): void {
+    this.updateAwsBedrockConfig();
+  }
+
+  onAwsInferenceProfileChange(): void {
+    this.updateAwsBedrockConfig();
+  }
+
+  private updateAwsBedrockConfig(): void {
+    if (this.selectedProvider === LLMProvider.AWS_BEDROCK) {
+      this.langChainService.updateConfig({
+        providerConfig: {
+          awsBedrock: this.awsBedrockConfig
+        }
+      });
+    }
+  }
+
+  // Check if the current provider is AWS Bedrock
+  get isAwsBedrock(): boolean {
+    return this.selectedProvider === LLMProvider.AWS_BEDROCK;
   }
 }

@@ -7,6 +7,7 @@ import {JsonOutputParser, StringOutputParser } from "@langchain/core/output_pars
 import { RunnableLambda, RunnableSequence } from "@langchain/core/runnables";
 import { LLMProvider } from '../models/langchain-config';
 import dedent from "dedent";
+import { BedrockChat } from "@langchain/community/chat_models/bedrock/web";
 
 /**
  * Document types for different output formats
@@ -157,7 +158,7 @@ export class PyramidalAgentService {
       console.log(`[processDocument] Starting at ${startTime.toISOString()}`);
       console.log('Processing document with pyramidal agent flow', { text, documentType, sourceApp, instructions });
 
-      const model = await this.getModel();
+      const model = await this.langChainService.getModel();
       const processingChain = this.createProcessingChain(model, instructions);
 
       const result = await processingChain.invoke({
@@ -192,30 +193,8 @@ export class PyramidalAgentService {
     }
   }
 
-  private async getModel(): Promise<ChatOpenAI | ChatAnthropic> {
-    const config = this.langChainService.getConfig();
-    if (!config.apiKey) {
-      throw new Error('API key is not set');
-    }
 
-    if (config.provider === LLMProvider.OPENAI) {
-      return new ChatOpenAI({
-        model: config.model,
-        openAIApiKey: config.apiKey,
-        temperature: 0.1,
-      });
-    } else if (config.provider === LLMProvider.ANTHROPIC) {
-      return new ChatAnthropic({
-        model: config.model,
-        anthropicApiKey: config.apiKey,
-        temperature: 0.1,
-      });
-    } else {
-      throw new Error(`Unsupported provider: ${config.provider}`);
-    }
-  }
-
-  private createProcessingChain(model: ChatOpenAI | ChatAnthropic, instructions?: string): RunnableSequence {
+  private createProcessingChain(model: ChatOpenAI | ChatAnthropic | BedrockChat, instructions?: string): RunnableSequence {
 
     // Step 1: Document Type Detection & Basic Analysis
     const analyzeDocument = RunnableLambda.from<DocumentInput, DocumentWithAnalysis>(async (input) => {
@@ -287,7 +266,7 @@ export class PyramidalAgentService {
           };
         }
       } else {
-        // Use specified type prompt when the document type is provided
+        // Use the specified type prompt when the document type is provided
         const specifiedTypePrompt = PromptTemplate.fromTemplate(dedent`
           Analyze this text and determine the base language.
 
@@ -543,7 +522,7 @@ export class PyramidalAgentService {
           formatElements: { subject: subject.trim() }
         };
       } else {
-        // For wiki, memo, powerpoint - generate title and summary
+        // For wiki, memo, PowerPoint - generate title and summary
         const prompt = PromptTemplate.fromTemplate(dedent`
           Create title and summary for {documentType}.
 

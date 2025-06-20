@@ -6,6 +6,7 @@ import { ChatAnthropic } from "@langchain/anthropic";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { invoke } from '@tauri-apps/api/core';
+import { BedrockChat } from "@langchain/community/chat_models/bedrock/web";
 
 /**
  * Service for interacting with LangChain
@@ -92,6 +93,70 @@ export class LangChainService {
   }
 
   /**
+   * Get a model instance based on the current configuration
+   * @returns A model instance (ChatOpenAI, ChatAnthropic, or BedrockChat)
+   */
+  public async getModel(): Promise<ChatOpenAI | ChatAnthropic | BedrockChat> {
+    const config = this.getConfig();
+    if (!config.apiKey) {
+      throw new Error('API key is not set');
+    }
+
+    if (config.provider === LLMProvider.OPENAI) {
+      return new ChatOpenAI({
+        model: config.model,
+        openAIApiKey: config.apiKey,
+        temperature: 0.1,
+        onFailedAttempt: (error: any) => {
+          console.error('OpenAI failed attempt:', error);
+        }
+      });
+    } else if (config.provider === LLMProvider.ANTHROPIC) {
+      return new ChatAnthropic({
+        model: config.model,
+        anthropicApiKey: config.apiKey,
+        temperature: 0.1,
+        onFailedAttempt: (error: any) => {
+          console.error('Anthropic failed attempt:', error);
+        }
+      });
+    } else if (config.provider === LLMProvider.AWS_BEDROCK) {
+
+      //TODO: implement a more robust inference profile selection / untested with non anthropic models
+
+      let inferenceProfile = config.providerConfig?.awsBedrock?.inferenceProfile;
+      if (!inferenceProfile && config.providerConfig!.awsBedrock!.region) {
+        if (config.providerConfig!.awsBedrock!.region.startsWith('us')) {
+          inferenceProfile = `us.${config.model}`;
+        } else if (config.providerConfig!.awsBedrock!.region.startsWith('eu')) {
+          inferenceProfile = `eu.${config.model}`;
+        } else if (config.providerConfig!.awsBedrock!.region.startsWith('ap')) {
+          inferenceProfile = `apac.${config.model}`;
+        }
+        console.log("inferenceProfile ", inferenceProfile);
+      }
+
+      return new BedrockChat({
+        model: config.model,
+        applicationInferenceProfile:inferenceProfile, //string like eu.anthropic.claude-sonnet-4-20250514-v1:0
+        region: config.providerConfig!.awsBedrock!.region,
+        cache: config.providerConfig!.awsBedrock!.cache,
+        credentials: {
+          accessKeyId: config.providerConfig!.awsBedrock!.aws_access_key_id,
+          secretAccessKey: config.providerConfig!.awsBedrock!.aws_secret_access_key,
+          sessionToken: config.providerConfig!.awsBedrock!.aws_session_token
+        },
+        temperature: 0.1,
+        onFailedAttempt: (error: any) => {
+          console.error('Bedrock failed attempt:', error);
+        }
+      });
+    } else {
+      throw new Error(`Unsupported provider: ${config.provider}`);
+    }
+  }
+
+  /**
    * Process text using LangChain
    * @param text The text to process
    * @param options Additional processing options
@@ -127,23 +192,8 @@ Rules:
 Text to fix: {text}`
       );
 
-      // Create the model based on the provider
-      let model;
-      if (config.provider === LLMProvider.OPENAI) {
-        model = new ChatOpenAI({
-          modelName: config.model,
-          openAIApiKey: config.apiKey,
-          temperature: 0.1, // Low temperature for more deterministic outputs
-        });
-      } else if (config.provider === LLMProvider.ANTHROPIC) {
-        model = new ChatAnthropic({
-          modelName: config.model,
-          anthropicApiKey: config.apiKey,
-          temperature: 0.1, // Low temperature for more deterministic outputs
-        });
-      } else {
-        throw new Error(`Unsupported provider: ${config.provider}`);
-      }
+      // Get the model based on the provider
+      const model = await this.getModel();
 
       // Create the chain with a string output parser
       const chain = promptTemplate.pipe(model).pipe(new StringOutputParser());
@@ -152,7 +202,7 @@ Text to fix: {text}`
       const processedText = await chain.invoke({
         text: text
       });
-
+      console.log("langchain result ", processedText);
       return processedText;
     } catch (error) {
       console.error('Error processing text with LangChain', error);
@@ -213,6 +263,60 @@ Text to fix: {text}`
         }
       }
 
+      // Load AWS Bedrock credentials from keyring if provider is AWS_BEDROCK
+      if (config.provider === LLMProvider.AWS_BEDROCK) {
+        // Initialize AWS Bedrock config if not present
+        if (!config.providerConfig) {
+          config.providerConfig = {};
+        }
+        if (!config.providerConfig.awsBedrock) {
+          config.providerConfig.awsBedrock = {
+            aws_access_key_id: '',
+            aws_secret_access_key: '',
+            aws_session_token: '',
+            region: '',
+            cache: false
+          };
+        }
+
+        try {
+          // Load AWS access key ID
+          const accessKeyId = await invoke<string>('get_api_key', { 
+            provider: `${config.provider}_access_key_id` 
+          });
+          if (accessKeyId) {
+            config.providerConfig.awsBedrock.aws_access_key_id = accessKeyId;
+          }
+
+          // Load AWS secret access key
+          const secretAccessKey = await invoke<string>('get_api_key', { 
+            provider: `${config.provider}_secret_access_key` 
+          });
+          if (secretAccessKey) {
+            config.providerConfig.awsBedrock.aws_secret_access_key = secretAccessKey;
+          }
+
+          // Load AWS session token
+          const sessionToken = await invoke<string>('get_api_key', { 
+            provider: `${config.provider}_session_token` 
+          });
+          if (sessionToken) {
+            config.providerConfig.awsBedrock.aws_session_token = sessionToken;
+          }
+
+          // Load AWS region
+          const region = await invoke<string>('get_api_key', { 
+            provider: `${config.provider}_region` 
+          });
+          if (region) {
+            config.providerConfig.awsBedrock.region = region;
+          }
+        } catch (keyringError) {
+          console.warn('Could not load AWS Bedrock credentials from keyring:', keyringError);
+          // Continue without AWS credentials
+        }
+      }
+
       this.configSubject.next(config);
     } catch (error) {
       console.error('Error loading LangChain configuration', error);
@@ -252,10 +356,61 @@ Text to fix: {text}`
         }
       }
 
-      // Store non-sensitive config in localStorage (without API key)
+      // Store AWS Bedrock credentials in keyring if provider is AWS_BEDROCK
+      if (config.provider === LLMProvider.AWS_BEDROCK && config.providerConfig?.awsBedrock) {
+        const awsConfig = config.providerConfig.awsBedrock;
+
+        try {
+          // Store AWS access key ID
+          if (awsConfig.aws_access_key_id) {
+            await invoke('store_api_key', {
+              provider: `${config.provider}_access_key_id`,
+              apiKey: awsConfig.aws_access_key_id
+            });
+          }
+
+          // Store AWS secret access key
+          if (awsConfig.aws_secret_access_key) {
+            await invoke('store_api_key', {
+              provider: `${config.provider}_secret_access_key`,
+              apiKey: awsConfig.aws_secret_access_key
+            });
+          }
+
+          // Store AWS session token if provided
+          if (awsConfig.aws_session_token) {
+            await invoke('store_api_key', {
+              provider: `${config.provider}_session_token`,
+              apiKey: awsConfig.aws_session_token
+            });
+          }
+
+        } catch (keyringError) {
+          console.error('Failed to store AWS Bedrock credentials in keyring:', keyringError);
+        }
+      }
+
+      // Store non-sensitive config in localStorage (without sensitive data)
       const nonsensitiveConfig = { ...config };
-      // Use type assertion to allow deleting the apiKey property
-      (nonsensitiveConfig as Partial<LangChainConfig>).apiKey = undefined;
+      // Use type assertion to allow deleting sensitive properties
+      const partialConfig = nonsensitiveConfig as Partial<LangChainConfig>;
+      partialConfig.apiKey = undefined;
+
+      // Remove sensitive AWS Bedrock credentials from localStorage
+      if (partialConfig.providerConfig?.awsBedrock) {
+        partialConfig.providerConfig = {
+          ...partialConfig.providerConfig,
+          awsBedrock: {
+            ...partialConfig.providerConfig.awsBedrock,
+            aws_access_key_id: '',
+            aws_secret_access_key: '',
+            aws_session_token: undefined,
+            // Keep non-sensitive data
+            region: partialConfig.providerConfig.awsBedrock.region,
+            cache: partialConfig.providerConfig.awsBedrock.cache
+          }
+        };
+      }
 
       localStorage.setItem('langchain_config_nonsensitive', JSON.stringify(nonsensitiveConfig));
     } catch (error) {

@@ -23,7 +23,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   autostart: false,
   startMinimized: true,
   shortcuts: {
-    silentFix: 'CommandOrControl+Shift+F',
+    silentFix: 'CommandOrControl+G',
     uiAssistant: 'CommandOrControl+G'
   }
 };
