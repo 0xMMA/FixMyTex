@@ -18,7 +18,7 @@ Tired of writing professional emails? Look no further.
 
 ### Prerequisites
 - Windows operating system
-- API key for at least one of the supported AI services (Anthropic, OpenAI)
+- API key for at least one of the supported AI services (Anthropic, OpenAI, AWS Bedrock), or an Ollama installation
 
 ### Installation
 
