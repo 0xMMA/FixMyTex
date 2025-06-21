@@ -7,10 +7,11 @@ Tired of writing professional emails? Look no further.
 
 - **Instant Text Enhancement**: Press Ctrl+G to improve any selected text
 - **LangChain Integration**: Flexible AI abstraction layer for advanced text processing
-- **Multiple AI Providers**: Supports OpenAI, Claude, (planned: Azure OpenAI, Amazon Bedrock)
+- **Multiple AI Providers**: Supports OpenAI, Claude, Ollama, AWS Bedrock (planned: Azure OpenAI)
 - **Context-Aware Formatting** (planned): Automatically detects source application and applies appropriate formatting (HTML, Markdown, or Plain text)
 - **Global Hotkeys**: Works across all applications with customizable keyboard shortcuts
 - **Minimal UI**: Runs in the background with minimal interruption to your workflow
+- **System Tray Integration**: Option to start minimized to system tray
 - **Automatic Updates**: Check for and install updates directly from the application
 
 ## Getting Started
@@ -118,6 +119,8 @@ To create a new release:
 ## Roadmap
 
 - [X] [Pyramidal Structuring](docs/feature%20pyradmidal%20structuring.md) (LangChain-powered advanced processing)
+  - [X] Enhanced pyramidal agent with improved analysis accuracy
+  - [X] Desired type preset for better text formatting
 - [ ] [Quick Actions](docs/feature%20quick%20actions.md) (Radial Menu) -> **Prompt** (change tone, change style)
   - [ ] [Smart Selection](docs/feature%20smart%20selection.md) (screenshots, OCR rectangles + add/remove area)
 - [ ] [Prompt Blocks](docs/prompt%20blocks.md) - modular prompt architecture
