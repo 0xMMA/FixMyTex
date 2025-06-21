@@ -3,16 +3,21 @@
 A desktop application that enhances your writing with AI-powered grammar, style, and text improvements - just a keyboard shortcut away.
 Tired of writing professional emails? Look no further.
 
-## Features
+## 🚀 Features
 
-* **Instant Text Enhancement**: Press Ctrl+G to improve any selected text.
-* **Assistant for Professional Emails**: Press Ctrl+G twice to elevate any prewritten text to professional email quality.
-* **Multiple AI Providers**: Supports OpenAI, Claude, Ollama, AWS Bedrock (planned: Azure OpenAI).
-* **Global Hotkeys**: Operates across all applications with customizable keyboard shortcuts.
-* **Minimal UI**: Runs in the background, minimally interrupting your workflow.
-* **System Tray Integration**: Option to start minimized in the system tray.
-* **Automatic Updates**: Automatically checks for and installs updates directly within the application.
-* **Protects Your API Keys**: Secrets are securely stored in the System Credential Manager.
+| Feature                        | Description                                                          |
+| ------------------------------ | -------------------------------------------------------------------- |
+| ⚡ **Instant Enhancement**     | Press `Ctrl+G` to instantly improve selected text.                   |
+| 📧 **Email Assistant**         | Press `Ctrl+G` twice for professional email quality.                 |
+| 🤖 **Multiple AI Providers**   | Supports OpenAI, Claude, Ollama, AWS Bedrock; Azure OpenAI *(soon)*. |
+| 🌍 **Global Hotkeys**          | Customizable shortcuts work in all apps.                             |
+| 🎯 **Minimal UI**              | Runs quietly in the background, no workflow disruption.              |
+| 🔽 **System Tray Integration** | Option to start minimized in system tray.                            |
+| 🔄 **Auto-Updates**            | Checks and installs updates automatically.                           |
+| 🔒 **Secure API Storage**      | Stores API keys securely using System Credential Manager.            |
+
+---
+
 
 
 ## Getting Started
@@ -28,12 +33,20 @@ Tired of writing professional emails? Look no further.
 2. Launch the application 
 3. Configure API keys, models and providers
 
-### Usage
-
+### Usage - Instant Silent Enhancement
 1. Select text in any application
 2. Press `Ctrl+G` 
 3. Wait a moment for the AI to process
 4. Your text will be replaced with the improved version
+
+### Usage - Instant Professional Emails 
+1. Select text in any application (Outlook or your preferred Mail Tool)
+2. Press `Ctrl+G` (twice)
+3. UI Asstiant opens
+4. Select `Mail | Auto-Detect | Wiki | Memo | Powerpoint`
+5. Click `Process with Pyramidal Agent`
+3. Wait a moment for the AI to process
+4. Your text will be refactored as a draft
 
 ## Build Instructions
 
