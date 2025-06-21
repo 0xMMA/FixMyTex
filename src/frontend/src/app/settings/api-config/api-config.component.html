@@ -42,115 +42,153 @@
   </div>
 
   <div class="settings-section">
-    <h2>API Key</h2>
+    <h2>Connection Settings</h2>
 
-    <div class="setting-item">
-      <label class="setting-label" for="apiKey">API Key</label>
-      <input 
-        type="password" 
-        id="apiKey" 
-        [(ngModel)]="apiKey" 
-        (change)="onApiKeyChange()"
-        class="text-input"
-        placeholder="Enter your API key"
-      >
-      <p class="setting-description">
-        Your API key will be stored securely and used for all requests to the selected provider.
-      </p>
-    </div>
+    @if (!isOllama) {
+      <div class="setting-item">
+        <label class="setting-label" for="apiKey">API Key</label>
+        <input 
+          type="password" 
+          id="apiKey" 
+          [(ngModel)]="apiKey" 
+          (change)="onApiKeyChange()"
+          class="text-input"
+          placeholder="Enter your API key"
+        >
+        <p class="setting-description">
+          Your API key will be stored securely and used for all requests to the selected provider.
+        </p>
+      </div>
+    }
+
+    @if (isOllama) {
+      <div class="setting-item">
+        <label class="setting-label" for="baseUrl">Base URL</label>
+        <input 
+          type="text" 
+          id="baseUrl" 
+          [(ngModel)]="baseUrl" 
+          (change)="onBaseUrlChange()"
+          class="text-input"
+          placeholder="http://localhost:11434"
+        >
+        <p class="setting-description">
+          The base URL for your Ollama server (default: http://localhost:11434).
+        </p>
+      </div>
+    }
+
+    @if (isCustomOllamaModel) {
+      <div class="setting-item">
+        <label class="setting-label" for="customModel">Custom Model Name</label>
+        <input 
+          type="text" 
+          id="customModel" 
+          [(ngModel)]="customModel" 
+          (change)="onCustomModelChange()"
+          class="text-input"
+          placeholder="Enter model name (e.g., llama3:8b)"
+        >
+        <p class="setting-description">
+          Enter the name of your custom Ollama model.
+        </p>
+      </div>
+    }
   </div>
 
   <!-- AWS Bedrock Configuration Section -->
-  <div class="settings-section" *ngIf="isAwsBedrock">
-    <h2>AWS Bedrock Configuration</h2>
+  @if (isAwsBedrock) {
+    <div class="settings-section">
+      <h2>AWS Bedrock Configuration</h2>
 
-    <div class="setting-item">
-      <label class="setting-label" for="awsAccessKeyId">AWS Access Key ID</label>
-      <input 
-        type="password" 
-        id="awsAccessKeyId" 
-        [(ngModel)]="awsBedrockConfig.aws_access_key_id" 
-        (change)="onAwsAccessKeyIdChange()"
-        class="text-input"
-        placeholder="Enter your AWS Access Key ID"
-      >
-      <p class="setting-description">
-        Your AWS Access Key ID will be stored securely.
-      </p>
-    </div>
+      <div class="setting-item">
+        <label class="setting-label" for="awsAccessKeyId">AWS Access Key ID</label>
+        <input 
+          type="password" 
+          id="awsAccessKeyId" 
+          [(ngModel)]="awsBedrockConfig.aws_access_key_id" 
+          (change)="onAwsAccessKeyIdChange()"
+          class="text-input"
+          placeholder="Enter your AWS Access Key ID"
+        >
+        <p class="setting-description">
+          Your AWS Access Key ID will be stored securely.
+        </p>
+      </div>
 
-    <div class="setting-item">
-      <label class="setting-label" for="awsSecretAccessKey">AWS Secret Access Key</label>
-      <input 
-        type="password" 
-        id="awsSecretAccessKey" 
-        [(ngModel)]="awsBedrockConfig.aws_secret_access_key" 
-        (change)="onAwsSecretAccessKeyChange()"
-        class="text-input"
-        placeholder="Enter your AWS Secret Access Key"
-      >
-      <p class="setting-description">
-        Your AWS Secret Access Key will be stored securely.
-      </p>
-    </div>
+      <div class="setting-item">
+        <label class="setting-label" for="awsSecretAccessKey">AWS Secret Access Key</label>
+        <input 
+          type="password" 
+          id="awsSecretAccessKey" 
+          [(ngModel)]="awsBedrockConfig.aws_secret_access_key" 
+          (change)="onAwsSecretAccessKeyChange()"
+          class="text-input"
+          placeholder="Enter your AWS Secret Access Key"
+        >
+        <p class="setting-description">
+          Your AWS Secret Access Key will be stored securely.
+        </p>
+      </div>
 
-    <div class="setting-item">
-      <label class="setting-label" for="awsSessionToken">AWS Session Token (Optional)</label>
-      <input 
-        type="password" 
-        id="awsSessionToken" 
-        [(ngModel)]="awsBedrockConfig.aws_session_token" 
-        (change)="onAwsSessionTokenChange()"
-        class="text-input"
-        placeholder="Enter your AWS Session Token if using temporary credentials"
-      >
-      <p class="setting-description">
-        Optional. Only required if you're using temporary credentials.
-      </p>
-    </div>
+      <div class="setting-item">
+        <label class="setting-label" for="awsSessionToken">AWS Session Token (Optional)</label>
+        <input 
+          type="password" 
+          id="awsSessionToken" 
+          [(ngModel)]="awsBedrockConfig.aws_session_token" 
+          (change)="onAwsSessionTokenChange()"
+          class="text-input"
+          placeholder="Enter your AWS Session Token if using temporary credentials"
+        >
+        <p class="setting-description">
+          Optional. Only required if you're using temporary credentials.
+        </p>
+      </div>
 
-    <div class="setting-item">
-      <label class="setting-label" for="awsRegion">AWS Region</label>
-      <input 
-        type="text" 
-        id="awsRegion" 
-        [(ngModel)]="awsBedrockConfig.region" 
-        (change)="onAwsRegionChange()"
-        class="text-input"
-        placeholder="e.g., eu-central-1, us-east-1, us-west-2"
-      >
-      <p class="setting-description">
-          The AWS region you want to use where Bedrock is available (e.g., us-east-1).
-      </p>
-    </div>
+      <div class="setting-item">
+        <label class="setting-label" for="awsRegion">AWS Region</label>
+        <input 
+          type="text" 
+          id="awsRegion" 
+          [(ngModel)]="awsBedrockConfig.region" 
+          (change)="onAwsRegionChange()"
+          class="text-input"
+          placeholder="e.g., eu-central-1, us-east-1, us-west-2"
+        >
+        <p class="setting-description">
+            The AWS region you want to use where Bedrock is available (e.g., us-east-1).
+        </p>
+      </div>
 
-    <div class="setting-item">
-      <label class="setting-label" for="awsInferenceProfile">Inference Profile (autofilled)</label>
-      <input 
-        type="text" 
-        id="awsInferenceProfile" 
-        [(ngModel)]="awsBedrockConfig.inferenceProfile" 
-        (change)="onAwsInferenceProfileChange()"
-        class="text-input"
-        placeholder="e.g., eu.anthropic.claude-sonnet-4-20250514-v1:0"
-      >
-      <p class="setting-description">
-        The inference profile ID of the model for the region.
-      </p>
-    </div>
+      <div class="setting-item">
+        <label class="setting-label" for="awsInferenceProfile">Inference Profile (autofilled)</label>
+        <input 
+          type="text" 
+          id="awsInferenceProfile" 
+          [(ngModel)]="awsBedrockConfig.inferenceProfile" 
+          (change)="onAwsInferenceProfileChange()"
+          class="text-input"
+          placeholder="e.g., eu.anthropic.claude-sonnet-4-20250514-v1:0"
+        >
+        <p class="setting-description">
+          The inference profile ID of the model for the region.
+        </p>
+      </div>
 
-    <div class="setting-item">
-      <label class="setting-label" for="awsCache">Enable Cache</label>
-      <input 
-        type="checkbox" 
-        id="awsCache" 
-        [(ngModel)]="awsBedrockConfig.cache" 
-        (change)="onAwsCacheChange()"
-        class="checkbox-input"
-      >
-      <p class="setting-description">
-        Enable caching for AWS Bedrock requests to improve performance.
-      </p>
+      <div class="setting-item">
+        <label class="setting-label" for="awsCache">Enable Cache</label>
+        <input 
+          type="checkbox" 
+          id="awsCache" 
+          [(ngModel)]="awsBedrockConfig.cache" 
+          (change)="onAwsCacheChange()"
+          class="checkbox-input"
+        >
+        <p class="setting-description">
+          Enable caching for AWS Bedrock requests to improve performance.
+        </p>
+      </div>
     </div>
-  </div>
+  }
 </div>

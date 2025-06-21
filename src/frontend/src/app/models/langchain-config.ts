@@ -8,7 +8,8 @@
 export enum LLMProvider {
   OPENAI = 'openai',
   ANTHROPIC = 'anthropic',
-  AWS_BEDROCK = 'aws-bedrock'
+  AWS_BEDROCK = 'aws-bedrock',
+  OLLAMA = 'ollama'
 }
 
 /**
@@ -56,7 +57,10 @@ export interface LangChainConfig {
   provider: LLMProvider;
   model: string;
   apiKey: string;
+  baseUrl?: string;
   providerConfig?: ProviderSpecificConfig;
+  temperature?: number;
+  customModelName?: string;
 }
 
 /**
@@ -113,8 +117,18 @@ export const DEFAULT_PROVIDERS: ProviderConfig[] = [
       { id: 'anthropic.claude-3-7-sonnet-20250219-v1:0', name: 'Claude 3.7 Sonnet', description: 'Previous flagship with extended thinking' },
       { id: 'anthropic.claude-3-haiku-20240307-v1:0', name: 'Claude 3 Haiku', description: 'Fast and cost-effective' },
     ]
+  },
+  {
+    id: LLMProvider.OLLAMA,
+    name: 'Ollama',
+    models: [
+      { id: 'deepseek-r1', name: 'DeepSeek-R1', description: 'DeepSeek-R1 model' },
+      { id: 'llama3', name: 'Llama 3', description: 'Meta\'s Llama 3 model' },
+      { id: 'mistral', name: 'Mistral', description: 'Mistral AI model' },
+      { id: 'gemma', name: 'Gemma', description: 'Google\'s Gemma model' },
+      { id: 'custom', name: 'Custom Model', description: 'Enter a custom model name' }
+    ]
   }
-
 ];
 
 /**
@@ -124,6 +138,8 @@ export const DEFAULT_CONFIG: LangChainConfig = {
   provider: LLMProvider.ANTHROPIC,
   model: 'claude-3-7-sonnet-latest',
   apiKey: '',
+  baseUrl: 'http://localhost:11434',
+  temperature: 0.1,
   providerConfig: {
     awsBedrock: {
       aws_access_key_id: '',

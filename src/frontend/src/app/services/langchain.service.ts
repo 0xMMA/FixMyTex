@@ -7,6 +7,7 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { invoke } from '@tauri-apps/api/core';
 import { BedrockChat } from "@langchain/community/chat_models/bedrock/web";
+import { ChatOllama } from "@langchain/ollama";
 import dedent from "dedent";
 
 /**
@@ -51,7 +52,7 @@ export class LangChainService {
     const currentConfig = this.configSubject.getValue();
     const newConfig = { ...currentConfig, ...config };
 
-    // If API key is being cleared, delete it from the keyring
+    // If the API key is being cleared, delete it from the keyring
     if (config.hasOwnProperty('apiKey') && !config.apiKey && currentConfig.provider) {
       await this.deleteApiKey(currentConfig.provider).catch(error => {
         console.warn('Failed to delete API key from keyring:', error);
@@ -95,10 +96,33 @@ export class LangChainService {
 
   /**
    * Get a model instance based on the current configuration
-   * @returns A model instance (ChatOpenAI, ChatAnthropic, or BedrockChat)
+   * @param temperature Optional temperature parameter for the model (0-1). Defaults to config value or 0.1.
+   * @returns A model instance (ChatOpenAI, ChatAnthropic, BedrockChat, or ChatOllama)
    */
-  public async getModel(): Promise<ChatOpenAI | ChatAnthropic | BedrockChat> {
+  public async getModel(temperature?: number): Promise<ChatOpenAI | ChatAnthropic | BedrockChat | ChatOllama> {
     const config = this.getConfig();
+    // Use the provided temperature, or fall back to config temperature, or use default 0.1
+    const effectiveTemperature = temperature !== undefined ? temperature : (config.temperature !== undefined ? config.temperature : 0.1);
+
+    if (config.provider === LLMProvider.OLLAMA) {
+      if (!config.baseUrl) {
+        throw new Error('Base URL is not set for Ollama');
+      }
+      // Use customModelName if model is 'custom', otherwise use the model directly
+      const modelName = (config.model === 'custom' && config.customModelName) 
+        ? config.customModelName 
+        : config.model;
+
+      return new ChatOllama({
+        model: modelName,
+        baseUrl: config.baseUrl,
+        temperature: effectiveTemperature,
+        onFailedAttempt: (error: any) => {
+          console.error('Ollama failed attempt:', error);
+        }
+      });
+    }
+
     if (!config.apiKey) {
       throw new Error('API key is not set');
     }
@@ -107,7 +131,7 @@ export class LangChainService {
       return new ChatOpenAI({
         model: config.model,
         openAIApiKey: config.apiKey,
-        temperature: 0.1,
+        temperature: effectiveTemperature,
         onFailedAttempt: (error: any) => {
           console.error('OpenAI failed attempt:', error);
         }
@@ -116,7 +140,7 @@ export class LangChainService {
       return new ChatAnthropic({
         model: config.model,
         anthropicApiKey: config.apiKey,
-        temperature: 0.1,
+        temperature: effectiveTemperature,
         onFailedAttempt: (error: any) => {
           console.error('Anthropic failed attempt:', error);
         }
@@ -147,7 +171,7 @@ export class LangChainService {
           secretAccessKey: config.providerConfig!.awsBedrock!.aws_secret_access_key,
           sessionToken: config.providerConfig!.awsBedrock!.aws_session_token
         },
-        temperature: 0.1,
+        temperature: effectiveTemperature,
         onFailedAttempt: (error: any) => {
           console.error('Bedrock failed attempt:', error);
         }
@@ -178,10 +202,15 @@ export class LangChainService {
       }
 
       // Load the prompt from SilentFix.md
-      const promptTemplate = ChatPromptTemplate.fromTemplate(dedent`          
+      const promptTemplate = ChatPromptTemplate.fromMessages([
+        [
+          "system",
+          dedent`          
           You are a grammar and spelling correction assistant. 
           Your task is to fix grammatical errors, spelling mistakes, and improve clarity in text while preserving the original meaning, tone, and intent.
-          
+          Do not show your thinking process or reasoning steps. 
+          RETURN ONLY THE FIXED TEXT
+
           Rules:
           1. Correct all grammar and spelling errors
           2. Preserve the original meaning and factual content exactly
@@ -189,14 +218,15 @@ export class LangChainService {
           4. Keep the original language - never translate
           5. Improve sentence structure only when necessary for clarity or semantic improvement
           6. Make direct corrections without explanations, comments, or questions
-          7. Focus on making the text more professional and readable while keeping it authentic
-          8. RETURN ONLY THE FIXED TEXT
-      
-          Text to fix: {text}`
-      );
+          7. Focus on making the text more professional and readable while keeping it authentic          
+          `
+        ],
+          ["human", text],
+      ]);
 
       // Get the model based on the provider
-      const model = await this.getModel();
+      // Pass temperature from options if available
+      const model = await this.getModel(options?.temperature);
 
       // Create the chain with a string output parser
       const chain = promptTemplate.pipe(model).pipe(new StringOutputParser());
@@ -235,7 +265,7 @@ export class LangChainService {
           const parsedOldConfig = JSON.parse(oldConfig);
           config = { ...config, ...parsedOldConfig };
 
-          // Store API key in keyring if available
+          // Store the API key in keyring if available
           if (parsedOldConfig.provider && parsedOldConfig.apiKey) {
             await this.migrateApiKey(parsedOldConfig.provider, parsedOldConfig.apiKey);
           }

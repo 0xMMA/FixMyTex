@@ -25,6 +25,8 @@ export class ApiConfigComponent implements OnInit, OnDestroy {
   selectedProvider: LLMProvider = LLMProvider.OPENAI;
   selectedModel: string = '';
   apiKey: string = '';
+  baseUrl: string = 'http://localhost:11434';
+  customModel: string = '';
 
   // AWS Bedrock configuration
   awsBedrockConfig: AwsBedrockConfig = {
@@ -54,6 +56,7 @@ export class ApiConfigComponent implements OnInit, OnDestroy {
         this.selectedProvider = config.provider;
         this.selectedModel = config.model;
         this.apiKey = config.apiKey;
+        this.baseUrl = config.baseUrl || 'http://localhost:11434';
 
         // Load AWS Bedrock configuration if available
         if (config.provider === LLMProvider.AWS_BEDROCK && config.providerConfig?.awsBedrock) {
@@ -61,6 +64,11 @@ export class ApiConfigComponent implements OnInit, OnDestroy {
             ...this.awsBedrockConfig,
             ...config.providerConfig.awsBedrock
           };
+        }
+
+        // Handle custom model for Ollama
+        if (config.provider === LLMProvider.OLLAMA && config.model === 'custom') {
+          this.customModel = config.customModelName || '';
         }
       })
     );
@@ -96,6 +104,24 @@ export class ApiConfigComponent implements OnInit, OnDestroy {
       };
     }
 
+    // If switching to Ollama, include the baseUrl
+    if (this.selectedProvider === LLMProvider.OLLAMA) {
+      configUpdate.baseUrl = this.baseUrl;
+
+      // Handle custom model
+      if (this.selectedModel === 'custom') {
+        // Initialize customModel if empty
+        if (!this.customModel) {
+          this.customModel = '';
+        }
+        // Include customModelName in the update
+        configUpdate.customModelName = this.customModel;
+      } else {
+        // Reset customModel if not using custom model
+        this.customModel = '';
+      }
+    }
+
     // Update the configuration
     this.langChainService.updateConfig(configUpdate);
 
@@ -104,9 +130,21 @@ export class ApiConfigComponent implements OnInit, OnDestroy {
 
   onModelChange(): void {
     // Update the configuration
-    this.langChainService.updateConfig({
+    const configUpdate: any = {
       model: this.selectedModel
-    });
+    };
+
+    // If selecting custom model, ensure customModelName is preserved
+    if (this.selectedProvider === LLMProvider.OLLAMA && this.selectedModel === 'custom') {
+      // If customModel is empty, initialize it with a default value or keep it empty
+      if (!this.customModel) {
+        this.customModel = '';
+      }
+      // Include customModelName in the update
+      configUpdate.customModelName = this.customModel;
+    }
+
+    this.langChainService.updateConfig(configUpdate);
 
     console.log('Model changed to:', this.selectedModel);
   }
@@ -118,6 +156,26 @@ export class ApiConfigComponent implements OnInit, OnDestroy {
     });
 
     console.log('API key changed');
+  }
+
+  onBaseUrlChange(): void {
+    // Update the configuration
+    this.langChainService.updateConfig({
+      baseUrl: this.baseUrl
+    });
+
+    console.log('Base URL changed to:', this.baseUrl);
+  }
+
+  onCustomModelChange(): void {
+    if (this.selectedProvider === LLMProvider.OLLAMA && this.selectedModel === 'custom') {
+      // Update the configuration with the custom model name
+      this.langChainService.updateConfig({
+        customModelName: this.customModel
+      });
+
+      console.log('Custom model changed to:', this.customModel);
+    }
   }
 
   getModelDescription(): string {
@@ -163,5 +221,15 @@ export class ApiConfigComponent implements OnInit, OnDestroy {
   // Check if the current provider is AWS Bedrock
   get isAwsBedrock(): boolean {
     return this.selectedProvider === LLMProvider.AWS_BEDROCK;
+  }
+
+  // Check if the current provider is Ollama
+  get isOllama(): boolean {
+    return this.selectedProvider === LLMProvider.OLLAMA;
+  }
+
+  // Check if the current model is a custom Ollama model
+  get isCustomOllamaModel(): boolean {
+    return this.isOllama && this.selectedModel === 'custom';
   }
 }

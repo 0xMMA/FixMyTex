@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -24,6 +24,7 @@
     "@langchain/anthropic": "^0.3.22",
     "@langchain/community": "^0.3.47",
     "@langchain/core": "^0.3.60",
+    "@langchain/ollama": "^0.2.3",
     "@langchain/openai": "^0.5.13",
     "@smithy/eventstream-codec": "^2.0.0",
     "@smithy/protocol-http": "^3.0.6",

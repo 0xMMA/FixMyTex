@@ -5,9 +5,9 @@ import { ChatAnthropic } from "@langchain/anthropic";
 import { PromptTemplate } from "@langchain/core/prompts";
 import {JsonOutputParser, StringOutputParser } from "@langchain/core/output_parsers";
 import { RunnableLambda, RunnableSequence } from "@langchain/core/runnables";
-import { LLMProvider } from '../models/langchain-config';
 import dedent from "dedent";
 import { BedrockChat } from "@langchain/community/chat_models/bedrock/web";
+import {ChatOllama} from "@langchain/ollama";
 
 /**
  * Document types for different output formats
@@ -194,7 +194,7 @@ export class PyramidalAgentService {
   }
 
 
-  private createProcessingChain(model: ChatOpenAI | ChatAnthropic | BedrockChat, instructions?: string): RunnableSequence {
+  private createProcessingChain(model: ChatOpenAI | ChatAnthropic | BedrockChat | ChatOllama, instructions?: string): RunnableSequence {
 
     // Step 1: Document Type Detection & Basic Analysis
     const analyzeDocument = RunnableLambda.from<DocumentInput, DocumentWithAnalysis>(async (input) => {
