@@ -5,14 +5,15 @@ Tired of writing professional emails? Look no further.
 
 ## Features
 
-- **Instant Text Enhancement**: Press Ctrl+G to improve any selected text
-- **LangChain Integration**: Flexible AI abstraction layer for advanced text processing
-- **Multiple AI Providers**: Supports OpenAI, Claude, Ollama, AWS Bedrock (planned: Azure OpenAI)
-- **Context-Aware Formatting** (planned): Automatically detects source application and applies appropriate formatting (HTML, Markdown, or Plain text)
-- **Global Hotkeys**: Works across all applications with customizable keyboard shortcuts
-- **Minimal UI**: Runs in the background with minimal interruption to your workflow
-- **System Tray Integration**: Option to start minimized to system tray
-- **Automatic Updates**: Check for and install updates directly from the application
+* **Instant Text Enhancement**: Press Ctrl+G to improve any selected text.
+* **Assistant for Professional Emails**: Press Ctrl+G twice to elevate any prewritten text to professional email quality.
+* **Multiple AI Providers**: Supports OpenAI, Claude, Ollama, AWS Bedrock (planned: Azure OpenAI).
+* **Global Hotkeys**: Operates across all applications with customizable keyboard shortcuts.
+* **Minimal UI**: Runs in the background, minimally interrupting your workflow.
+* **System Tray Integration**: Option to start minimized in the system tray.
+* **Automatic Updates**: Automatically checks for and installs updates directly within the application.
+* **Protects Your API Keys**: Secrets are securely stored in the System Credential Manager.
+
 
 ## Getting Started
 
