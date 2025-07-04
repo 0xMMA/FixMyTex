@@ -47,7 +47,6 @@ export class CommunicationAssistantComponent implements OnInit, OnDestroy {
   selectedStyle = 'professional';
   selectedRelationship = 'professional';
   selectedDocumentType = DocumentType.AUTO;
-  enablePyramidalStructuring = true;
 
   // Text panel properties
   originalText = '';
@@ -99,10 +98,6 @@ export class CommunicationAssistantComponent implements OnInit, OnDestroy {
     // In a real implementation, this would trigger text processing
   }
 
-  onPyramidalStructuringChange(): void {
-    console.log('Pyramidal structuring toggled:', this.enablePyramidalStructuring);
-    // In a real implementation, this would trigger text processing
-  }
 
   onDocumentTypeChange(): void {
     console.log('Document type changed to:', this.selectedDocumentType);

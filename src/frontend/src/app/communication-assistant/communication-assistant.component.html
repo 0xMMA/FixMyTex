@@ -47,17 +47,6 @@
         </mat-form-field>
       </div>
 
-      <div class="setting-group">
-        <mat-checkbox 
-          [(ngModel)]="enablePyramidalStructuring" 
-          (change)="onPyramidalStructuringChange()"
-        >
-          Enable Pyramidal Structuring
-        </mat-checkbox>
-        <p class="setting-description">
-          Organizes content in a hierarchical structure for better readability
-        </p>
-      </div>
     </mat-card-content>
   </mat-card>
 
@@ -145,15 +134,15 @@
             </mat-menu>
 
             <!-- Send back button - only enabled when there's a source app -->
-            <button 
-              mat-raised-button
-              class="send-back-button"
-              color="accent" 
-              (click)="sendBackToSourceApp()" 
-              [disabled]="!sourceApp"
-              matTooltip="Send the processed text back to the source application">
-              Send Back to {{ sourceApp || 'Source App' }}
-            </button>
+<!--            <button -->
+<!--              mat-raised-button-->
+<!--              class="send-back-button"-->
+<!--              color="accent" -->
+<!--              (click)="sendBackToSourceApp()" -->
+<!--              [disabled]="!sourceApp"-->
+<!--              matTooltip="Send the processed text back to the source application">-->
+<!--              Send Back to {{ sourceApp || 'Source App' }}-->
+<!--            </button>-->
           </div>
 
             <!-- Instructions input -->

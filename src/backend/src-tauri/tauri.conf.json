@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "FixMyTex",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "identifier": "dev.michael-martin.FixMyTex",
   "build": {
     "frontendDist": "../../frontend/dist/frontend/browser",
@@ -12,8 +12,8 @@
     "windows": [
       {
         "title": "FixMyTex",
-        "width": 1200,
-        "height": 800,
+        "width": 1600,
+        "height": 1080,
         "resizable": true,
         "fullscreen": false
       }
