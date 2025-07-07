@@ -59,30 +59,102 @@
           <!-- Tabs for Draft/Original -->
           <mat-tab-group [selectedIndex]="activeTab === 'draft' ? 0 : 1" (selectedIndexChange)="onTabChange($event === 0 ? 'draft' : 'original')" >
             <mat-tab label="Draft">
-              <mat-form-field appearance="fill" class="full-width text-area-container">
-                <textarea 
-                  matInput
-                  [(ngModel)]="draftText" 
-                  (input)="onTextChange()"
-                  placeholder="Your processed text will appear here..."
-                  [cdkTextareaAutosize]="true"
-                  [cdkAutosizeMinRows]="11"
-                  [cdkAutosizeMaxRows]="Math.floor((window.innerHeight - (444)) / 26)"
-                ></textarea>
-              </mat-form-field>
+              <div class="markdown-container">
+                <div class="markdown-controls">
+                  <button 
+                    mat-button 
+                    [color]="draftEditMode ? 'primary' : ''"
+                    (click)="draftEditMode = true"
+                    class="mode-button"
+                  >
+                    <mat-icon>edit</mat-icon>
+                    Edit
+                  </button>
+                  <button 
+                    mat-button 
+                    [color]="!draftEditMode ? 'primary' : ''"
+                    (click)="draftEditMode = false"
+                    class="mode-button"
+                  >
+                    <mat-icon>preview</mat-icon>
+                    Preview
+                  </button>
+                </div>
+                
+                @if (draftEditMode) {
+                  <mat-form-field appearance="fill" class="full-width text-area-container">
+                    <textarea 
+                      matInput
+                      [(ngModel)]="draftText" 
+                      (input)="onTextChange()"
+                      placeholder="Your processed text will appear here..."
+                      [cdkTextareaAutosize]="true"
+                      [cdkAutosizeMinRows]="11"
+                      [cdkAutosizeMaxRows]="Math.floor((window.innerHeight - (444)) / 26)"
+                    ></textarea>
+                  </mat-form-field>
+                } @else {
+                  <div class="markdown-preview">
+                    @if (draftText) {
+                      <markdown [data]="draftText"></markdown>
+                    } @else {
+                      <div class="empty-preview">
+                        <mat-icon>description</mat-icon>
+                        <p>No content to preview</p>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
             </mat-tab>
             <mat-tab label="Original">
-              <mat-form-field appearance="fill" class="full-width text-area-container">
-                <textarea 
-                  matInput
-                  [(ngModel)]="originalText" 
-                  (input)="onTextChange()"
-                  placeholder="Enter or paste your text here..."
-                  [cdkTextareaAutosize]="true"
-                  [cdkAutosizeMinRows]="11"
-                  [cdkAutosizeMaxRows]="Math.floor((window.innerHeight - (444)) / 26)"
-                  ></textarea>
-              </mat-form-field>
+              <div class="markdown-container">
+                <div class="markdown-controls">
+                  <button 
+                    mat-button 
+                    [color]="originalEditMode ? 'primary' : ''"
+                    (click)="originalEditMode = true"
+                    class="mode-button"
+                  >
+                    <mat-icon>edit</mat-icon>
+                    Edit
+                  </button>
+                  <button 
+                    mat-button 
+                    [color]="!originalEditMode ? 'primary' : ''"
+                    (click)="originalEditMode = false"
+                    class="mode-button"
+                  >
+                    <mat-icon>preview</mat-icon>
+                    Preview
+                  </button>
+                </div>
+                
+                @if (originalEditMode) {
+                  <mat-form-field appearance="fill" class="full-width text-area-container">
+                    <textarea 
+                      matInput
+                      [(ngModel)]="originalText" 
+                      (input)="onTextChange()"
+                      placeholder="Enter or paste your text here..."
+                      [cdkTextareaAutosize]="true"
+                      [cdkAutosizeMinRows]="11"
+                      [cdkAutosizeMaxRows]="Math.floor((window.innerHeight - (444)) / 26)"
+                      ></textarea>
+                  </mat-form-field>
+                } @else {
+                  <div class="markdown-preview">
+                    @if (originalText) {
+                      <markdown [data]="originalText"></markdown>
+                    } @else {
+                      <div class="empty-preview">
+                        <mat-icon>description</mat-icon>
+                        <p>No content to preview</p>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
             </mat-tab>
           </mat-tab-group>
 
@@ -118,7 +190,7 @@
             </button>
 
             <!-- Legacy dropdown menu (can be removed if not needed) -->
-            <button mat-raised-button color="primary" [matMenuTriggerFor]="makeMenu" [disabled]="isProcessing" class="more-button">
+            <!-- <button mat-raised-button color="primary" [matMenuTriggerFor]="makeMenu" [disabled]="isProcessing" class="more-button">
               More Options
               <mat-icon>arrow_drop_down</mat-icon>
             </button>
@@ -131,7 +203,7 @@
               <button mat-menu-item (click)="processText('direct')">Direct</button>
               <button mat-menu-item (click)="processText('casual')">Casual</button>
               <button mat-menu-item (click)="processText('professional')">Professional</button>
-            </mat-menu>
+            </mat-menu> -->
 
             <!-- Send back button - only enabled when there's a source app -->
 <!--            <button -->

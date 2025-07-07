@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MaterialModule } from '../shared/material.module';
+import { MarkdownModule } from 'ngx-markdown';
 import { MessageBusService } from '../services/message-bus.service';
 import { UIAssistedActionData, UIAssistedActionHandler } from '../handlers/ui-assisted-action-handler';
 import { PyramidalAgentService, PyramidalAgentResult, DocumentType } from '../services/pyramidal-agent.service';
@@ -10,7 +11,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-communication-assistant',
   standalone: true,
-  imports: [CommonModule, FormsModule, MaterialModule],
+  imports: [CommonModule, FormsModule, MaterialModule, MarkdownModule],
   templateUrl: './communication-assistant.component.html',
   styleUrls: ['./communication-assistant.component.scss']
 })
@@ -53,6 +54,11 @@ export class CommunicationAssistantComponent implements OnInit, OnDestroy {
   draftText = '';
   instructionsText = ''; // New property for instructions input
   activeTab = 'original'; // 'draft', 'original'
+
+  // Markdown view modes
+  originalEditMode = false;
+  draftEditMode = false;
+
 
   // Pyramidal agent properties
   processingResult: PyramidalAgentResult | null = null;
