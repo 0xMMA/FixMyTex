@@ -57,4 +57,35 @@
     </div>
   </div>
 
+  <div class="settings-section">
+    <h2>HTML Clipboard Support</h2>
+
+    <div class="setting-item">
+      <label class="setting-label">
+        <input type="checkbox" [(ngModel)]="htmlClipboardEnabled" (change)="onHtmlClipboardEnabledChange()">
+        Enable HTML clipboard support
+      </label>
+      <p class="setting-description">
+        When enabled, FixMyTex will paste formatted HTML content to applications that support it, 
+        preserving formatting like headers, lists, and basic styling.
+      </p>
+    </div>
+
+    <div class="setting-item">
+      <label class="setting-label" for="htmlClipboardAppPatterns">Applications that support HTML clipboard</label>
+      <textarea 
+        id="htmlClipboardAppPatterns" 
+        [(ngModel)]="htmlClipboardAppPatterns" 
+        (change)="onHtmlClipboardAppPatternsChange()"
+        class="app-patterns-textarea"
+        rows="8"
+        placeholder="Enter one application name per line (e.g., Microsoft Word, Google Docs)"
+      ></textarea>
+      <p class="setting-description">
+        List applications that support HTML clipboard. Each line should contain an application name or a part of it. 
+        The application name will be matched case-insensitively and the matching is done with a simple contains check.
+      </p>
+    </div>
+  </div>
+
 </div>

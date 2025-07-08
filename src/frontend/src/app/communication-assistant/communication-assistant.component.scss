@@ -86,17 +86,18 @@
 
 // Action buttons
 .action-buttons {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  display: flex;
+  flex-direction: row;
   margin-bottom: 1rem;
   gap: 1rem;
-  min-width: 200px;
+  width: 100%;
 }
 .more-button,
 .send-back-button,
-.process-button {
+.process-button,
+.copy-button {
   height: 3.5rem;
-  min-width: 200px;
+  width: 100%;
 }
 
 // Processing result styles

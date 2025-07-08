@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { MessageBusService } from '../services/message-bus.service';
 import { LangChainService } from '../services/langchain.service';
-import { writeText, readText } from '@tauri-apps/plugin-clipboard-manager';
+import { writeText, readText, writeHtml } from '@tauri-apps/plugin-clipboard-manager';
 import { invoke } from '@tauri-apps/api/core';
+import { HtmlClipboardService } from '../services/html-clipboard.service';
 
 /**
  * Message types for shortcut events
@@ -21,7 +22,8 @@ export enum ShortcutEventType {
 export class SilentFixActionHandler {
   constructor(
     private messageBus: MessageBusService,
-    private langChainService: LangChainService
+    private langChainService: LangChainService,
+    private htmlClipboardService: HtmlClipboardService
   ) {
     // Subscribe to silent-fix events
     this.messageBus.on<void>(ShortcutEventType.SILENT_FIX)
@@ -68,8 +70,24 @@ export class SilentFixActionHandler {
       // Process text using LangChain
       const processedText = await this.langChainService.fixTextSilent(clipboardText);
 
+      // Check if the app supports HTML clipboard
+      const supportsHtml = this.htmlClipboardService.supportsHtmlClipboard(focusedApp);
+      console.log(`App ${focusedApp} HTML clipboard support: ${supportsHtml}`);
+
       // Write processed text back to the clipboard
-      await this.setClipboardText(processedText);
+      if (supportsHtml) {
+        try {
+          const html = await this.htmlClipboardService.convertMarkdownToHtml(processedText);
+          await writeHtml(html, processedText);
+          console.log('HTML written to clipboard');
+        } catch (error) {
+          console.error('Error converting to HTML, falling back to plain text:', error);
+          await this.setClipboardText(processedText);
+        }
+      } else {
+        await this.setClipboardText(processedText);
+        console.log('Plain text written to clipboard');
+      }
 
       // Send Ctrl+V / paste command via the operating system to the current focused application
       try {

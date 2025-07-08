@@ -17,6 +17,8 @@ export class GeneralConfigComponent implements OnInit, OnDestroy {
   startMinimized = true;
   silentFixShortcut = 'CommandOrControl+G';
   uiAssistantShortcut = 'CommandOrControl+G';
+  htmlClipboardEnabled = true;
+  htmlClipboardAppPatterns = '';
 
   private subscription: Subscription = new Subscription();
 
@@ -30,6 +32,8 @@ export class GeneralConfigComponent implements OnInit, OnDestroy {
         this.startMinimized = settings.startMinimized;
         this.silentFixShortcut = settings.shortcuts.silentFix;
         this.uiAssistantShortcut = settings.shortcuts.uiAssistant;
+        this.htmlClipboardEnabled = settings.htmlClipboardSupport.enabled;
+        this.htmlClipboardAppPatterns = settings.htmlClipboardSupport.appPatterns.join('\n');
       })
     );
   }
@@ -54,17 +58,41 @@ export class GeneralConfigComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Handle shortcut change
+   * @param shortcutType The type of shortcut being changed
+   * @param value The new shortcut value
+   */
   onShortcutChange(shortcutType: string, value: string): void {
-    // Save shortcut setting using the settings service
     if (shortcutType === 'Silent Fix') {
-      this.settingsService.updateShortcut('silentFix', value).catch(error => {
-        console.error('Error updating silent fix shortcut:', error);
-      });
+      this.settingsService.updateShortcut('silentFix', value);
     } else if (shortcutType === 'UI Assistant') {
-      this.settingsService.updateShortcut('uiAssistant', value).catch(error => {
-        console.error('Error updating UI assistant shortcut:', error);
-      });
+      this.settingsService.updateShortcut('uiAssistant', value);
     }
+  }
+
+  /**
+   * Handle HTML clipboard enabled change
+   */
+  onHtmlClipboardEnabledChange(): void {
+    const appPatterns = this.htmlClipboardAppPatterns
+      .split('\n')
+      .map(pattern => pattern.trim())
+      .filter(pattern => pattern.length > 0);
+    
+    this.settingsService.updateHtmlClipboardSupport(this.htmlClipboardEnabled, appPatterns);
+  }
+
+  /**
+   * Handle HTML clipboard app patterns change
+   */
+  onHtmlClipboardAppPatternsChange(): void {
+    const appPatterns = this.htmlClipboardAppPatterns
+      .split('\n')
+      .map(pattern => pattern.trim())
+      .filter(pattern => pattern.length > 0);
+    
+    this.settingsService.updateHtmlClipboardSupport(this.htmlClipboardEnabled, appPatterns);
   }
 
 }

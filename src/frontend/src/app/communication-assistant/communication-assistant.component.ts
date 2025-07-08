@@ -6,6 +6,7 @@ import { MarkdownModule } from 'ngx-markdown';
 import { MessageBusService } from '../services/message-bus.service';
 import { UIAssistedActionData, UIAssistedActionHandler } from '../handlers/ui-assisted-action-handler';
 import { PyramidalAgentService, PyramidalAgentResult, DocumentType } from '../services/pyramidal-agent.service';
+import { HtmlClipboardService } from '../services/html-clipboard.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -68,6 +69,7 @@ export class CommunicationAssistantComponent implements OnInit, OnDestroy {
     private messageBus: MessageBusService,
     private uiAssistedActionHandler: UIAssistedActionHandler,
     private pyramidalAgentService: PyramidalAgentService,
+    private htmlClipboardService: HtmlClipboardService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -188,6 +190,38 @@ export class CommunicationAssistantComponent implements OnInit, OnDestroy {
       .catch(error => {
         console.error('Error sending text back to source application:', error);
       });
+  }
+
+  /**
+   * Copy the processed text to both plain text and HTML clipboards
+   * @param text The text to copy (defaults to the draft text)
+   */
+  async copyToClipboard(text: string = this.draftText): Promise<void> {
+    if (!text) {
+      console.warn('No text to copy');
+      return;
+    }
+
+    try {
+      console.log('Copying text to clipboard:', text);
+      
+      // First, copy as plain text
+      await navigator.clipboard.writeText(text);
+      console.log('Text copied to plain text clipboard');
+      
+      // Then, convert to HTML and copy as HTML
+      const htmlText = await this.htmlClipboardService.convertMarkdownToHtml(text);
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          'text/plain': new Blob([text], { type: 'text/plain' }),
+          'text/html': new Blob([htmlText], { type: 'text/html' })
+        })
+      ]);
+      console.log('Text copied to HTML clipboard');
+      
+    } catch (error) {
+      console.error('Error copying text to clipboard:', error);
+    }
   }
 
   protected readonly Math = Math;

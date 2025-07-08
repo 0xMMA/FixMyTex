@@ -206,15 +206,27 @@
             </mat-menu> -->
 
             <!-- Send back button - only enabled when there's a source app -->
-<!--            <button -->
-<!--              mat-raised-button-->
-<!--              class="send-back-button"-->
-<!--              color="accent" -->
-<!--              (click)="sendBackToSourceApp()" -->
-<!--              [disabled]="!sourceApp"-->
-<!--              matTooltip="Send the processed text back to the source application">-->
-<!--              Send Back to {{ sourceApp || 'Source App' }}-->
-<!--            </button>-->
+              <!--  <button
+                  mat-raised-button
+                  class="send-back-button"
+                  color="accent"
+                  (click)="sendBackToSourceApp()"
+                  [disabled]="!sourceApp"
+                 matTooltip="Send the processed text back to the source application">
+                 Send Back to {{ sourceApp || 'Source App' }}
+               </button>
+    -->
+                <!-- Copy button - copies to both plain text and HTML clipboards -->
+           <button
+              mat-raised-button
+              class="copy-button"
+              color="primary"
+              (click)="copyToClipboard()"
+              [disabled]="!draftText"
+             matTooltip="Copy the processed text to clipboard (both plain text and HTML)">
+             <mat-icon>content_copy</mat-icon>
+             Copy
+           </button>
           </div>
 
             <!-- Instructions input -->

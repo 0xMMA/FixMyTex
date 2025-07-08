@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { MessageBusService } from '../services/message-bus.service';
 import { LangChainService } from '../services/langchain.service';
-import { writeText, readText } from '@tauri-apps/plugin-clipboard-manager';
+import { writeText, readText, writeHtml } from '@tauri-apps/plugin-clipboard-manager';
 import { invoke } from '@tauri-apps/api/core';
 import { Window } from '@tauri-apps/api/window';
 import { ShortcutEventType } from './silent-fix-action-handler';
+import { HtmlClipboardService } from '../services/html-clipboard.service';
 
 /**
  * Data structure for UI assisted action
@@ -26,7 +27,8 @@ export class UIAssistedActionHandler {
 
   constructor(
     private messageBus: MessageBusService,
-    private langChainService: LangChainService
+    private langChainService: LangChainService,
+    private htmlClipboardService: HtmlClipboardService
   ) {
     // Subscribe to ui-assisted events
     this.messageBus.on<void>(ShortcutEventType.UI_ASSISTED)
@@ -125,12 +127,43 @@ export class UIAssistedActionHandler {
    */
   async pasteBackToSourceApp(text: string): Promise<void> {
     try {
+      // Analyse if app to which we want to paste back supports html clipboard
+      // we do this with a good old regex and let that come from settings
+      const supportsHtml = this.htmlClipboardService.supportsHtmlClipboard(this.sourceApp);
+      console.log(`App ${this.sourceApp} HTML clipboard support: ${supportsHtml}`);
+
+      let clipboardText = text;
+      let clipboardHtml: string | undefined;
+
+      if (supportsHtml) {
+        // if it does, we write the text to the clipboard as html 
+        // we need a package that takes our markdown and converts it to light weight html like h1 and ul should already be good enough
+        try {
+          clipboardHtml = await this.htmlClipboardService.convertMarkdownToHtml(text);
+          console.log('Converted text to HTML for clipboard');
+        } catch (error) {
+          console.error('Error converting to HTML, falling back to plain text:', error);
+          clipboardHtml = undefined;
+        }
+      } else {
+        // if it does not, we write the text to the clipboard as plain text
+        clipboardText = text;
+      }
+
       // Write the processed text to the clipboard
-      await this.setClipboardText(text);
+      if (supportsHtml && clipboardHtml) {
+        // Write HTML to clipboard with plain text fallback
+        await writeHtml(clipboardHtml, text);
+        console.log('HTML written to clipboard');
+      } else {
+        // Write plain text to clipboard
+        await this.setClipboardText(clipboardText);
+        console.log('Plain text written to clipboard');
+      }
 
       // Send Ctrl+V / paste command via the operating system to the source application
-      // Note: This assumes the source application is still in focus or can be brought back to focus
-      await invoke('send_paste_command');
+      // Pass the source app name so the backend can try to find and focus the window
+      await invoke('send_paste_command', { source_app_name: this.sourceApp });
       console.log('Paste command sent to source application:', this.sourceApp);
     } catch (error) {
       console.error('Error pasting back to source application:', error);
@@ -148,7 +181,7 @@ export class UIAssistedActionHandler {
 
   private async setClipboardText(text: string): Promise<void> {
     try {
-      await writeText(text);
+      await writeText(text);      
     } catch (error) {
       console.error('Error writing to clipboard:', error);
     }

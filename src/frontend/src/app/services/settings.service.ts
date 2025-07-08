@@ -14,6 +14,10 @@ export interface AppSettings {
     silentFix: string;
     uiAssistant: string;
   };
+  htmlClipboardSupport: {
+    enabled: boolean;
+    appPatterns: string[];
+  };
 }
 
 /**
@@ -25,6 +29,27 @@ export const DEFAULT_SETTINGS: AppSettings = {
   shortcuts: {
     silentFix: 'CommandOrControl+G',
     uiAssistant: 'CommandOrControl+G'
+  },
+  htmlClipboardSupport: {
+    enabled: true,
+    appPatterns: [
+      'Microsoft Word',
+      'Google Docs',
+      'LibreOffice Writer',
+      'Notion',
+      'OneNote',
+      'Evernote',
+      'Slack',
+      'Discord',
+      'Teams',
+      'Outlook',
+      'Thunderbird',
+      'Gmail',
+      'Chrome',
+      'Firefox',
+      'Edge',
+      'Safari'
+    ]
   }
 };
 
@@ -155,6 +180,31 @@ export class SettingsService {
     // Save the settings to storage
     await this.saveSettings(newSettings).catch(error => {
       console.error('Error saving settings:', error);
+    });
+  }
+
+  /**
+   * Update HTML clipboard support settings
+   * @param enabled Whether HTML clipboard support is enabled
+   * @param appPatterns Array of app name patterns that support HTML clipboard
+   */
+  public async updateHtmlClipboardSupport(enabled: boolean, appPatterns?: string[]): Promise<void> {
+    const currentSettings = this.settingsSubject.getValue();
+    const newSettings = { 
+      ...currentSettings, 
+      htmlClipboardSupport: { 
+        ...currentSettings.htmlClipboardSupport,
+        enabled,
+        ...(appPatterns && { appPatterns })
+      } 
+    };
+
+    // Update the settings subject
+    this.settingsSubject.next(newSettings);
+
+    // Save the settings to storage
+    await this.saveSettings(newSettings).catch(error => {
+      console.error('Error saving HTML clipboard support settings:', error);
     });
   }
 
