@@ -4,6 +4,8 @@ A desktop application that enhances your writing with AI-powered grammar, style,
 
 Perfect for professional emails, chat messages, documents, and social media posts. No more copy-pasting between tools - FixMyTex provides instant AI text enhancement wherever you're typing. Select text, press `Ctrl+G` for instant improvements, or press twice for the advanced UI assistant.
 
+![FixMyTex Demo](./Demo.gif)
+
 ## 🚀 Features
 
 | Feature                        | Description                                                          |
