@@ -3,6 +3,7 @@ use tauri::{
     tray::{TrayIconBuilder, TrayIconEvent},
     AppHandle, Manager, WebviewWindow,
 };
+use tauri_plugin_log::LogTarget;
 
 // Import the system utilities module
 mod system_utils;
@@ -35,6 +36,12 @@ pub fn run() {
             None,
         ))
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+        .plugin(
+            tauri_plugin_log::Builder::default()
+                .level(log::LevelFilter::Info)
+                .targets([LogTarget::LogDir, LogTarget::Stdout])
+                .build(),
+        )
         // Register the system utilities and keyring commands
         .invoke_handler(tauri::generate_handler![
             system_utils::get_focused_app_name,
@@ -45,13 +52,7 @@ pub fn run() {
             keyring_utils::delete_api_key,
         ])
         .setup(|app| {
-            if cfg!(debug_assertions) {
-                app.handle().plugin(
-                    tauri_plugin_log::Builder::default()
-                        .level(log::LevelFilter::Info)
-                        .build(),
-                )?;
-            }
+            log::info!("Starting FixMyTex application");
 
             // Create tray menu
             let open_item = MenuItem::with_id(app, "open", "Open", true, None::<&str>)?;
