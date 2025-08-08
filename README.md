@@ -45,11 +45,11 @@ Perfect for professional emails, chat messages, documents, and social media post
 ### Usage - Instant Professional Emails 
 1. Select text in any application (Outlook or your preferred Mail Tool)
 2. Press `Ctrl+G` (twice)
-3. UI Asstiant opens
+3. UI Assistant opens
 4. Select `Mail | Auto-Detect | Wiki | Memo | Powerpoint`
 5. Click `Process with Pyramidal Agent`
-3. Wait a moment for the AI to process
-4. Your text will be refactored as a draft
+6. Wait a moment for the AI to process
+7. Your text will be refactored as a draft
 
 ## Build Instructions
 
