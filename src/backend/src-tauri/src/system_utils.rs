@@ -76,7 +76,7 @@ mod internal {
 
         unsafe {
             let hwnd = GetForegroundWindow();
-            if hwnd.0 == std::ptr::null_mut() {
+            if hwnd.is_invalid() {
                 return Err(io::Error::new(
                     io::ErrorKind::Other,
                     "No foreground window found",
@@ -115,7 +115,10 @@ mod internal {
         }
 
         // Callback function for EnumWindows
-        extern "system" fn enum_windows_callback(hwnd: HWND, lparam: LPARAM) -> ::windows::core::BOOL {
+        extern "system" fn enum_windows_callback(
+            hwnd: HWND,
+            lparam: LPARAM,
+        ) -> ::windows::core::BOOL {
             unsafe {
                 let data = &mut *(lparam.0 as *mut EnumWindowsData);
                 data.windows_checked += 1;
@@ -128,7 +131,10 @@ mod internal {
                     let window_title = String::from_utf16_lossy(&text[..len as usize]);
 
                     // Log the window title we're checking
-                    eprintln!("Checking window #{}: '{}'", data.windows_checked, window_title);
+                    eprintln!(
+                        "Checking window #{}: '{}'",
+                        data.windows_checked, window_title
+                    );
 
                     // Check if this window title contains our target name
                     if window_title.contains(&data.target_name) {
@@ -175,13 +181,18 @@ mod internal {
                 // Give a small delay to allow the window to gain focus
                 std::thread::sleep(std::time::Duration::from_millis(100));
 
-                eprintln!("Successfully set focus to window with name '{}'", window_name);
+                eprintln!(
+                    "Successfully set focus to window with name '{}'",
+                    window_name
+                );
                 return Ok(());
             }
         }
 
-        eprintln!("No matching window found for '{}' after checking {} windows", 
-                 window_name, data.windows_checked);
+        eprintln!(
+            "No matching window found for '{}' after checking {} windows",
+            window_name, data.windows_checked
+        );
 
         Err(io::Error::new(
             io::ErrorKind::NotFound,
