@@ -1,0 +1,17 @@
+@import "primeicons/primeicons.css";
+
+:root {
+  --p-primary-color: #f97316;
+  --p-primary-color-text: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--p-surface-950, #09090b);
+  color: var(--p-surface-100, #f4f4f5);
+}
