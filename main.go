@@ -1,0 +1,96 @@
+package main
+
+import (
+	"embed"
+	"flag"
+	"log"
+
+	"fixmytex/internal/app"
+	"fixmytex/internal/features/shortcut"
+
+	"github.com/wailsapp/wails/v3/pkg/application"
+)
+
+//go:embed all:frontend/dist
+var assets embed.FS
+
+func init() {
+	application.RegisterEvent[string]("shortcut:triggered")
+	application.RegisterEvent[string]("settings:changed")
+}
+
+func main() {
+	simulateShortcut := flag.Bool("simulate-shortcut", false, "Fire a synthetic shortcut event on startup (Linux dev mode)")
+	flag.Parse()
+
+	wailsApp := application.New(application.Options{
+		Name:        "FixMyTex",
+		Description: "AI-powered text enhancement",
+		Assets: application.AssetOptions{
+			Handler: application.AssetFileServerFS(assets),
+		},
+		Mac: application.MacOptions{
+			ApplicationShouldTerminateAfterLastWindowClosed: true,
+		},
+	})
+
+	services, err := app.InitializeApp(wailsApp)
+	if err != nil {
+		log.Fatalf("failed to initialise app: %v", err)
+	}
+
+	// Register backend services so the frontend can call their methods.
+	wailsApp.RegisterService(application.NewService(services.Settings))
+	wailsApp.RegisterService(application.NewService(services.Welcome))
+	wailsApp.RegisterService(application.NewService(services.Clipboard))
+
+	// Dev-tools shortcut simulation service.
+	sim := &simulateService{shortcut: services.Shortcut}
+	wailsApp.RegisterService(application.NewService(sim))
+
+	// Start the system tray.
+	services.Tray.Setup()
+
+	// Register the global shortcut (no-op on Linux).
+	if err := services.Shortcut.Register(); err != nil {
+		log.Printf("warn: shortcut registration failed: %v", err)
+	}
+
+	// Forward shortcut events to the frontend.
+	go func() {
+		ch := services.Shortcut.Triggered()
+		for event := range ch {
+			wailsApp.Event.Emit("shortcut:triggered", event.Source)
+		}
+	}()
+
+	// Simulate shortcut on startup when --simulate-shortcut flag is set.
+	if *simulateShortcut {
+		if s, ok := services.Shortcut.(interface{ Simulate() }); ok {
+			go s.Simulate()
+		}
+	}
+
+	wailsApp.Window.NewWithOptions(application.WebviewWindowOptions{
+		Title:            "FixMyTex",
+		Width:            1280,
+		Height:           800,
+		BackgroundColour: application.NewRGB(27, 38, 54),
+		URL:              "/",
+	})
+
+	if err := wailsApp.Run(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+// simulateService exposes SimulateShortcut to the frontend (used by dev-tools button).
+type simulateService struct {
+	shortcut shortcut.Service
+}
+
+func (s *simulateService) SimulateShortcut() {
+	if sim, ok := s.shortcut.(interface{ Simulate() }); ok {
+		sim.Simulate()
+	}
+}
