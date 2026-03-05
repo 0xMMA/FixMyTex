@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -39,10 +41,18 @@ jobs:
         working-directory: frontend
         run: npm run build
 
+      - name: Run frontend tests
+        working-directory: frontend
+        run: npm test
+
+      - name: Run Go tests
+        run: go test ./internal/...
+
       - name: Build Linux binary
         run: |
           export PATH=$PATH:$HOME/go/bin
-          CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -tags production -trimpath -ldflags="-w -s" -o bin/FixMyTex .
+          VERSION=$(git describe --tags --always --dirty 2>/dev/null || echo "dev")
+          CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -tags production -trimpath -ldflags="-w -s -X main.AppVersion=${VERSION}" -o bin/FixMyTex .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

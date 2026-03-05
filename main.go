@@ -8,9 +8,13 @@ import (
 	"fixmytex/internal/app"
 	"fixmytex/internal/features/enhance"
 	"fixmytex/internal/features/shortcut"
+	"fixmytex/internal/features/updater"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
+
+// AppVersion is injected at build time via -ldflags "-X main.AppVersion=x.y.z".
+var AppVersion = "dev"
 
 //go:embed all:frontend/dist
 var assets embed.FS
@@ -45,6 +49,9 @@ func main() {
 	wailsApp.RegisterService(application.NewService(services.Welcome))
 	wailsApp.RegisterService(application.NewService(services.Clipboard))
 	wailsApp.RegisterService(application.NewService(enhance.NewService(services.Settings)))
+
+	// Updater service — AppVersion injected at build time via ldflags.
+	wailsApp.RegisterService(application.NewService(updater.NewService(AppVersion)))
 
 	// Dev-tools shortcut simulation service.
 	sim := &simulateService{shortcut: services.Shortcut}

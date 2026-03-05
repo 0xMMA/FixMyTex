@@ -4,7 +4,7 @@ import { ComponentFixture } from '@angular/core/testing';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { SettingsComponent } from './settings.component';
 import { WailsService } from '../../core/wails.service';
-import { createWailsMock, defaultSettings, defaultKeyStatus } from '../../../testing/wails-mock';
+import { createWailsMock, defaultSettings, defaultKeyStatus, defaultUpdateInfo } from '../../../testing/wails-mock';
 
 // PrimeNG TabList uses ResizeObserver which is not available in jsdom
 (globalThis as Record<string, unknown>)['ResizeObserver'] = class {
@@ -150,5 +150,42 @@ describe('SettingsComponent', () => {
 
     expect(wailsMock.deleteKey).toHaveBeenCalledWith('openai');
     expect(pk.status?.is_set).toBe(false);
+  });
+
+  describe('About tab', () => {
+    it('displays app version after init', async () => {
+      wailsMock.getVersion.mockResolvedValue('3.6.0');
+      await component.ngOnInit();
+      fixture.detectChanges();
+      expect(component.appVersion).toBe('3.6.0');
+    });
+
+    it('checkForUpdate() sets updateInfo when update is available', async () => {
+      wailsMock.checkForUpdate.mockResolvedValue({
+        ...defaultUpdateInfo,
+        is_available: true,
+        latest_version: '3.7.0',
+        notes: 'Bug fixes',
+      });
+      await component.checkForUpdate();
+      expect(component.updateInfo?.is_available).toBe(true);
+      expect(component.updateInfo?.latest_version).toBe('3.7.0');
+      expect(component.updateError).toBe('');
+    });
+
+    it('checkForUpdate() sets updateError when check throws', async () => {
+      wailsMock.checkForUpdate.mockRejectedValue(new Error('network error'));
+      await component.checkForUpdate();
+      expect(component.updateError).toContain('network error');
+      expect(component.updateInfo).toBeNull();
+    });
+
+    it('installUpdate() sets updateSuccess on success', async () => {
+      wailsMock.downloadAndInstall.mockResolvedValue(undefined);
+      component.updateInfo = { ...defaultUpdateInfo, is_available: true, latest_version: '3.7.0' };
+      await component.installUpdate();
+      expect(component.updateSuccess).toBe(true);
+      expect(wailsMock.downloadAndInstall).toHaveBeenCalled();
+    });
   });
 });

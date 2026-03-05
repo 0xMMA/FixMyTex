@@ -9,7 +9,7 @@ import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primeng/tabs';
 import { MessageModule } from 'primeng/message';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
-import { WailsService, Settings as AppSettings, KeyStatus } from '../../core/wails.service';
+import { WailsService, Settings as AppSettings, KeyStatus, UpdateInfo } from '../../core/wails.service';
 
 interface ProviderKey {
   id: string;
@@ -152,8 +152,56 @@ interface ProviderKey {
 
               <!-- About tab -->
               <p-tabpanel value="about">
-                <p>FixMyTex v2 — Wails v3 + Angular v21</p>
+                <p>FixMyTex — Wails v3 + Angular v21</p>
                 <p>Built with Go, Angular, and PrimeNG.</p>
+                <p data-testid="app-version">Version: {{ appVersion }}</p>
+
+                <div class="mt-3">
+                  <p-button
+                    data-testid="check-update-btn"
+                    label="Check for Updates"
+                    icon="pi pi-refresh"
+                    severity="secondary"
+                    [loading]="updateChecking"
+                    (onClick)="checkForUpdate()"
+                  />
+                </div>
+
+                @if (updateInfo?.is_available) {
+                  <div class="mt-3">
+                    <p-message
+                      data-testid="update-available-msg"
+                      severity="info"
+                      [text]="'Update available: v' + updateInfo!.latest_version + (updateInfo!.notes ? ' — ' + updateInfo!.notes : '')"
+                      styleClass="mb-2"
+                    />
+                    <p-button
+                      data-testid="install-update-btn"
+                      label="Download and Install"
+                      icon="pi pi-download"
+                      [loading]="updateInstalling"
+                      (onClick)="installUpdate()"
+                    />
+                  </div>
+                }
+
+                @if (updateSuccess) {
+                  <p-message
+                    data-testid="update-success-msg"
+                    severity="success"
+                    text="Update installed! Restart the app to use the new version."
+                    styleClass="mt-3"
+                  />
+                }
+
+                @if (updateError) {
+                  <p-message
+                    data-testid="update-error-msg"
+                    severity="error"
+                    [text]="updateError"
+                    styleClass="mt-3"
+                  />
+                }
               </p-tabpanel>
             </p-tabpanels>
           </p-tabs>
@@ -234,6 +282,13 @@ export class SettingsComponent implements OnInit {
   saved = false;
   keyError = '';
 
+  appVersion = '';
+  updateInfo: UpdateInfo | null = null;
+  updateChecking = false;
+  updateInstalling = false;
+  updateError = '';
+  updateSuccess = false;
+
   readonly providers = [
     { label: 'OpenAI', value: 'openai' },
     { label: 'Anthropic Claude', value: 'claude' },
@@ -258,6 +313,7 @@ export class SettingsComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     this.settings = await this.wails.loadSettings();
     await this.refreshKeyStatuses();
+    this.appVersion = await this.wails.getVersion();
     this.cdr.detectChanges();
   }
 
@@ -314,6 +370,39 @@ export class SettingsComponent implements OnInit {
       this.keyError = `Failed to clear key: ${e instanceof Error ? e.message : String(e)}`;
     } finally {
       pk.saving = false;
+    }
+  }
+
+  async checkForUpdate(): Promise<void> {
+    this.updateChecking = true;
+    this.updateError = '';
+    this.updateInfo = null;
+    try {
+      this.updateInfo = await this.wails.checkForUpdate();
+      if (!this.updateInfo.is_available) {
+        this.updateError = 'You are already on the latest version.';
+      }
+    } catch (e) {
+      this.updateError = `Update check failed: ${e instanceof Error ? e.message : String(e)}`;
+    } finally {
+      this.updateChecking = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  async installUpdate(): Promise<void> {
+    this.updateInstalling = true;
+    this.updateError = '';
+    this.updateSuccess = false;
+    try {
+      await this.wails.downloadAndInstall();
+      this.updateSuccess = true;
+      this.updateInfo = null;
+    } catch (e) {
+      this.updateError = `Install failed: ${e instanceof Error ? e.message : String(e)}`;
+    } finally {
+      this.updateInstalling = false;
+      this.cdr.detectChanges();
     }
   }
 

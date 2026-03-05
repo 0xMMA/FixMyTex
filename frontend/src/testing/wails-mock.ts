@@ -1,6 +1,6 @@
 import { Subject } from 'rxjs';
 import { vi } from 'vitest';
-import type { Settings, KeyStatus } from '../app/core/wails.service';
+import type { Settings, KeyStatus, UpdateInfo } from '../app/core/wails.service';
 
 export const defaultSettings: Settings = {
   active_provider: 'openai',
@@ -15,6 +15,14 @@ export const defaultSettings: Settings = {
 };
 
 export const defaultKeyStatus: KeyStatus = { is_set: false, source: 'none' };
+
+export const defaultUpdateInfo: UpdateInfo = {
+  is_available: false,
+  latest_version: '',
+  current_version: '3.6.0',
+  release_url: '',
+  notes: '',
+};
 
 export function createWailsMock() {
   const shortcutTriggered$ = new Subject<string>();
@@ -40,6 +48,9 @@ export function createWailsMock() {
     setKey: vi.fn().mockResolvedValue(undefined),
     deleteKey: vi.fn().mockResolvedValue(undefined),
     resetSettings: vi.fn().mockResolvedValue(undefined),
+    getVersion: vi.fn().mockResolvedValue('3.6.0'),
+    checkForUpdate: vi.fn().mockResolvedValue({ ...defaultUpdateInfo }),
+    downloadAndInstall: vi.fn().mockResolvedValue(undefined),
     ngOnDestroy: vi.fn(),
   };
 }
