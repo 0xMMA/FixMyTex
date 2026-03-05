@@ -26,8 +26,10 @@ import { WailsService } from '../core/wails.service';
             </li>
             <li class="nav-item">
               <a routerLink="/enhance" routerLinkActive="active-route">
-                <i class="pi pi-pencil"></i>
-                <span>Advanced</span>
+                <svg class="nav-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" width="1rem" height="1rem">
+                  <polygon points="12,3 22,21 2,21"/>
+                </svg>
+                <span>Pyramidize</span>
               </a>
             </li>
             <li class="nav-item">
