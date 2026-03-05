@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"fixmytex/internal/app"
+	"fixmytex/internal/features/enhance"
 	"fixmytex/internal/features/shortcut"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
@@ -43,6 +44,7 @@ func main() {
 	wailsApp.RegisterService(application.NewService(services.Settings))
 	wailsApp.RegisterService(application.NewService(services.Welcome))
 	wailsApp.RegisterService(application.NewService(services.Clipboard))
+	wailsApp.RegisterService(application.NewService(enhance.NewService(services.Settings)))
 
 	// Dev-tools shortcut simulation service.
 	sim := &simulateService{shortcut: services.Shortcut}

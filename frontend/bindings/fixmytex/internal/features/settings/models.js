@@ -7,7 +7,48 @@
 import { Create as $Create } from "@wailsio/runtime";
 
 /**
- * Provider holds credentials for a single AI provider.
+ * KeyStatus describes whether a key is configured and where it comes from.
+ */
+export class KeyStatus {
+    /**
+     * Creates a new KeyStatus instance.
+     * @param {Partial<KeyStatus>} [$$source = {}] - The source object to create the KeyStatus.
+     */
+    constructor($$source = {}) {
+        if (!("is_set" in $$source)) {
+            /**
+             * @member
+             * @type {boolean}
+             */
+            this["is_set"] = false;
+        }
+        if (!("source" in $$source)) {
+            /**
+             * "env", "keyring", or "none"
+             * @member
+             * @type {string}
+             */
+            this["source"] = "";
+        }
+
+        Object.assign(this, $$source);
+    }
+
+    /**
+     * Creates a new KeyStatus instance from a string or object.
+     * @param {any} [$$source = {}]
+     * @returns {KeyStatus}
+     */
+    static createFrom($$source = {}) {
+        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
+        return new KeyStatus(/** @type {Partial<KeyStatus>} */($$parsedSource));
+    }
+}
+
+/**
+ * Provider holds non-secret configuration for AI providers.
+ * API keys are stored in the OS keyring, NOT here.
+ * OllamaURL and AWSRegion are non-secret and remain in settings.
  */
 export class Provider {
     /**
@@ -15,20 +56,6 @@ export class Provider {
      * @param {Partial<Provider>} [$$source = {}] - The source object to create the Provider.
      */
     constructor($$source = {}) {
-        if (!("openai_key" in $$source)) {
-            /**
-             * @member
-             * @type {string}
-             */
-            this["openai_key"] = "";
-        }
-        if (!("claude_key" in $$source)) {
-            /**
-             * @member
-             * @type {string}
-             */
-            this["claude_key"] = "";
-        }
         if (!("ollama_url" in $$source)) {
             /**
              * @member
@@ -42,20 +69,6 @@ export class Provider {
              * @type {string}
              */
             this["aws_region"] = "";
-        }
-        if (!("aws_key_id" in $$source)) {
-            /**
-             * @member
-             * @type {string}
-             */
-            this["aws_key_id"] = "";
-        }
-        if (!("aws_secret" in $$source)) {
-            /**
-             * @member
-             * @type {string}
-             */
-            this["aws_secret"] = "";
         }
 
         Object.assign(this, $$source);

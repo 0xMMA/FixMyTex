@@ -1,17 +1,43 @@
 @import "primeicons/primeicons.css";
-
-:root {
-  --p-primary-color: #f97316;
-  --p-primary-color-text: #ffffff;
-}
+@import "primeflex/primeflex.css";
 
 * {
   box-sizing: border-box;
 }
 
+// PrimeNG Aura defines --p-card-background in :root but does NOT override it in .app-dark.
+// We fill in those gaps here so dark mode works correctly across all components.
+:root {
+  --p-surface-ground: var(--p-surface-50);   // page bg in light mode
+  --p-card-background: var(--p-surface-0);   // card bg in light mode
+}
+// PrimeNG Aura does not propagate all dark-mode CSS vars correctly.
+// We override the gaps here so components render dark in .app-dark mode.
+.app-dark {
+  // Page & card backgrounds
+  --p-surface-ground: var(--p-surface-950);
+  --p-card-background: var(--p-surface-ground);
+
+  // Tabs (tablist bar + tabpanel content area) — match page background
+  .p-tablist,
+  .p-tabpanels {
+    background: var(--p-surface-ground);
+  }
+
+  // Form fields: input, textarea, select
+  .p-textarea,
+  .p-inputtext,
+  .p-select,
+  .p-select-label {
+    background: var(--p-surface-950);
+    color: var(--p-text-color);
+    border-color: var(--p-surface-700);
+  }
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: var(--p-surface-950, #09090b);
-  color: var(--p-surface-100, #f4f4f5);
+  background: var(--p-surface-ground);
+  color: var(--p-text-color);
 }

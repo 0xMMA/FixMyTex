@@ -1,13 +1,17 @@
 package settings
 
-// Provider holds credentials for a single AI provider.
+// Provider holds non-secret configuration for AI providers.
+// API keys are stored in the OS keyring, NOT here.
+// OllamaURL and AWSRegion are non-secret and remain in settings.
 type Provider struct {
-	OpenAIKey   string `json:"openai_key"`
-	ClaudeKey   string `json:"claude_key"`
-	OllamaURL   string `json:"ollama_url"`
-	AWSRegion   string `json:"aws_region"`
-	AWSKeyID    string `json:"aws_key_id"`
-	AWSSecret   string `json:"aws_secret"`
+	OllamaURL string `json:"ollama_url"`
+	AWSRegion string `json:"aws_region"`
+}
+
+// KeyStatus describes whether a key is configured and where it comes from.
+type KeyStatus struct {
+	IsSet  bool   `json:"is_set"`
+	Source string `json:"source"` // "env", "keyring", or "none"
 }
 
 // Settings is the top-level application settings structure persisted to disk.
@@ -25,6 +29,6 @@ func Default() Settings {
 	return Settings{
 		ActiveProvider:  "openai",
 		ShortcutKey:     "ctrl+g",
-		ThemePreference: "system",
+		ThemePreference: "dark",
 	}
 }

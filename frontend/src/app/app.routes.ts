@@ -14,6 +14,11 @@ export const routes: Routes = [
       import('./layout/shell.component').then(m => m.ShellComponent),
     children: [
       {
+        path: 'fix',
+        loadComponent: () =>
+          import('./features/fix/fix.component').then(m => m.FixComponent),
+      },
+      {
         path: 'enhance',
         loadComponent: () =>
           import('./features/text-enhancement/text-enhancement.component').then(m => m.TextEnhancementComponent),
@@ -28,7 +33,7 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/dev-tools/dev-tools.component').then(m => m.DevToolsComponent),
       },
-      { path: '', redirectTo: 'enhance', pathMatch: 'full' },
+      { path: '', redirectTo: 'fix', pathMatch: 'full' },
     ],
   },
   { path: '**', redirectTo: '' },

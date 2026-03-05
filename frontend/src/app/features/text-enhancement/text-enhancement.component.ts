@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
@@ -14,47 +14,29 @@ import { TextEnhancementService } from './text-enhancement.service';
   standalone: true,
   imports: [CommonModule, FormsModule, ButtonModule, TextareaModule, ProgressSpinnerModule, MessageModule],
   template: `
-    <div class="enhance-container">
-      <h2>Text Enhancement</h2>
-
-      <div class="panels">
-        <div class="panel">
-          <label>Input</label>
-          <textarea pTextarea [(ngModel)]="inputText" rows="12" placeholder="Paste or type text to enhance…"></textarea>
-        </div>
-        <div class="panel">
-          <label>Output</label>
-          <textarea pTextarea [(ngModel)]="outputText" rows="12" placeholder="Enhanced text will appear here…" readonly></textarea>
-        </div>
+    <div class="enhance-page">
+      <div class="enhance-textareas">
+        <textarea data-testid="input-textarea" pTextarea [(ngModel)]="inputText" rows="10" placeholder="Paste or type text to enhance…" class="enhance-textarea"></textarea>
+        <textarea data-testid="output-textarea" pTextarea [(ngModel)]="outputText" rows="10" placeholder="Enhanced text will appear here…" readonly class="enhance-textarea"></textarea>
       </div>
 
-      @if (error) {
-        <p-message severity="error" [text]="error" />
-      }
-
-      <div class="actions">
-        <p-button label="Enhance" icon="pi pi-sparkles" (onClick)="enhance()" [loading]="loading" />
+      <div class="enhance-actions">
+        <p-button data-testid="enhance-btn" label="Enhance" icon="pi pi-sparkles" (onClick)="enhance()" [loading]="loading" />
         <p-button label="Copy Result" icon="pi pi-copy" severity="secondary" (onClick)="copyResult()" [disabled]="!outputText" />
         <p-button label="Write to Clipboard" icon="pi pi-send" severity="secondary" (onClick)="writeToClipboard()" [disabled]="!outputText" />
       </div>
+
+      @if (error) {
+        <p-message data-testid="error-message" severity="error" [text]="error" />
+      }
     </div>
   `,
   styles: [`
-    .enhance-container {
-      padding: 2rem;
-      color: var(--p-surface-100, #f4f4f5);
-    }
-    h2 { margin: 0 0 1.5rem; color: var(--p-primary-color, #f97316); }
-    .panels {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-    .panel { display: flex; flex-direction: column; gap: 0.4rem; }
-    label { font-size: 0.875rem; color: var(--p-surface-300, #d4d4d8); }
-    textarea { width: 100%; resize: vertical; }
-    .actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.5rem; }
+    .enhance-page { display: flex; flex-direction: column; gap: 1rem; padding: 2.75rem; height: 100%; box-sizing: border-box; }
+    .hint-text { margin: 0; font-size: 0.875rem; color: var(--p-text-muted-color); }
+    .enhance-textareas { display: flex; gap: 2.75rem; flex: 1; }
+    .enhance-textarea { flex: 1; resize: none; min-height: 200px; }
+    .enhance-actions { display: flex; gap: 0.5rem; }
   `],
 })
 export class TextEnhancementComponent implements OnInit, OnDestroy {
@@ -68,12 +50,14 @@ export class TextEnhancementComponent implements OnInit, OnDestroy {
   constructor(
     private readonly wails: WailsService,
     private readonly svc: TextEnhancementService,
+    private readonly cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
     // Listen for shortcut events from backend — auto-populate from clipboard.
     this.sub = this.wails.shortcutTriggered$.subscribe(async () => {
       this.inputText = await this.wails.readClipboard();
+      this.cdr.detectChanges();
       await this.enhance();
     });
   }
@@ -88,6 +72,7 @@ export class TextEnhancementComponent implements OnInit, OnDestroy {
       this.error = e instanceof Error ? e.message : String(e);
     } finally {
       this.loading = false;
+      this.cdr.detectChanges();
     }
   }
 
