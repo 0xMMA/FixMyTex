@@ -8,9 +8,12 @@ import * as WelcomeService from '../../../bindings/fixmytex/internal/features/we
 import * as ClipboardService from '../../../bindings/fixmytex/internal/features/clipboard/service.js';
 import * as SimulateService from '../../../bindings/fixmytex/simulateservice.js';
 import * as EnhanceService from '../../../bindings/fixmytex/internal/features/enhance/service.js';
+import * as UpdaterService from '../../../bindings/fixmytex/internal/features/updater/service.js';
 import { Settings, KeyStatus } from '../../../bindings/fixmytex/internal/features/settings/models.js';
+import { UpdateInfo } from '../../../bindings/fixmytex/internal/features/updater/models.js';
 
-export type { Settings, KeyStatus };
+export type { Settings, KeyStatus, UpdateInfo };
+
 
 // Default settings used when the Wails backend is unavailable (browser dev / Playwright mode).
 const BROWSER_MODE_DEFAULTS: Settings = {
@@ -126,6 +129,22 @@ export class WailsService implements OnDestroy {
   enhance(text: string): Promise<string> {
     // API call made from Go — avoids WebKit WebView network-policy issues on Linux.
     return EnhanceService.Enhance(text);
+  }
+
+  getVersion(): Promise<string> {
+    try {
+      return UpdaterService.GetVersion().catch(() => 'dev');
+    } catch {
+      return Promise.resolve('dev');
+    }
+  }
+
+  checkForUpdate(): Promise<UpdateInfo> {
+    return UpdaterService.CheckForUpdate();
+  }
+
+  downloadAndInstall(): Promise<void> {
+    return UpdaterService.DownloadAndInstall();
   }
 
   simulateShortcut(): Promise<void> {
