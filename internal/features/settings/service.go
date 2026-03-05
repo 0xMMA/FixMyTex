@@ -4,7 +4,19 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+
+	keyring "github.com/zalando/go-keyring"
 )
+
+const appName = "FixMyTex"
+
+// envVars maps provider ID → environment variable name for the API key.
+// Empty string means no standard env var for that provider.
+var envVars = map[string]string{
+	"openai":  "OPENAI_API_KEY",
+	"claude":  "ANTHROPIC_API_KEY",
+	"bedrock": "AWS_SECRET_ACCESS_KEY",
+}
 
 // Service handles loading and saving application settings.
 type Service struct {
@@ -18,7 +30,7 @@ func NewService() (*Service, error) {
 	if err != nil {
 		return nil, err
 	}
-	dir := filepath.Join(configDir, "FixMyTex")
+	dir := filepath.Join(configDir, appName)
 	if err := os.MkdirAll(dir, 0700); err != nil {
 		return nil, err
 	}
@@ -53,4 +65,51 @@ func (s *Service) Save(updated Settings) error {
 		return err
 	}
 	return os.WriteFile(s.filePath, data, 0600)
+}
+
+// GetKeyStatus returns whether an API key is configured for the given provider,
+// and where it comes from ("env", "keyring", or "none").
+func (s *Service) GetKeyStatus(provider string) KeyStatus {
+	if envVar, ok := envVars[provider]; ok && envVar != "" {
+		if os.Getenv(envVar) != "" {
+			return KeyStatus{IsSet: true, Source: "env"}
+		}
+	}
+	_, err := keyring.Get(appName, provider)
+	if err == nil {
+		return KeyStatus{IsSet: true, Source: "keyring"}
+	}
+	return KeyStatus{IsSet: false, Source: "none"}
+}
+
+// GetKey returns the API key for the given provider.
+// Priority: environment variable → OS keyring.
+// Returns empty string if not configured.
+func (s *Service) GetKey(provider string) string {
+	if envVar, ok := envVars[provider]; ok && envVar != "" {
+		if val := os.Getenv(envVar); val != "" {
+			return val
+		}
+	}
+	key, err := keyring.Get(appName, provider)
+	if err == nil {
+		return key
+	}
+	return ""
+}
+
+// SetKey stores an API key for the given provider in the OS keyring.
+// Returns an error if the keyring is unavailable on this platform.
+func (s *Service) SetKey(provider, key string) error {
+	return keyring.Set(appName, provider, key)
+}
+
+// DeleteKey removes an API key for the given provider from the OS keyring.
+func (s *Service) DeleteKey(provider string) error {
+	return keyring.Delete(appName, provider)
+}
+
+// ResetToDefaults resets settings to their default values and saves to disk.
+func (s *Service) ResetToDefaults() error {
+	return s.Save(Default())
 }

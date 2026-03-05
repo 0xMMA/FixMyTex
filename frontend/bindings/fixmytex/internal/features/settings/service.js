@@ -16,6 +16,15 @@ import { Call as $Call, CancellablePromise as $CancellablePromise, Create as $Cr
 import * as $models from "./models.js";
 
 /**
+ * DeleteKey removes an API key for the given provider from the OS keyring.
+ * @param {string} provider
+ * @returns {$CancellablePromise<void>}
+ */
+export function DeleteKey(provider) {
+    return $Call.ByID(3705027350, provider);
+}
+
+/**
  * Get returns a copy of the current settings.
  * @returns {$CancellablePromise<$models.Settings>}
  */
@@ -23,6 +32,37 @@ export function Get() {
     return $Call.ByID(1738358976).then(/** @type {($result: any) => any} */(($result) => {
         return $$createType0($result);
     }));
+}
+
+/**
+ * GetKey returns the API key for the given provider.
+ * Priority: environment variable → OS keyring.
+ * Returns empty string if not configured.
+ * @param {string} provider
+ * @returns {$CancellablePromise<string>}
+ */
+export function GetKey(provider) {
+    return $Call.ByID(1892476223, provider);
+}
+
+/**
+ * GetKeyStatus returns whether an API key is configured for the given provider,
+ * and where it comes from ("env", "keyring", or "none").
+ * @param {string} provider
+ * @returns {$CancellablePromise<$models.KeyStatus>}
+ */
+export function GetKeyStatus(provider) {
+    return $Call.ByID(3648269193, provider).then(/** @type {($result: any) => any} */(($result) => {
+        return $$createType1($result);
+    }));
+}
+
+/**
+ * ResetToDefaults resets settings to their default values and saves to disk.
+ * @returns {$CancellablePromise<void>}
+ */
+export function ResetToDefaults() {
+    return $Call.ByID(3443119584);
 }
 
 /**
@@ -34,5 +74,17 @@ export function Save(updated) {
     return $Call.ByID(3456788065, updated);
 }
 
+/**
+ * SetKey stores an API key for the given provider in the OS keyring.
+ * Returns an error if the keyring is unavailable on this platform.
+ * @param {string} provider
+ * @param {string} key
+ * @returns {$CancellablePromise<void>}
+ */
+export function SetKey(provider, key) {
+    return $Call.ByID(1846918715, provider, key);
+}
+
 // Private type creation functions
 const $$createType0 = $models.Settings.createFrom;
+const $$createType1 = $models.KeyStatus.createFrom;

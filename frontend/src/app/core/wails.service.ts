@@ -7,9 +7,20 @@ import * as SettingsService from '../../../bindings/fixmytex/internal/features/s
 import * as WelcomeService from '../../../bindings/fixmytex/internal/features/welcome/service.js';
 import * as ClipboardService from '../../../bindings/fixmytex/internal/features/clipboard/service.js';
 import * as SimulateService from '../../../bindings/fixmytex/simulateservice.js';
-import { Settings } from '../../../bindings/fixmytex/internal/features/settings/models.js';
+import * as EnhanceService from '../../../bindings/fixmytex/internal/features/enhance/service.js';
+import { Settings, KeyStatus } from '../../../bindings/fixmytex/internal/features/settings/models.js';
 
-export type { Settings };
+export type { Settings, KeyStatus };
+
+// Default settings used when the Wails backend is unavailable (browser dev / Playwright mode).
+const BROWSER_MODE_DEFAULTS: Settings = {
+  active_provider: 'claude',
+  providers: { ollama_url: '', aws_region: '' },
+  shortcut_key: 'ctrl+g',
+  start_on_boot: false,
+  theme_preference: 'dark',
+  completed_setup: false,
+};
 
 @Injectable({ providedIn: 'root' })
 export class WailsService implements OnDestroy {
@@ -38,7 +49,11 @@ export class WailsService implements OnDestroy {
   }
 
   loadSettings(): Promise<Settings> {
-    return SettingsService.Get();
+    try {
+      return SettingsService.Get().catch(() => ({ ...BROWSER_MODE_DEFAULTS }));
+    } catch {
+      return Promise.resolve({ ...BROWSER_MODE_DEFAULTS });
+    }
   }
 
   saveSettings(s: Settings): Promise<void> {
@@ -46,7 +61,11 @@ export class WailsService implements OnDestroy {
   }
 
   isFirstRun(): Promise<boolean> {
-    return WelcomeService.IsFirstRun();
+    try {
+      return WelcomeService.IsFirstRun().catch(() => false);
+    } catch {
+      return Promise.resolve(false);
+    }
   }
 
   completeSetup(): Promise<void> {
@@ -59,6 +78,54 @@ export class WailsService implements OnDestroy {
 
   writeClipboard(text: string): Promise<void> {
     return ClipboardService.Write(text);
+  }
+
+  getKeyStatus(provider: string): Promise<KeyStatus> {
+    try {
+      return SettingsService.GetKeyStatus(provider).catch(() => ({ is_set: false, source: 'none' }));
+    } catch {
+      return Promise.resolve({ is_set: false, source: 'none' });
+    }
+  }
+
+  getKey(provider: string): Promise<string> {
+    try {
+      // Do NOT swallow async errors here — let Wails RPC failures surface as real errors
+      // so "key not configured" is not confused with "key retrieval failed".
+      // Only the synchronous catch handles browser mode (Wails runtime unavailable).
+      return SettingsService.GetKey(provider);
+    } catch {
+      return Promise.resolve(''); // Browser/Playwright mode: Wails runtime not initialised
+    }
+  }
+
+  setKey(provider: string, key: string): Promise<void> {
+    try {
+      return SettingsService.SetKey(provider, key).catch(() => {});
+    } catch {
+      return Promise.resolve();
+    }
+  }
+
+  deleteKey(provider: string): Promise<void> {
+    try {
+      return SettingsService.DeleteKey(provider).catch(() => {});
+    } catch {
+      return Promise.resolve();
+    }
+  }
+
+  resetSettings(): Promise<void> {
+    try {
+      return SettingsService.ResetToDefaults().catch(() => {});
+    } catch {
+      return Promise.resolve();
+    }
+  }
+
+  enhance(text: string): Promise<string> {
+    // API call made from Go — avoids WebKit WebView network-policy issues on Linux.
+    return EnhanceService.Enhance(text);
   }
 
   simulateShortcut(): Promise<void> {

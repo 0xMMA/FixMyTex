@@ -5,74 +5,79 @@ import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
-import { Stepper, StepItem, Step, StepPanel } from 'primeng/stepper';
-import { WailsService, Settings as AppSettings } from '../../core/wails.service';
+import { WailsService } from '../../core/wails.service';
 
 @Component({
   selector: 'app-welcome-wizard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonModule, InputTextModule, SelectModule, Stepper, StepItem, Step, StepPanel],
+  imports: [CommonModule, FormsModule, ButtonModule, InputTextModule, SelectModule],
   template: `
     <div class="wizard-wrapper">
       <div class="wizard-card">
         <h1>Welcome to <span class="brand">FixMyTex</span></h1>
         <p class="subtitle">Let's get you set up in a few quick steps.</p>
 
-        <p-stepper [(value)]="step" [linear]="true">
-          <!-- Step 1: Welcome -->
-          <p-step-item [value]="1">
-            <p-step>Welcome</p-step>
-            <p-step-panel>
-              <p>FixMyTex uses AI to fix grammar, spelling, and improve your writing — triggered by a global keyboard shortcut.</p>
-              <div class="step-footer">
-                <p-button label="Get Started" icon="pi pi-arrow-right" iconPos="right" (onClick)="step = 2" />
-              </div>
-            </p-step-panel>
-          </p-step-item>
+        <!-- Step indicators -->
+        <div class="wizard-steps">
+          @for (s of stepDefs; track s.value) {
+            <div class="wizard-step" [class.active]="step === s.value" [class.done]="step > s.value">
+              <span class="step-circle">{{ step > s.value ? '✓' : s.value }}</span>
+              <span class="step-label">{{ s.label }}</span>
+            </div>
+            @if (!$last) {
+              <div class="step-line" [class.done]="step > s.value"></div>
+            }
+          }
+        </div>
 
-          <!-- Step 2: Choose provider -->
-          <p-step-item [value]="2">
-            <p-step>AI Provider</p-step>
-            <p-step-panel>
-              <p>Choose which AI provider to use for text enhancement:</p>
-              <p-select
-                [(ngModel)]="selectedProvider"
-                [options]="providers"
-                optionLabel="label"
-                optionValue="value"
-                placeholder="Select a provider"
-              />
-              <div class="step-footer">
-                <p-button label="Back" severity="secondary" (onClick)="step = 1" />
-                <p-button label="Next" icon="pi pi-arrow-right" iconPos="right" (onClick)="step = 3" [disabled]="!selectedProvider" />
+        <!-- Step content -->
+        <div class="wizard-content">
+          @switch (step) {
+            @case (1) {
+              <div data-testid="step-1-content">
+                <p>FixMyTex uses AI to fix grammar, spelling, and improve your writing — triggered by a global keyboard shortcut.</p>
+                <div class="step-footer">
+                  <p-button data-testid="wizard-next" label="Get Started" icon="pi pi-arrow-right" iconPos="right" (onClick)="step = 2" />
+                </div>
               </div>
-            </p-step-panel>
-          </p-step-item>
-
-          <!-- Step 3: API Key -->
-          <p-step-item [value]="3">
-            <p-step>API Key</p-step>
-            <p-step-panel>
-              <p>Enter your API key for <strong>{{ providerLabel }}</strong>:</p>
-              <input pInputText [(ngModel)]="apiKey" type="password" [placeholder]="apiKeyPlaceholder" style="width: 100%" />
-              <div class="step-footer">
-                <p-button label="Back" severity="secondary" (onClick)="step = 2" />
-                <p-button label="Next" icon="pi pi-arrow-right" iconPos="right" (onClick)="step = 4" [disabled]="!apiKey && selectedProvider !== 'ollama'" />
+            }
+            @case (2) {
+              <div data-testid="step-2-content">
+                <p>Choose which AI provider to use for text enhancement:</p>
+                <p-select
+                  [(ngModel)]="selectedProvider"
+                  [options]="providers"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Select a provider"
+                />
+                <div class="step-footer">
+                  <p-button data-testid="wizard-back" label="Back" severity="secondary" (onClick)="step = 1" />
+                  <p-button data-testid="wizard-next" label="Next" icon="pi pi-arrow-right" iconPos="right" (onClick)="step = 3" [disabled]="!selectedProvider" />
+                </div>
               </div>
-            </p-step-panel>
-          </p-step-item>
-
-          <!-- Step 4: Done -->
-          <p-step-item [value]="4">
-            <p-step>Done</p-step>
-            <p-step-panel>
-              <p>You're all set! Press <kbd>Ctrl+G</kbd> anywhere to enhance selected text.</p>
-              <div class="step-footer">
-                <p-button label="Start Using FixMyTex" icon="pi pi-check" (onClick)="finish()" [loading]="finishing" />
+            }
+            @case (3) {
+              <div data-testid="step-3-content">
+                <p>Enter your API key for <strong>{{ providerLabel }}</strong>:</p>
+                <input pInputText [(ngModel)]="apiKey" type="password" [placeholder]="apiKeyPlaceholder" style="width: 100%" />
+                <div class="step-footer">
+                  <p-button data-testid="wizard-back" label="Back" severity="secondary" (onClick)="step = 2" />
+                  <p-button data-testid="wizard-next" label="Next" icon="pi pi-arrow-right" iconPos="right" (onClick)="step = 4" [disabled]="!apiKey && selectedProvider !== 'ollama'" />
+                </div>
               </div>
-            </p-step-panel>
-          </p-step-item>
-        </p-stepper>
+            }
+            @case (4) {
+              <div data-testid="step-4-content">
+                <p>You're all set! Press <kbd>Ctrl+G</kbd> anywhere to enhance selected text.</p>
+                <div class="step-footer">
+                  <p-button data-testid="wizard-back" label="Back" severity="secondary" (onClick)="step = 3" />
+                  <p-button data-testid="wizard-finish" label="Start Using FixMyTex" icon="pi pi-check" (onClick)="finish()" [loading]="finishing" />
+                </div>
+              </div>
+            }
+          }
+        </div>
       </div>
     </div>
   `,
@@ -95,6 +100,67 @@ import { WailsService, Settings as AppSettings } from '../../core/wails.service'
     h1 { margin: 0 0 0.5rem; }
     .brand { color: var(--p-primary-color, #f97316); }
     .subtitle { color: var(--p-surface-400, #a1a1aa); margin-bottom: 2rem; }
+
+    .wizard-steps {
+      display: flex;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    .wizard-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .step-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border: 2px solid var(--p-surface-600, #52525b);
+      background: transparent;
+      color: var(--p-surface-400, #a1a1aa);
+      transition: all 0.2s;
+    }
+    .wizard-step.active .step-circle {
+      border-color: var(--p-primary-color, #f97316);
+      background: var(--p-primary-color, #f97316);
+      color: #fff;
+    }
+    .wizard-step.done .step-circle {
+      border-color: var(--p-primary-color, #f97316);
+      background: var(--p-primary-color, #f97316);
+      color: #fff;
+    }
+    .step-label {
+      font-size: 0.75rem;
+      color: var(--p-surface-400, #a1a1aa);
+      white-space: nowrap;
+    }
+    .wizard-step.active .step-label,
+    .wizard-step.done .step-label {
+      color: var(--p-primary-color, #f97316);
+    }
+    .step-line {
+      flex: 1;
+      height: 2px;
+      background: var(--p-surface-600, #52525b);
+      margin: 0 8px;
+      margin-bottom: 20px;
+      transition: background 0.2s;
+    }
+    .step-line.done {
+      background: var(--p-primary-color, #f97316);
+    }
+
+    .wizard-content {
+      min-height: 140px;
+    }
     .step-footer {
       display: flex;
       gap: 0.75rem;
@@ -114,6 +180,13 @@ export class WelcomeWizardComponent implements OnInit {
   selectedProvider = 'openai';
   apiKey = '';
   finishing = false;
+
+  readonly stepDefs = [
+    { value: 1, label: 'Welcome' },
+    { value: 2, label: 'AI Provider' },
+    { value: 3, label: 'API Key' },
+    { value: 4, label: 'Done' },
+  ];
 
   readonly providers = [
     { label: 'OpenAI (GPT)', value: 'openai' },
@@ -145,18 +218,13 @@ export class WelcomeWizardComponent implements OnInit {
   async finish(): Promise<void> {
     this.finishing = true;
     try {
-      const settings = (await this.wails.loadSettings()) as AppSettings ?? {
-        active_provider: this.selectedProvider,
-        providers: { openai_key: '', claude_key: '', ollama_url: '', aws_region: '', aws_key_id: '', aws_secret: '' },
-        shortcut_key: 'ctrl+g',
-        start_on_boot: false,
-        theme_preference: 'system',
-        completed_setup: false,
-      };
+      const settings = await this.wails.loadSettings();
       settings.active_provider = this.selectedProvider;
-      if (this.selectedProvider === 'openai') settings.providers.openai_key = this.apiKey;
-      if (this.selectedProvider === 'claude') settings.providers.claude_key = this.apiKey;
       await this.wails.saveSettings(settings);
+      // Store API key securely in the OS keyring (not in settings.json)
+      if (this.apiKey && this.selectedProvider !== 'ollama') {
+        await this.wails.setKey(this.selectedProvider, this.apiKey);
+      }
       await this.wails.completeSetup();
       await this.router.navigate(['/']);
     } finally {

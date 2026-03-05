@@ -1,33 +1,43 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { isDevMode } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { WailsService } from '../core/wails.service';
 
 @Component({
   selector: 'app-shell',
   standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  styleUrls: ['./shell.component.scss'],
   template: `
-    <div class="layout-wrapper layout-static">
+    <div class="layout-wrapper">
       <aside class="layout-sidebar">
-        <div class="sidebar-header">
-          <span class="app-title">FixMyTex</span>
+        <div class="layout-logo">
+          <i class="pi pi-sparkles logo-icon"></i>
+          <span class="logo-text">FixMyTex</span>
         </div>
-        <nav class="sidebar-menu">
+        <nav class="sidebar-nav">
           <ul>
-            <li>
-              <a routerLink="/enhance" routerLinkActive="active-route">
-                <i class="pi pi-pencil"></i>
-                <span>Enhance</span>
+            <li class="nav-item">
+              <a routerLink="/fix" routerLinkActive="active-route">
+                <i class="pi pi-sparkles"></i>
+                <span>Fix</span>
               </a>
             </li>
-            <li>
+            <li class="nav-item">
+              <a routerLink="/enhance" routerLinkActive="active-route">
+                <i class="pi pi-pencil"></i>
+                <span>Advanced</span>
+              </a>
+            </li>
+            <li class="nav-item">
               <a routerLink="/settings" routerLinkActive="active-route">
                 <i class="pi pi-cog"></i>
                 <span>Settings</span>
               </a>
             </li>
             @if (dev) {
-              <li>
+              <li class="nav-item">
                 <a routerLink="/dev-tools" routerLinkActive="active-route">
                   <i class="pi pi-wrench"></i>
                   <span>Dev Tools</span>
@@ -42,55 +52,27 @@ import { isDevMode } from '@angular/core';
       </div>
     </div>
   `,
-  styles: [`
-    .layout-wrapper {
-      display: flex;
-      height: 100vh;
-    }
-    .layout-sidebar {
-      width: 250px;
-      background: var(--p-surface-900, #18181b);
-      border-right: 1px solid var(--p-surface-700, #3f3f46);
-      display: flex;
-      flex-direction: column;
-    }
-    .sidebar-header {
-      padding: 1.5rem 1rem;
-      border-bottom: 1px solid var(--p-surface-700, #3f3f46);
-    }
-    .app-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--p-primary-color, #f97316);
-    }
-    .sidebar-menu ul {
-      list-style: none;
-      padding: 0.5rem 0;
-      margin: 0;
-    }
-    .sidebar-menu a {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.75rem 1rem;
-      color: var(--p-surface-200, #e4e4e7);
-      text-decoration: none;
-      border-radius: 6px;
-      margin: 2px 0.5rem;
-      transition: background 0.15s;
-    }
-    .sidebar-menu a:hover,
-    .sidebar-menu a.active-route {
-      background: var(--p-primary-color, #f97316);
-      color: #fff;
-    }
-    .layout-main {
-      flex: 1;
-      overflow: auto;
-      background: var(--p-surface-950, #09090b);
-    }
-  `],
 })
-export class ShellComponent {
+export class ShellComponent implements OnInit, OnDestroy {
   readonly dev = isDevMode();
+  private sub?: Subscription;
+
+  constructor(private readonly wails: WailsService) {}
+
+  ngOnInit(): void {
+    void this.applyTheme();
+    this.sub = this.wails.settingsChanged$.subscribe(() => void this.applyTheme());
+  }
+
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
+  }
+
+  private async applyTheme(): Promise<void> {
+    const settings = await this.wails.loadSettings();
+    // Dark-first app: only explicit 'light' disables dark mode.
+    // 'dark', 'system', or anything else → keep dark mode.
+    const dark = settings.theme_preference !== 'light';
+    document.body.classList.toggle('app-dark', dark);
+  }
 }
