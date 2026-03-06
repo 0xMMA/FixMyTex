@@ -83,6 +83,14 @@ export class WailsService implements OnDestroy {
     return ClipboardService.Write(text);
   }
 
+  pasteToForeground(): Promise<void> {
+    try {
+      return ClipboardService.PasteToForeground().catch(() => {});
+    } catch {
+      return Promise.resolve();
+    }
+  }
+
   getKeyStatus(provider: string): Promise<KeyStatus> {
     try {
       return SettingsService.GetKeyStatus(provider).catch(() => ({ is_set: false, source: 'none' }));
