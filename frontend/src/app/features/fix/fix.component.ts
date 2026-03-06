@@ -138,6 +138,7 @@ export class FixComponent implements OnInit, OnDestroy {
       _outputCache = this.outputText;
       if (this.autoCopy) {
         try { await this.wails.writeClipboard(this.outputText); } catch { /* ignore */ }
+        await this.wails.pasteToForeground();
         this.done = true;
       }
     } catch (e: unknown) {

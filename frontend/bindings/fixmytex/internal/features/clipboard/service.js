@@ -13,6 +13,17 @@
 import { Call as $Call, CancellablePromise as $CancellablePromise, Create as $Create } from "@wailsio/runtime";
 
 /**
+ * PasteToForeground sends a Ctrl+V keystroke to the currently focused window.
+ * Uses xdotool; intended to be called after writing fixed text to the clipboard
+ * so the result is pasted back into the source application.
+ * A 150 ms delay is applied first to let the clipboard write settle.
+ * @returns {$CancellablePromise<void>}
+ */
+export function PasteToForeground() {
+    return $Call.ByID(1965794476);
+}
+
+/**
  * Read returns the current clipboard text content.
  * @returns {$CancellablePromise<string>}
  */

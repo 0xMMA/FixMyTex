@@ -50,6 +50,8 @@ FixMyTex is a desktop app that fixes/enhances clipboard text via AI (OpenAI, Ant
 
 **Environment setup:** copy `.env.example` → `.env` and add `ANTHROPIC_API_KEY` for E2E tests. Linux needs `libgtk-3-dev libwebkit2gtk-4.1-dev` installed.
 
+**Releasing:** merge to `main`, then `git tag vX.Y.Z[-alpha|-beta|-rc] && git push origin <tag>` — see `.claude/docs/versioning.md`.
+
 ## Verification
 
 1. Never mark work complete without running the relevant test suite and seeing it pass.
@@ -65,3 +67,4 @@ FixMyTex is a desktop app that fixes/enhances clipboard text via AI (OpenAI, Ant
 
 - `.claude/docs/architecture.md` — service wiring, RPC bridge, platform differences
 - `.claude/docs/testing.md` — Vitest constraints, mock patterns, timer faking, DOM test patterns
+- `.claude/docs/versioning.md` — version format, branch→tag→release pipeline, CI workflows
