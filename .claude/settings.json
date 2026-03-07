@@ -1,0 +1,49 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status)",
+      "Bash(git status *)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git branch*)",
+      "Bash(git show*)",
+      "Bash(git stash list)",
+      "Bash(git tag*)",
+      "Bash(git add *)",
+
+      "Bash(go test*)",
+      "Bash(go build*)",
+      "Bash(go vet*)",
+
+      "Bash(bash -l -c \"go test*\")",
+      "Bash(bash -l -c \"go build*\")",
+      "Bash(bash -l -c \"go vet*\")",
+      "Bash(bash -l -c \"wire gen*\")",
+      "Bash(bash -l -c \"wails3*\")",
+
+      "Bash(wire gen*)",
+      "Bash(wails3*)",
+
+      "Bash(cd frontend && npm test*)",
+      "Bash(cd frontend && npm run build*)",
+      "Bash(npm test*)",
+      "Bash(npm run build*)",
+
+      "Bash(gh pr list*)",
+      "Bash(gh pr view*)",
+      "Bash(gh pr create*)",
+      "Bash(gh pr checks*)",
+      "Bash(gh run view*)",
+      "Bash(gh run list*)",
+      "Bash(gh issue list*)",
+      "Bash(gh issue view*)",
+      "Bash(gh release list*)",
+      "Bash(gh release view*)",
+      "Bash(gh release create*)",
+
+      "Read(*)",
+      "Glob(*)",
+      "Grep(*)"
+    ]
+  }
+}
