@@ -13,6 +13,7 @@ export const defaultSettings: Settings = {
   theme_preference: 'dark',
   completed_setup: false,
   debug_logging: false,
+  sensitive_logging: false,
 };
 
 export const defaultKeyStatus: KeyStatus = { is_set: false, source: 'none' };
@@ -52,6 +53,7 @@ export function createWailsMock() {
     getVersion: vi.fn().mockResolvedValue('3.6.0'),
     checkForUpdate: vi.fn().mockResolvedValue({ ...defaultUpdateInfo }),
     downloadAndInstall: vi.fn().mockResolvedValue(undefined),
+    log: vi.fn().mockResolvedValue(undefined),
     ngOnDestroy: vi.fn(),
   };
 }

@@ -7,6 +7,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { MessageModule } from 'primeng/message';
 import { CheckboxModule } from 'primeng/checkbox';
 import { WailsService } from '../../core/wails.service';
+import { LogService } from '../../core/log.service';
 import { TextEnhancementService } from '../text-enhancement/text-enhancement.service';
 
 // Module-level cache — survives Angular route navigation (component destroy/recreate).
@@ -95,6 +96,7 @@ export class FixComponent implements OnInit, OnDestroy {
     private readonly wails: WailsService,
     private readonly svc: TextEnhancementService,
     private readonly cdr: ChangeDetectorRef,
+    private readonly log: LogService,
   ) {}
 
   _sync(value: string): void { _inputCache = value; }
@@ -102,7 +104,10 @@ export class FixComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // On shortcut: silently fix clipboard and write result back.
-    this.sub = this.wails.shortcutTriggered$.subscribe(() => void this.fixClipboard());
+    this.sub = this.wails.shortcutTriggered$.subscribe(() => {
+      this.log.info('fix: shortcut received');
+      void this.fixClipboard();
+    });
   }
 
   async fix(): Promise<void> {
@@ -110,15 +115,18 @@ export class FixComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error = '';
     this.done = false;
+    this.log.info('fix: enhance started');
     try {
       this.outputText = await this.svc.enhance(this.inputText);
       _outputCache = this.outputText;
+      this.log.info('fix: enhance done');
       if (this.autoCopy) {
         try { await this.wails.writeClipboard(this.outputText); } catch { /* ignore */ }
         this.done = true;
       }
     } catch (e: unknown) {
       this.error = e instanceof Error ? e.message : String(e);
+      this.log.error('fix: enhance failed: ' + this.error);
     } finally {
       this.loading = false;
       this.cdr.detectChanges();
@@ -130,12 +138,14 @@ export class FixComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error = '';
     this.done = false;
+    this.log.info('fix: clipboard enhance started');
     try {
       this.inputText = await this.wails.readClipboard();
       _inputCache = this.inputText;
       this.cdr.detectChanges();
       this.outputText = await this.svc.enhance(this.inputText);
       _outputCache = this.outputText;
+      this.log.info('fix: clipboard enhance done');
       if (this.autoCopy) {
         try { await this.wails.writeClipboard(this.outputText); } catch { /* ignore */ }
         await this.wails.pasteToForeground();
@@ -143,6 +153,7 @@ export class FixComponent implements OnInit, OnDestroy {
       }
     } catch (e: unknown) {
       this.error = e instanceof Error ? e.message : String(e);
+      this.log.error('fix: clipboard enhance failed: ' + this.error);
     } finally {
       this.loading = false;
       this.cdr.detectChanges();

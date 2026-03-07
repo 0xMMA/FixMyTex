@@ -147,6 +147,14 @@ export class Settings {
              */
             this["debug_logging"] = false;
         }
+        if (!("sensitive_logging" in $$source)) {
+            /**
+             * logs full API payloads; never share the log file while enabled
+             * @member
+             * @type {boolean}
+             */
+            this["sensitive_logging"] = false;
+        }
 
         Object.assign(this, $$source);
     }

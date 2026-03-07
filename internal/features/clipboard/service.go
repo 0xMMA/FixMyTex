@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
+
+	"keylint/internal/logger"
 )
 
 // Service reads from and writes to the system clipboard.
@@ -25,11 +27,14 @@ func (s *Service) Read() (string, error) {
 			return "", fmt.Errorf("clipboard read failed: %w", err)
 		}
 	}
-	return strings.TrimRight(string(out), "\n"), nil
+	text := strings.TrimRight(string(out), "\n")
+	logger.Debug("clipboard: read", "len", len(text))
+	return text, nil
 }
 
 // Write sets the clipboard text content.
 func (s *Service) Write(text string) error {
+	logger.Debug("clipboard: write", "len", len(text))
 	cmd := exec.Command("xclip", "-selection", "clipboard")
 	cmd.Stdin = strings.NewReader(text)
 	if err := cmd.Run(); err != nil {

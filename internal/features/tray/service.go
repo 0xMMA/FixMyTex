@@ -1,6 +1,9 @@
 package tray
 
-import "github.com/wailsapp/wails/v3/pkg/application"
+import (
+	"github.com/wailsapp/wails/v3/pkg/application"
+	"keylint/internal/logger"
+)
 
 // Service manages the system tray icon and menu.
 type Service struct {
@@ -20,10 +23,12 @@ func (s *Service) Setup(window application.Window) {
 
 	menu := s.app.NewMenu()
 	menu.Add("Open KeyLint").OnClick(func(ctx *application.Context) {
+		logger.Info("tray: open clicked")
 		window.Show().Focus()
 	})
 	menu.AddSeparator()
 	menu.Add("Exit").OnClick(func(ctx *application.Context) {
+		logger.Info("tray: quit clicked")
 		s.app.Quit()
 	})
 	tray.SetMenu(menu)
@@ -34,4 +39,5 @@ func (s *Service) Setup(window application.Window) {
 	tray.OnDoubleClick(func() {
 		window.Show().Focus()
 	})
+	logger.Info("tray: setup complete")
 }

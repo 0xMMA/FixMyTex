@@ -10,6 +10,7 @@ import { MessageModule } from 'primeng/message';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { WailsService, Settings as AppSettings, KeyStatus, UpdateInfo } from '../../core/wails.service';
+import { LogService } from '../../core/log.service';
 
 interface ProviderKey {
   id: string;
@@ -55,9 +56,11 @@ interface ProviderKey {
                   <label>Shortcut Key</label>
                   <input data-testid="shortcut-input" pInputText [(ngModel)]="settings.shortcut_key" placeholder="ctrl+g" />
                 </div>
-                <div class="form-group inline">
-                  <label>Start on Boot</label>
-                  <p-toggle-switch [(ngModel)]="settings.start_on_boot" />
+                <div class="form-group" data-testid="start-on-boot-section">
+                  <div class="toggle-row">
+                    <label>Start on Boot</label>
+                    <p-toggle-switch [(ngModel)]="settings.start_on_boot" />
+                  </div>
                 </div>
                 <div class="form-group">
                   <label>Theme</label>
@@ -68,13 +71,24 @@ interface ProviderKey {
                     optionValue="value"
                   />
                 </div>
-                <div class="form-group inline">
-                  <label>Debug Logging</label>
-                  <p-toggle-switch [(ngModel)]="settings.debug_logging" />
+                <div class="form-group" data-testid="debug-logging-section">
+                  <div class="toggle-row">
+                    <div class="toggle-label-group">
+                      <label>Debug Logging</label>
+                      <small class="hint-text">When enabled, writes a <code>debug.log</code> to the app config folder. Takes effect on next launch.</small>
+                    </div>
+                    <p-toggle-switch [(ngModel)]="settings.debug_logging" />
+                  </div>
                 </div>
-                <small class="hint-text">
-                  When enabled, writes a <code>debug.log</code> to the app config folder. Takes effect on next launch.
-                </small>
+                <div class="form-group" data-testid="sensitive-logging-section">
+                  <div class="toggle-row">
+                    <div class="toggle-label-group">
+                      <label>Sensitive Logging</label>
+                      <small class="hint-text">Logs full API request payloads and responses. <strong>Do not share the log file while this is enabled.</strong> Takes effect on next launch.</small>
+                    </div>
+                    <p-toggle-switch [(ngModel)]="settings.sensitive_logging" [disabled]="!settings.debug_logging" />
+                  </div>
+                </div>
               </p-tabpanel>
 
               <!-- AI Providers / Keys tab -->
@@ -236,11 +250,18 @@ interface ProviderKey {
       gap: 0.4rem;
       margin-bottom: 1.25rem;
     }
-    .form-group.inline {
-      flex-direction: row;
+    .toggle-row {
+      display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 1rem;
     }
+    .toggle-label-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .toggle-label-group .hint-text { margin-bottom: 0; }
     label { font-size: 0.875rem; color: var(--p-text-muted-color); }
     input { width: 100%; }
 
@@ -315,10 +336,15 @@ export class SettingsComponent implements OnInit {
     { id: 'bedrock', label: 'AWS Secret Access Key', status: null, editing: false, draftKey: '', saving: false },
   ];
 
-  constructor(private readonly wails: WailsService, private readonly cdr: ChangeDetectorRef) {}
+  constructor(
+    private readonly wails: WailsService,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly log: LogService,
+  ) {}
 
   async ngOnInit(): Promise<void> {
     this.settings = await this.wails.loadSettings();
+    this.log.info('settings: loaded');
     await this.refreshKeyStatuses();
     this.appVersion = await this.wails.getVersion();
     this.cdr.detectChanges();
@@ -360,6 +386,7 @@ export class SettingsComponent implements OnInit {
       pk.editing = false;
       pk.draftKey = '';
       pk.status = await this.wails.getKeyStatus(pk.id);
+      this.log.info(`settings: key saved for ${pk.id}`);
     } catch (e) {
       this.keyError = `Failed to save key: ${e instanceof Error ? e.message : String(e)}`;
     } finally {
@@ -373,6 +400,7 @@ export class SettingsComponent implements OnInit {
     try {
       await this.wails.deleteKey(pk.id);
       pk.status = await this.wails.getKeyStatus(pk.id);
+      this.log.info(`settings: key cleared for ${pk.id}`);
     } catch (e) {
       this.keyError = `Failed to clear key: ${e instanceof Error ? e.message : String(e)}`;
     } finally {
@@ -416,6 +444,7 @@ export class SettingsComponent implements OnInit {
   async save(): Promise<void> {
     if (!this.settings) return;
     await this.wails.saveSettings(this.settings);
+    this.log.info('settings: saved');
     this.saved = true;
     this.cdr.detectChanges();
     setTimeout(() => { this.saved = false; this.cdr.detectChanges(); }, 3000);
