@@ -12,6 +12,7 @@ import (
 	"fixmytex/internal/logger"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
+	"github.com/wailsapp/wails/v3/pkg/events"
 )
 
 // AppVersion is injected at build time via -ldflags "-X main.AppVersion=x.y.z".
@@ -36,7 +37,7 @@ func main() {
 			Handler: application.AssetFileServerFS(assets),
 		},
 		Mac: application.MacOptions{
-			ApplicationShouldTerminateAfterLastWindowClosed: true,
+			ApplicationShouldTerminateAfterLastWindowClosed: false,
 		},
 	})
 
@@ -61,8 +62,22 @@ func main() {
 	sim := &simulateService{shortcut: services.Shortcut}
 	wailsApp.RegisterService(application.NewService(sim))
 
+	window := wailsApp.Window.NewWithOptions(application.WebviewWindowOptions{
+		Title:            "FixMyTex",
+		Width:            1280,
+		Height:           800,
+		BackgroundColour: application.NewRGB(27, 38, 54),
+		URL:              "/",
+	})
+
+	// Hide to tray on close instead of quitting.
+	window.RegisterHook(events.Common.WindowClosing, func(e *application.WindowEvent) {
+		window.Hide()
+		e.Cancel()
+	})
+
 	// Start the system tray.
-	services.Tray.Setup()
+	services.Tray.Setup(window)
 
 	// Register the global shortcut (no-op on Linux).
 	// Unregister on shutdown so dev-mode restarts don't leave a stale registration.
@@ -74,6 +89,7 @@ func main() {
 	// Forward shortcut events to the frontend.
 	// First send Ctrl+C to copy selected text from the source app, then notify
 	// the frontend so it can read the clipboard and enhance the text.
+	// Show the window so the frontend can receive and process the event.
 	go func() {
 		ch := services.Shortcut.Triggered()
 		for event := range ch {
@@ -90,14 +106,6 @@ func main() {
 			go s.Simulate()
 		}
 	}
-
-	wailsApp.Window.NewWithOptions(application.WebviewWindowOptions{
-		Title:            "FixMyTex",
-		Width:            1280,
-		Height:           800,
-		BackgroundColour: application.NewRGB(27, 38, 54),
-		URL:              "/",
-	})
 
 	if err := wailsApp.Run(); err != nil {
 		log.Fatal(err)

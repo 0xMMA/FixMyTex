@@ -13,13 +13,14 @@ func NewService(app *application.App) *Service {
 }
 
 // Setup initialises the system tray with menu items.
-func (s *Service) Setup() {
+// window is used to show/focus the main window from tray interactions.
+func (s *Service) Setup(window application.Window) {
 	tray := s.app.SystemTray.New()
 	tray.SetLabel("FixMyTex")
 
 	menu := s.app.NewMenu()
 	menu.Add("Open FixMyTex").OnClick(func(ctx *application.Context) {
-		tray.ShowWindow()
+		window.Show().Focus()
 	})
 	menu.AddSeparator()
 	menu.Add("Exit").OnClick(func(ctx *application.Context) {
