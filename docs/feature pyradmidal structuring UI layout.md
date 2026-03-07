@@ -1,9 +1,9 @@
 app:
-  title: "FixMyTex"
+  title: "KeyLint"
   
   system_tray:
-    icon: "fixmytex_icon"
-    tooltip: "FixMyTex - AI Writing Assistant"
+    icon: "keylint_icon"
+    tooltip: "KeyLint - AI Writing Assistant"
     menu:
       - label: "Open"
         action: show_communication_assistant

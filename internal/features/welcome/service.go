@@ -1,6 +1,6 @@
 package welcome
 
-import "fixmytex/internal/features/settings"
+import "keylint/internal/features/settings"
 
 // Service handles first-run detection and setup completion.
 type Service struct {

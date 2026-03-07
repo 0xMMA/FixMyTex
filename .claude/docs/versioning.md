@@ -44,7 +44,7 @@ Then go to **GitHub → Releases** and publish the draft once the workflow compl
 - Builds Linux binary (artifact only, not released)
 
 **`release.yml`** (tag push):
-- Builds `FixMyTex-vX.Y.Z-linux-amd64` and `FixMyTex-vX.Y.Z-windows-amd64.exe`
+- Builds `KeyLint-vX.Y.Z-linux-amd64` and `KeyLint-vX.Y.Z-windows-amd64.exe`
 - Generates `latest.json` for the in-app updater (`UpdaterService.CheckForUpdate`)
 - Creates a **draft** GitHub Release with auto-generated notes from PR titles
 - All three files are attached to the release

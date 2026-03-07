@@ -14,7 +14,7 @@ import { WailsService } from '../../core/wails.service';
   template: `
     <div class="wizard-wrapper">
       <div class="wizard-card">
-        <h1>Welcome to <span class="brand">FixMyTex</span></h1>
+        <h1>Welcome to <span class="brand">KeyLint</span></h1>
         <p class="subtitle">Let's get you set up in a few quick steps.</p>
 
         <!-- Step indicators -->
@@ -35,7 +35,7 @@ import { WailsService } from '../../core/wails.service';
           @switch (step) {
             @case (1) {
               <div data-testid="step-1-content">
-                <p>FixMyTex uses AI to fix grammar, spelling, and improve your writing — triggered by a global keyboard shortcut.</p>
+                <p>KeyLint uses AI to fix grammar, spelling, and improve your writing — triggered by a global keyboard shortcut.</p>
                 <div class="step-footer">
                   <p-button data-testid="wizard-next" label="Get Started" icon="pi pi-arrow-right" iconPos="right" (onClick)="step = 2" />
                 </div>
@@ -72,7 +72,7 @@ import { WailsService } from '../../core/wails.service';
                 <p>You're all set! Press <kbd>Ctrl+G</kbd> anywhere to enhance selected text.</p>
                 <div class="step-footer">
                   <p-button data-testid="wizard-back" label="Back" severity="secondary" (onClick)="step = 3" />
-                  <p-button data-testid="wizard-finish" label="Start Using FixMyTex" icon="pi pi-check" (onClick)="finish()" [loading]="finishing" />
+                  <p-button data-testid="wizard-finish" label="Start Using KeyLint" icon="pi pi-check" (onClick)="finish()" [loading]="finishing" />
                 </div>
               </div>
             }

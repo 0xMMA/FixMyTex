@@ -16,7 +16,7 @@ var (
 )
 
 // Init enables or disables file logging. When enabled, output goes to
-// %AppData%/FixMyTex/debug.log (Windows) or $HOME/.config/FixMyTex/debug.log (Linux).
+// %AppData%/KeyLint/debug.log (Windows) or $HOME/.config/KeyLint/debug.log (Linux).
 // Safe to call only once at startup; not goroutine-safe with concurrent log calls.
 func Init(enabled bool) {
 	if logFile != nil {
@@ -31,7 +31,7 @@ func Init(enabled bool) {
 	if err != nil {
 		return
 	}
-	dir = filepath.Join(dir, "FixMyTex")
+	dir = filepath.Join(dir, "KeyLint")
 	_ = os.MkdirAll(dir, 0700)
 	logPath := filepath.Join(dir, "debug.log")
 	f, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)

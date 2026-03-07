@@ -8,7 +8,7 @@
         AllowPromptForPassword="false">
     </Settings>
     <Installer
-        Path="fixmytex"
+        Path="keylint"
         Arguments=""
         InstallLocation="C:\Program Files\My Company\My Product">
     </Installer>
@@ -18,17 +18,17 @@
         PublisherName="CN=My Company"
         PublisherDisplayName="My Company"
         Version="0.1.0.0"
-        PackageDescription="A FixMyTex application">
+        PackageDescription="A KeyLint application">
         <Capabilities>
             <Capability Name="runFullTrust" />
             
         </Capabilities>
         <Applications>
             <Application
-                Id="com.example.fixmytex"
-                Description="A FixMyTex application"
+                Id="com.example.keylint"
+                Description="A KeyLint application"
                 DisplayName="My Product"
-                ExecutableName="fixmytex"
+                ExecutableName="keylint"
                 EntryPoint="Windows.FullTrustApplication">
                 
             </Application>
@@ -43,11 +43,11 @@
             <Framework>false</Framework>
             <DisplayName>My Product</DisplayName>
             <PublisherDisplayName>My Company</PublisherDisplayName>
-            <Description>A FixMyTex application</Description>
+            <Description>A KeyLint application</Description>
             <Logo>Assets\AppIcon.png</Logo>
         </Properties>
     </PackageInformation>
-    <SaveLocation PackagePath="fixmytex.msix" />
+    <SaveLocation PackagePath="keylint.msix" />
     <PackageIntegrity>
         <CertificatePath></CertificatePath>
     </PackageIntegrity>

@@ -1,4 +1,4 @@
-# FixMyTex
+# KeyLint
 
 AI-powered text enhancement triggered by a global keyboard shortcut. Select text anywhere, press **Ctrl+G**, and get it fixed instantly.
 
@@ -40,25 +40,25 @@ wails3 dev
 cd frontend && npm run build
 
 # Build production binary (Linux)
-go build -tags production -o bin/FixMyTex .
+go build -tags production -o bin/KeyLint .
 
 # Simulate the global shortcut without a real hotkey (Linux)
-./bin/FixMyTex --simulate-shortcut
+./bin/KeyLint --simulate-shortcut
 ```
 
 ## Windows Cross-Compilation (from Linux)
 
 ```bash
 GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc \
-  go build -tags production -ldflags="-w -s -H windowsgui" -o bin/FixMyTex.exe .
+  go build -tags production -ldflags="-w -s -H windowsgui" -o bin/KeyLint.exe .
 ```
 
 ## Project Structure
 
 ```
-FixMyTex/
+KeyLint/
 ├── main.go                         # Entry point — CLI flags, Wails app setup
-├── go.mod                          # Go module (fixmytex)
+├── go.mod                          # Go module (keylint)
 ├── internal/
 │   ├── app/
 │   │   ├── wire.go                 # Wire DI provider declarations

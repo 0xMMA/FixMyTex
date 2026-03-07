@@ -1,4 +1,4 @@
-module fixmytex
+module keylint
 
 go 1.26
 

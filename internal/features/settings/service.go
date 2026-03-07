@@ -8,7 +8,7 @@ import (
 	keyring "github.com/zalando/go-keyring"
 )
 
-const appName = "FixMyTex"
+const appName = "KeyLint"
 
 // envVars maps provider ID → environment variable name for the API key.
 // Empty string means no standard env var for that provider.

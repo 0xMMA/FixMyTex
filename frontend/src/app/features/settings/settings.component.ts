@@ -159,7 +159,7 @@ interface ProviderKey {
 
               <!-- About tab -->
               <p-tabpanel value="about">
-                <p>FixMyTex — Wails v3 + Angular v21</p>
+                <p>KeyLint — Wails v3 + Angular v21</p>
                 <p>Built with Go, Angular, and PrimeNG.</p>
                 <p data-testid="app-version">Version: {{ appVersion }}</p>
 

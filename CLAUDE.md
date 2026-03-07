@@ -1,4 +1,4 @@
-# FixMyTex — CLAUDE.md
+# KeyLint — CLAUDE.md
 
 ## What (The Map)
 
@@ -16,7 +16,7 @@
 **Build / run / test:**
 ```
 cd frontend && npm run build          # Angular → frontend/dist/ (embedded in Go binary)
-go build -o bin/FixMyTex .           # Linux binary (needs PATH with /usr/local/go/bin:$HOME/go/bin)
+go build -o bin/KeyLint .            # Linux binary (needs PATH with /usr/local/go/bin:$HOME/go/bin)
 wails3 dev                            # Hot-reload dev server (runs both)
 wire gen ./internal/app/             # Regenerate DI after Go service changes
 wails3 generate bindings             # Regenerate JS bindings after Go service changes
@@ -27,7 +27,7 @@ npx playwright test                  # E2E tests (requires ng serve on :4200)
 
 ## Why (The Context)
 
-FixMyTex is a desktop app that fixes/enhances clipboard text via AI (OpenAI, Anthropic, Ollama, Bedrock). A global hotkey silently grabs clipboard text, enhances it, and writes it back. The main UI provides manual fix and advanced enhancement modes.
+KeyLint is a desktop app that fixes/enhances clipboard text via AI (OpenAI, Anthropic, Ollama, Bedrock). A global hotkey silently grabs clipboard text, enhances it, and writes it back. The main UI provides manual fix and advanced enhancement modes.
 
 **Architecture decisions:**
 - AI API calls go through the Go backend (`internal/features/enhance/service.go:1`) — WebKit2GTK on Linux blocks external HTTPS fetch from the webview
@@ -59,7 +59,7 @@ FixMyTex is a desktop app that fixes/enhances clipboard text via AI (OpenAI, Ant
 3. Before handing back, run:
    - `cd frontend && npm test` — must show 0 failures
    - `go test ./internal/...` — must pass
-   - `go build -o bin/FixMyTex .` — must compile cleanly
+   - `go build -o bin/KeyLint .` — must compile cleanly
 4. After any Go service change: run `wire gen ./internal/app/` + `wails3 generate bindings` before building.
 5. If a command cannot be run (e.g. no display for Playwright), state explicitly what was skipped and why.
 

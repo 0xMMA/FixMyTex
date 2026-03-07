@@ -16,10 +16,10 @@ func NewService(app *application.App) *Service {
 // window is used to show/focus the main window from tray interactions.
 func (s *Service) Setup(window application.Window) {
 	tray := s.app.SystemTray.New()
-	tray.SetLabel("FixMyTex")
+	tray.SetLabel("KeyLint")
 
 	menu := s.app.NewMenu()
-	menu.Add("Open FixMyTex").OnClick(func(ctx *application.Context) {
+	menu.Add("Open KeyLint").OnClick(func(ctx *application.Context) {
 		window.Show().Focus()
 	})
 	menu.AddSeparator()

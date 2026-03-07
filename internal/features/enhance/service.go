@@ -7,8 +7,8 @@ import (
 	"io"
 	"net/http"
 
-	"fixmytex/internal/features/settings"
-	"fixmytex/internal/logger"
+	"keylint/internal/features/settings"
+	"keylint/internal/logger"
 )
 
 const systemPrompt = `You are a grammar, spelling, and clarity correction assistant. Your task is to fix grammatical errors, spelling mistakes, and improve clarity in text while preserving the original meaning, tone, and intent.

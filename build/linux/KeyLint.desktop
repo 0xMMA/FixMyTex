@@ -1,8 +1,8 @@
 [Desktop Entry]
 Type=Application
-Name=fixmytex
-Exec=FixMyTex
-Icon=FixMyTex
+Name=keylint
+Exec=KeyLint
+Icon=KeyLint
 Categories=Development;
 Terminal=false
 Keywords=wails

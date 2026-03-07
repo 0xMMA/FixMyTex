@@ -4,8 +4,8 @@ import (
 	"os"
 	"testing"
 
-	"fixmytex/internal/features/settings"
-	"fixmytex/internal/features/welcome"
+	"keylint/internal/features/settings"
+	"keylint/internal/features/welcome"
 )
 
 func newServices(t *testing.T) (*settings.Service, *welcome.Service) {

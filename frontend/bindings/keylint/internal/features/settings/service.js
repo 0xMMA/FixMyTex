@@ -21,7 +21,7 @@ import * as $models from "./models.js";
  * @returns {$CancellablePromise<void>}
  */
 export function DeleteKey(provider) {
-    return $Call.ByID(3705027350, provider);
+    return $Call.ByID(3023780468, provider);
 }
 
 /**
@@ -29,7 +29,7 @@ export function DeleteKey(provider) {
  * @returns {$CancellablePromise<$models.Settings>}
  */
 export function Get() {
-    return $Call.ByID(1738358976).then(/** @type {($result: any) => any} */(($result) => {
+    return $Call.ByID(2040733582).then(/** @type {($result: any) => any} */(($result) => {
         return $$createType0($result);
     }));
 }
@@ -42,7 +42,7 @@ export function Get() {
  * @returns {$CancellablePromise<string>}
  */
 export function GetKey(provider) {
-    return $Call.ByID(1892476223, provider);
+    return $Call.ByID(3739301461, provider);
 }
 
 /**
@@ -52,7 +52,7 @@ export function GetKey(provider) {
  * @returns {$CancellablePromise<$models.KeyStatus>}
  */
 export function GetKeyStatus(provider) {
-    return $Call.ByID(3648269193, provider).then(/** @type {($result: any) => any} */(($result) => {
+    return $Call.ByID(1645967871, provider).then(/** @type {($result: any) => any} */(($result) => {
         return $$createType1($result);
     }));
 }
@@ -62,7 +62,7 @@ export function GetKeyStatus(provider) {
  * @returns {$CancellablePromise<void>}
  */
 export function ResetToDefaults() {
-    return $Call.ByID(3443119584);
+    return $Call.ByID(2262468238);
 }
 
 /**
@@ -71,7 +71,7 @@ export function ResetToDefaults() {
  * @returns {$CancellablePromise<void>}
  */
 export function Save(updated) {
-    return $Call.ByID(3456788065, updated);
+    return $Call.ByID(3744916527, updated);
 }
 
 /**
@@ -82,7 +82,7 @@ export function Save(updated) {
  * @returns {$CancellablePromise<void>}
  */
 export function SetKey(provider, key) {
-    return $Call.ByID(1846918715, provider, key);
+    return $Call.ByID(3799725721, provider, key);
 }
 
 // Private type creation functions

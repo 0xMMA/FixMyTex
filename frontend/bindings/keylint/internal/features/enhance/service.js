@@ -18,5 +18,5 @@ import { Call as $Call, CancellablePromise as $CancellablePromise, Create as $Cr
  * @returns {$CancellablePromise<string>}
  */
 export function Enhance(text) {
-    return $Call.ByID(3481711417, text);
+    return $Call.ByID(1845763311, text);
 }

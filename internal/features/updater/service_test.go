@@ -28,7 +28,7 @@ func TestCheckForUpdate_UpdateAvailable(t *testing.T) {
 		Version: "3.7.0",
 		Notes:   "Bug fixes",
 		Platforms: map[string]PlatformAsset{
-			"linux-x86_64": {URL: "https://example.com/FixMyTex-linux"},
+			"linux-x86_64": {URL: "https://example.com/KeyLint-linux"},
 		},
 	}
 	srv := serveLatestJSON(t, latest)
@@ -54,7 +54,7 @@ func TestCheckForUpdate_AlreadyUpToDate(t *testing.T) {
 	latest := LatestJSON{
 		Version: "3.6.0",
 		Platforms: map[string]PlatformAsset{
-			"linux-x86_64": {URL: "https://example.com/FixMyTex-linux"},
+			"linux-x86_64": {URL: "https://example.com/KeyLint-linux"},
 		},
 	}
 	srv := serveLatestJSON(t, latest)

@@ -18,7 +18,7 @@ import { Call as $Call, CancellablePromise as $CancellablePromise, Create as $Cr
  * @returns {$CancellablePromise<void>}
  */
 export function CopyFromForeground() {
-    return $Call.ByID(2818713757);
+    return $Call.ByID(239340991);
 }
 
 /**
@@ -29,7 +29,7 @@ export function CopyFromForeground() {
  * @returns {$CancellablePromise<void>}
  */
 export function PasteToForeground() {
-    return $Call.ByID(1965794476);
+    return $Call.ByID(2319679526);
 }
 
 /**
@@ -37,7 +37,7 @@ export function PasteToForeground() {
  * @returns {$CancellablePromise<string>}
  */
 export function Read() {
-    return $Call.ByID(4016215765);
+    return $Call.ByID(52599179);
 }
 
 /**
@@ -46,5 +46,5 @@ export function Read() {
  * @returns {$CancellablePromise<void>}
  */
 export function Write(text) {
-    return $Call.ByID(2416338060, text);
+    return $Call.ByID(608683786, text);
 }

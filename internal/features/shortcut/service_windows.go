@@ -9,7 +9,7 @@ import (
 	"time"
 	"unsafe"
 
-	"fixmytex/internal/logger"
+	"keylint/internal/logger"
 )
 
 const (

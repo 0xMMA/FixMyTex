@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"testing"
 
-	"fixmytex/internal/features/settings"
+	"keylint/internal/features/settings"
 )
 
 // newServiceAt creates a Service pointed at a specific directory — used in tests
@@ -95,7 +95,7 @@ func TestSave_WritesValidJSON(t *testing.T) {
 	}
 
 	// Find and parse the written file.
-	filePath := filepath.Join(tmp, "FixMyTex", "settings.json")
+	filePath := filepath.Join(tmp, "KeyLint", "settings.json")
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		t.Fatalf("ReadFile: %v", err)
@@ -114,7 +114,7 @@ func TestNewService_LoadsExistingFile(t *testing.T) {
 	tmp := t.TempDir()
 
 	// Write a settings file before creating the service.
-	dir := filepath.Join(tmp, "FixMyTex")
+	dir := filepath.Join(tmp, "KeyLint")
 	if err := os.MkdirAll(dir, 0700); err != nil {
 		t.Fatal(err)
 	}

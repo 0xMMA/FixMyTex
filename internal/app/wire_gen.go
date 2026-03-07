@@ -7,13 +7,13 @@
 package app
 
 import (
-	"fixmytex/internal/features/clipboard"
-	"fixmytex/internal/features/settings"
-	"fixmytex/internal/features/shortcut"
-	"fixmytex/internal/features/tray"
-	"fixmytex/internal/features/welcome"
 	"github.com/google/wire"
 	"github.com/wailsapp/wails/v3/pkg/application"
+	"keylint/internal/features/clipboard"
+	"keylint/internal/features/settings"
+	"keylint/internal/features/shortcut"
+	"keylint/internal/features/tray"
+	"keylint/internal/features/welcome"
 )
 
 // Injectors from wire.go:
@@ -41,7 +41,7 @@ func InitializeApp(wailsApp *application.App) (*App, error) {
 
 // wire.go:
 
-// App bundles all top-level services needed to run FixMyTex.
+// App bundles all top-level services needed to run KeyLint.
 type App struct {
 	Settings  *settings.Service
 	Welcome   *welcome.Service

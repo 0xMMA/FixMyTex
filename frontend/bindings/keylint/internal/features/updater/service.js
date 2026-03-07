@@ -21,7 +21,7 @@ import * as $models from "./models.js";
  * @returns {$CancellablePromise<$models.UpdateInfo>}
  */
 export function CheckForUpdate() {
-    return $Call.ByID(2075707726).then(/** @type {($result: any) => any} */(($result) => {
+    return $Call.ByID(2035259492).then(/** @type {($result: any) => any} */(($result) => {
         return $$createType0($result);
     }));
 }
@@ -31,7 +31,7 @@ export function CheckForUpdate() {
  * @returns {$CancellablePromise<void>}
  */
 export function DownloadAndInstall() {
-    return $Call.ByID(3894875076);
+    return $Call.ByID(1125161478);
 }
 
 /**
@@ -39,7 +39,7 @@ export function DownloadAndInstall() {
  * @returns {$CancellablePromise<string>}
  */
 export function GetVersion() {
-    return $Call.ByID(1876932488);
+    return $Call.ByID(4045591078);
 }
 
 // Private type creation functions

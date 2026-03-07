@@ -72,8 +72,8 @@ This command is run **after** a PR has been merged to `main`.
 
 7. **Report outcome**
    - Print the tag name
-   - Link to GitHub Actions: `https://github.com/0xMMA/FixMyTex/actions`
-   - Link to Releases page: `https://github.com/0xMMA/FixMyTex/releases`
+   - Link to GitHub Actions: `https://github.com/0xMMA/KeyLint/actions`
+   - Link to Releases page: `https://github.com/0xMMA/KeyLint/releases`
    - Remind: "Once CI completes, open the draft release and click Publish."
 
 ## Notes

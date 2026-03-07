@@ -44,7 +44,7 @@ test.describe('Dark mode — visual verification', () => {
 
     // Sidebar must be visible
     await expect(page.locator('.layout-sidebar')).toBeVisible();
-    // "FixMyTex" logo text
+    // "KeyLint" logo text
     await expect(page.locator('.logo-text')).toBeVisible();
   });
 

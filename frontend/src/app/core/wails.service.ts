@@ -3,14 +3,14 @@ import { Subject, Observable } from 'rxjs';
 import { Events } from '@wailsio/runtime';
 
 // Generated bindings — auto-updated by `wails3 generate bindings`
-import * as SettingsService from '../../../bindings/fixmytex/internal/features/settings/service.js';
-import * as WelcomeService from '../../../bindings/fixmytex/internal/features/welcome/service.js';
-import * as ClipboardService from '../../../bindings/fixmytex/internal/features/clipboard/service.js';
-import * as SimulateService from '../../../bindings/fixmytex/simulateservice.js';
-import * as EnhanceService from '../../../bindings/fixmytex/internal/features/enhance/service.js';
-import * as UpdaterService from '../../../bindings/fixmytex/internal/features/updater/service.js';
-import { Settings, KeyStatus } from '../../../bindings/fixmytex/internal/features/settings/models.js';
-import { UpdateInfo } from '../../../bindings/fixmytex/internal/features/updater/models.js';
+import * as SettingsService from '../../../bindings/keylint/internal/features/settings/service.js';
+import * as WelcomeService from '../../../bindings/keylint/internal/features/welcome/service.js';
+import * as ClipboardService from '../../../bindings/keylint/internal/features/clipboard/service.js';
+import * as SimulateService from '../../../bindings/keylint/simulateservice.js';
+import * as EnhanceService from '../../../bindings/keylint/internal/features/enhance/service.js';
+import * as UpdaterService from '../../../bindings/keylint/internal/features/updater/service.js';
+import { Settings, KeyStatus } from '../../../bindings/keylint/internal/features/settings/models.js';
+import { UpdateInfo } from '../../../bindings/keylint/internal/features/updater/models.js';
 
 export type { Settings, KeyStatus, UpdateInfo };
 

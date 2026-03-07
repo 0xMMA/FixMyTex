@@ -49,13 +49,13 @@ jobs:
           export PATH=$PATH:$HOME/go/bin
           VERSION=$(git describe --tags --always)
           CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -tags production -trimpath \
-            -ldflags="-w -s -X main.AppVersion=${VERSION}" -o bin/FixMyTex .
+            -ldflags="-w -s -X main.AppVersion=${VERSION}" -o bin/KeyLint .
 
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4
         with:
-          name: FixMyTex-linux-amd64
-          path: bin/FixMyTex
+          name: KeyLint-linux-amd64
+          path: bin/KeyLint
 
   build-windows:
     runs-on: ubuntu-latest
@@ -100,13 +100,13 @@ jobs:
           GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc \
             go build -tags production -trimpath \
             -ldflags="-w -s -H windowsgui -X main.AppVersion=${VERSION}" \
-            -o bin/FixMyTex.exe .
+            -o bin/KeyLint.exe .
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
-          name: FixMyTex-windows-amd64
-          path: bin/FixMyTex.exe
+          name: KeyLint-windows-amd64
+          path: bin/KeyLint.exe
 
   create-release:
     runs-on: ubuntu-latest
@@ -123,26 +123,26 @@ jobs:
       - name: Download Linux artifact
         uses: actions/download-artifact@v4
         with:
-          name: FixMyTex-linux-amd64
+          name: KeyLint-linux-amd64
           path: dist/
 
       - name: Download Windows artifact
         uses: actions/download-artifact@v4
         with:
-          name: FixMyTex-windows-amd64
+          name: KeyLint-windows-amd64
           path: dist/
 
       - name: Rename artifacts
         run: |
           VERSION=${{ steps.version.outputs.VERSION }}
-          mv dist/FixMyTex "dist/FixMyTex-${VERSION}-linux-amd64"
-          mv dist/FixMyTex.exe "dist/FixMyTex-${VERSION}-windows-amd64.exe"
-          chmod +x "dist/FixMyTex-${VERSION}-linux-amd64"
+          mv dist/KeyLint "dist/KeyLint-${VERSION}-linux-amd64"
+          mv dist/KeyLint.exe "dist/KeyLint-${VERSION}-windows-amd64.exe"
+          chmod +x "dist/KeyLint-${VERSION}-linux-amd64"
 
       - name: Generate latest.json
         run: |
           VERSION=${{ steps.version.outputs.VERSION }}
-          REPO="0xMMA/FixMyTex"
+          REPO="0xMMA/KeyLint"
           PUB_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           cat > dist/latest.json <<EOF
           {
@@ -151,11 +151,11 @@ jobs:
             "pub_date": "${PUB_DATE}",
             "platforms": {
               "linux-x86_64": {
-                "url": "https://github.com/${REPO}/releases/download/${VERSION}/FixMyTex-${VERSION}-linux-amd64",
+                "url": "https://github.com/${REPO}/releases/download/${VERSION}/KeyLint-${VERSION}-linux-amd64",
                 "signature": ""
               },
               "windows-x86_64": {
-                "url": "https://github.com/${REPO}/releases/download/${VERSION}/FixMyTex-${VERSION}-windows-amd64.exe",
+                "url": "https://github.com/${REPO}/releases/download/${VERSION}/KeyLint-${VERSION}-windows-amd64.exe",
                 "signature": ""
               }
             }
@@ -168,6 +168,6 @@ jobs:
           draft: true
           generate_release_notes: true
           files: |
-            dist/FixMyTex-${{ steps.version.outputs.VERSION }}-linux-amd64
-            dist/FixMyTex-${{ steps.version.outputs.VERSION }}-windows-amd64.exe
+            dist/KeyLint-${{ steps.version.outputs.VERSION }}-linux-amd64
+            dist/KeyLint-${{ steps.version.outputs.VERSION }}-windows-amd64.exe
             dist/latest.json

@@ -16,7 +16,7 @@ import { Call as $Call, CancellablePromise as $CancellablePromise, Create as $Cr
  * @returns {$CancellablePromise<void>}
  */
 export function CompleteSetup() {
-    return $Call.ByID(3562801053);
+    return $Call.ByID(2084461659);
 }
 
 /**
@@ -24,5 +24,5 @@ export function CompleteSetup() {
  * @returns {$CancellablePromise<boolean>}
  */
 export function IsFirstRun() {
-    return $Call.ByID(3064530420);
+    return $Call.ByID(2551651914);
 }

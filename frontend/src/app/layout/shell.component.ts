@@ -14,7 +14,7 @@ import { WailsService } from '../core/wails.service';
       <aside class="layout-sidebar">
         <div class="layout-logo">
           <i class="pi pi-sparkles logo-icon"></i>
-          <span class="logo-text">FixMyTex</span>
+          <span class="logo-text">KeyLint</span>
         </div>
         <nav class="sidebar-nav">
           <ul>

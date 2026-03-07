@@ -5,7 +5,7 @@ import (
 	"runtime"
 	"testing"
 
-	"fixmytex/internal/features/clipboard"
+	"keylint/internal/features/clipboard"
 )
 
 func hasXclip() bool {
@@ -31,7 +31,7 @@ func TestWrite_And_Read_RoundTrip(t *testing.T) {
 	}
 
 	svc := clipboard.NewService()
-	const text = "hello FixMyTex test"
+	const text = "hello KeyLint test"
 
 	if err := svc.Write(text); err != nil {
 		t.Fatalf("Write: %v", err)

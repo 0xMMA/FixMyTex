@@ -1,4 +1,4 @@
-# FixMyTex — Feature Parity TODO
+# KeyLint — Feature Parity TODO
 
 Audit of gaps between v1 (Rust/Tauri) and v2 (Go/Wails).
 Focus: the two core features — **Silent Fix** and **Pyramidize**.
@@ -13,7 +13,7 @@ Focus: the two core features — **Silent Fix** and **Pyramidize**.
       `window.Hide()` instead. Tray menu already has "Exit" for intentional quit.
 
 - [ ] **Tray icon click / double-click brings window to front** *(v4.0.0-alpha finding)* — clicking or
-      double-clicking the tray icon should show and focus the window. The "Open FixMyTex" menu item
+      double-clicking the tray icon should show and focus the window. The "Open KeyLint" menu item
       calls `tray.ShowWindow()` but the icon itself has no click handler. Add
       `tray.OnClick` / `tray.OnDoubleClick` in `internal/features/tray/service.go`.
 

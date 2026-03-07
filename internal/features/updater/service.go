@@ -11,7 +11,7 @@ import (
 	"github.com/minio/selfupdate"
 )
 
-const defaultLatestJSONURL = "https://github.com/0xMMA/FixMyTex/releases/latest/download/latest.json"
+const defaultLatestJSONURL = "https://github.com/0xMMA/KeyLint/releases/latest/download/latest.json"
 
 // Service checks for updates and can apply them in-place using minio/selfupdate.
 type Service struct {

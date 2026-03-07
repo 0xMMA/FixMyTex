@@ -5,11 +5,11 @@ version: '3'
 
 # This information is used to generate the build assets.
 info:
-  companyName: "FixMyTex"
-  productName: "FixMyTex"
-  productIdentifier: "io.github.fixmytex"
+  companyName: "KeyLint"
+  productName: "KeyLint"
+  productIdentifier: "io.github.keylint"
   description: "AI-powered text enhancement"
-  copyright: "(c) 2026, FixMyTex"
+  copyright: "(c) 2026, KeyLint"
   comments: "Fix grammar, spelling, and improve text clarity with AI"
   version: "3.6.0"
   # cfBundleIconName: "appicon" # The macOS icon name in Assets.car icon bundles (optional)

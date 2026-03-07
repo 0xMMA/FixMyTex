@@ -7,7 +7,7 @@ import (
 	"syscall"
 	"unsafe"
 
-	"fixmytex/internal/logger"
+	"keylint/internal/logger"
 )
 
 // Service reads from and writes to the system clipboard via Win32 APIs.

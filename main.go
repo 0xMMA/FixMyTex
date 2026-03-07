@@ -5,11 +5,11 @@ import (
 	"flag"
 	"log"
 
-	"fixmytex/internal/app"
-	"fixmytex/internal/features/enhance"
-	"fixmytex/internal/features/shortcut"
-	"fixmytex/internal/features/updater"
-	"fixmytex/internal/logger"
+	"keylint/internal/app"
+	"keylint/internal/features/enhance"
+	"keylint/internal/features/shortcut"
+	"keylint/internal/features/updater"
+	"keylint/internal/logger"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
@@ -31,7 +31,7 @@ func main() {
 	flag.Parse()
 
 	wailsApp := application.New(application.Options{
-		Name:        "FixMyTex",
+		Name:        "KeyLint",
 		Description: "AI-powered text enhancement",
 		Assets: application.AssetOptions{
 			Handler: application.AssetFileServerFS(assets),
@@ -63,7 +63,7 @@ func main() {
 	wailsApp.RegisterService(application.NewService(sim))
 
 	window := wailsApp.Window.NewWithOptions(application.WebviewWindowOptions{
-		Title:            "FixMyTex",
+		Title:            "KeyLint",
 		Width:            1280,
 		Height:           800,
 		BackgroundColour: application.NewRGB(27, 38, 54),
