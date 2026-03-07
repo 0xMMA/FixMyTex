@@ -27,4 +27,11 @@ func (s *Service) Setup(window application.Window) {
 		s.app.Quit()
 	})
 	tray.SetMenu(menu)
+
+	tray.OnClick(func() {
+		tray.OpenMenu()
+	})
+	tray.OnDoubleClick(func() {
+		window.Show().Focus()
+	})
 }
