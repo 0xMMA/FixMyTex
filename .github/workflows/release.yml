@@ -102,15 +102,36 @@ jobs:
             -ldflags="-w -s -H windowsgui -X main.AppVersion=${VERSION}" \
             -o bin/KeyLint.exe .
 
+      - name: Install NSIS
+        run: sudo apt-get install -y nsis
+
+      - name: Download WebView2 bootstrapper
+        run: |
+          curl -sSL "https://go.microsoft.com/fwlink/p/?LinkId=2124703" \
+            -o build/windows/nsis/MicrosoftEdgeWebview2Setup.exe
+
+      - name: Build NSIS installer
+        run: |
+          VERSION=$(git describe --tags --always)
+          makensis -DARG_WAILS_AMD64_BINARY=../../../bin/KeyLint.exe \
+            -DINFO_PRODUCTVERSION="${VERSION#v}" \
+            build/windows/nsis/project.nsi
+
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
           name: KeyLint-windows-amd64
           path: bin/KeyLint.exe
 
+      - name: Upload Windows installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: KeyLint-windows-amd64-installer
+          path: bin/KeyLint-amd64-installer.exe
+
   create-release:
     runs-on: ubuntu-latest
-    needs: [build-linux, build-windows]
+    needs: [ build-linux, build-windows ]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -132,11 +153,18 @@ jobs:
           name: KeyLint-windows-amd64
           path: dist/
 
+      - name: Download Windows installer artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: KeyLint-windows-amd64-installer
+          path: dist/
+
       - name: Rename artifacts
         run: |
           VERSION=${{ steps.version.outputs.VERSION }}
           mv dist/KeyLint "dist/KeyLint-${VERSION}-linux-amd64"
           mv dist/KeyLint.exe "dist/KeyLint-${VERSION}-windows-amd64.exe"
+          mv dist/KeyLint-amd64-installer.exe "dist/KeyLint-${VERSION}-windows-amd64-setup.exe"
           chmod +x "dist/KeyLint-${VERSION}-linux-amd64"
 
       - name: Generate latest.json
@@ -155,7 +183,7 @@ jobs:
                 "signature": ""
               },
               "windows-x86_64": {
-                "url": "https://github.com/${REPO}/releases/download/${VERSION}/KeyLint-${VERSION}-windows-amd64.exe",
+                "url": "https://github.com/${REPO}/releases/download/${VERSION}/KeyLint-${VERSION}-windows-amd64-setup.exe",
                 "signature": ""
               }
             }
@@ -170,4 +198,5 @@ jobs:
           files: |
             dist/KeyLint-${{ steps.version.outputs.VERSION }}-linux-amd64
             dist/KeyLint-${{ steps.version.outputs.VERSION }}-windows-amd64.exe
+            dist/KeyLint-${{ steps.version.outputs.VERSION }}-windows-amd64-setup.exe
             dist/latest.json
