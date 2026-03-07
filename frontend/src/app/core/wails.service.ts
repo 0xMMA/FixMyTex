@@ -23,6 +23,7 @@ const BROWSER_MODE_DEFAULTS: Settings = {
   start_on_boot: false,
   theme_preference: 'dark',
   completed_setup: false,
+  debug_logging: false,
 };
 
 @Injectable({ providedIn: 'root' })

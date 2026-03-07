@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"fixmytex/internal/features/settings"
+	"fixmytex/internal/logger"
 )
 
 const systemPrompt = "You are a professional text editor. Fix grammar, spelling, and improve clarity. Return only the improved text."
@@ -25,8 +26,16 @@ func NewService(s *settings.Service) *Service {
 }
 
 // Enhance sends text to the configured AI provider and returns the improved version.
-func (s *Service) Enhance(text string) (string, error) {
+func (s *Service) Enhance(text string) (result string, err error) {
 	cfg := s.settings.Get()
+	logger.Info("enhance: start", "provider", cfg.ActiveProvider, "input_len", len(text))
+	defer func() {
+		if err != nil {
+			logger.Error("enhance: failed", "provider", cfg.ActiveProvider, "err", err)
+		} else {
+			logger.Info("enhance: done", "provider", cfg.ActiveProvider, "output_len", len(result))
+		}
+	}()
 	switch cfg.ActiveProvider {
 	case "openai":
 		key := s.settings.GetKey("openai")

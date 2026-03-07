@@ -12,6 +12,7 @@ export const defaultSettings: Settings = {
   start_on_boot: false,
   theme_preference: 'dark',
   completed_setup: false,
+  debug_logging: false,
 };
 
 export const defaultKeyStatus: KeyStatus = { is_set: false, source: 'none' };

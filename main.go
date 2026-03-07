@@ -9,6 +9,7 @@ import (
 	"fixmytex/internal/features/enhance"
 	"fixmytex/internal/features/shortcut"
 	"fixmytex/internal/features/updater"
+	"fixmytex/internal/logger"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
@@ -44,6 +45,9 @@ func main() {
 		log.Fatalf("failed to initialise app: %v", err)
 	}
 
+	// Initialize structured logger based on the saved setting.
+	logger.Init(services.Settings.Get().DebugLogging)
+
 	// Register backend services so the frontend can call their methods.
 	wailsApp.RegisterService(application.NewService(services.Settings))
 	wailsApp.RegisterService(application.NewService(services.Welcome))
@@ -61,14 +65,21 @@ func main() {
 	services.Tray.Setup()
 
 	// Register the global shortcut (no-op on Linux).
+	// Unregister on shutdown so dev-mode restarts don't leave a stale registration.
 	if err := services.Shortcut.Register(); err != nil {
 		log.Printf("warn: shortcut registration failed: %v", err)
 	}
+	wailsApp.OnShutdown(func() { services.Shortcut.Unregister() })
 
 	// Forward shortcut events to the frontend.
+	// First send Ctrl+C to copy selected text from the source app, then notify
+	// the frontend so it can read the clipboard and enhance the text.
 	go func() {
 		ch := services.Shortcut.Triggered()
 		for event := range ch {
+			if err := services.Clipboard.CopyFromForeground(); err != nil {
+				logger.Warn("shortcut: CopyFromForeground failed", "err", err)
+			}
 			wailsApp.Event.Emit("shortcut:triggered", event.Source)
 		}
 	}()

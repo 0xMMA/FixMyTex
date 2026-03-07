@@ -7,38 +7,71 @@ import (
 	"syscall"
 	"time"
 	"unsafe"
+
+	"fixmytex/internal/logger"
 )
 
 var (
-	clipUser32    = syscall.NewLazyDLL("user32.dll")
-	clipSendInput = clipUser32.NewProc("SendInput")
+	clipUser32             = syscall.NewLazyDLL("user32.dll")
+	clipSendInput          = clipUser32.NewProc("SendInput")
+	clipGetForegroundWindow = clipUser32.NewProc("GetForegroundWindow")
 )
 
 const (
-	inputKeyboard   = 1
-	keyEventKeyUp   = 0x0002
-	vkControl       = 0x11
-	vkV             = 0x56
+	inputKeyboard = 1
+	keyEventKeyUp = 0x0002
+	vkControl     = 0x11
+	vkC           = 0x43
+	vkV           = 0x56
 )
 
-// input mirrors the Win32 INPUT struct (keyboard variant, 40 bytes on 64-bit).
-// Layout: type(4) + pad(4) + wVk(2) + wScan(2) + dwFlags(4) + time(4) +
-//         dwExtraInfo(8) + pad(12) = 40 bytes.
+// pasteInput mirrors the Win32 INPUT struct (keyboard variant, 40 bytes on 64-bit).
+// Go aligns uintptr to 8 bytes, so an explicit uint32 pad is needed before
+// dwExtraInfo to avoid implicit padding that would push the total to 44 bytes.
+// Layout: type(4)+pad(4)+wVk(2)+wScan(2)+dwFlags(4)+time(4)+pad(4)+dwExtraInfo(8)+pad(8) = 40
 type pasteInput struct {
 	inputType   uint32
-	_           uint32
+	_           uint32 // pad: align union to 8 bytes
 	wVk         uint16
 	wScan       uint16
 	dwFlags     uint32
 	time        uint32
-	dwExtraInfo uintptr
-	_           [12]byte
+	_           uint32  // pad: align dwExtraInfo to 8 bytes
+	dwExtraInfo uintptr // must be at offset 24 to match KEYBDINPUT layout
+	_           [8]byte // pad: union is 32 bytes (size of MOUSEINPUT)
+}
+
+// CopyFromForeground sends Ctrl+C to the foreground window via Win32 SendInput,
+// then waits 150 ms for the clipboard to be populated by the source app.
+func (s *Service) CopyFromForeground() error {
+	hwnd, _, _ := clipGetForegroundWindow.Call()
+	logger.Info("clipboard: CopyFromForeground sending Ctrl+C", "foreground_hwnd", hwnd)
+	inputs := [4]pasteInput{
+		{inputType: inputKeyboard, wVk: vkControl},
+		{inputType: inputKeyboard, wVk: vkC},
+		{inputType: inputKeyboard, wVk: vkC, dwFlags: keyEventKeyUp},
+		{inputType: inputKeyboard, wVk: vkControl, dwFlags: keyEventKeyUp},
+	}
+	ret, _, err := clipSendInput.Call(
+		uintptr(len(inputs)),
+		uintptr(unsafe.Pointer(&inputs[0])),
+		unsafe.Sizeof(inputs[0]),
+	)
+	if ret == 0 {
+		logger.Error("clipboard: CopyFromForeground SendInput failed", "err", err)
+		return fmt.Errorf("SendInput (Ctrl+C) failed: %w", err)
+	}
+	time.Sleep(150 * time.Millisecond)
+	logger.Info("clipboard: CopyFromForeground ok")
+	return nil
 }
 
 // PasteToForeground sends Ctrl+V to the foreground window via Win32 SendInput.
 // A 150 ms delay is applied first to let the clipboard write settle.
 func (s *Service) PasteToForeground() error {
 	time.Sleep(150 * time.Millisecond)
+	hwnd, _, _ := clipGetForegroundWindow.Call()
+	logger.Info("clipboard: PasteToForeground sending Ctrl+V", "foreground_hwnd", hwnd)
 	inputs := [4]pasteInput{
 		{inputType: inputKeyboard, wVk: vkControl},
 		{inputType: inputKeyboard, wVk: vkV},
@@ -51,7 +84,9 @@ func (s *Service) PasteToForeground() error {
 		unsafe.Sizeof(inputs[0]),
 	)
 	if ret == 0 {
+		logger.Error("clipboard: SendInput failed", "err", err)
 		return fmt.Errorf("SendInput failed: %w", err)
 	}
+	logger.Info("clipboard: PasteToForeground ok", "inputs_sent", ret)
 	return nil
 }

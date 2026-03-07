@@ -2,6 +2,7 @@ package clipboard_test
 
 import (
 	"os/exec"
+	"runtime"
 	"testing"
 
 	"fixmytex/internal/features/clipboard"
@@ -25,7 +26,7 @@ func TestNewService_CreatesService(t *testing.T) {
 }
 
 func TestWrite_And_Read_RoundTrip(t *testing.T) {
-	if !hasXclip() && !hasXsel() {
+	if runtime.GOOS != "windows" && !hasXclip() && !hasXsel() {
 		t.Skip("xclip and xsel not available, skipping clipboard round-trip test")
 	}
 
@@ -46,6 +47,9 @@ func TestWrite_And_Read_RoundTrip(t *testing.T) {
 }
 
 func TestRead_ReturnsError_WhenNoClipboardTool(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Windows uses native Win32 clipboard, not xclip/xsel")
+	}
 	if hasXclip() || hasXsel() {
 		t.Skip("clipboard tool present, skipping error path test")
 	}

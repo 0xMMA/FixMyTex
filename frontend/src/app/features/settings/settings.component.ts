@@ -68,6 +68,13 @@ interface ProviderKey {
                     optionValue="value"
                   />
                 </div>
+                <div class="form-group inline">
+                  <label>Debug Logging</label>
+                  <p-toggle-switch [(ngModel)]="settings.debug_logging" />
+                </div>
+                <small class="hint-text">
+                  When enabled, writes a <code>debug.log</code> to the app config folder. Takes effect on next launch.
+                </small>
               </p-tabpanel>
 
               <!-- AI Providers / Keys tab -->

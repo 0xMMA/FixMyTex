@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"fixmytex/internal/features/settings"
@@ -13,10 +14,16 @@ import (
 // to avoid writing to the real user config directory.
 func newServiceAt(t *testing.T, dir string) *settings.Service {
 	t.Helper()
-	// Temporarily override XDG_CONFIG_HOME so os.UserConfigDir() returns our dir.
-	original := os.Getenv("XDG_CONFIG_HOME")
-	t.Cleanup(func() { os.Setenv("XDG_CONFIG_HOME", original) })
-	os.Setenv("XDG_CONFIG_HOME", dir)
+	// os.UserConfigDir() reads XDG_CONFIG_HOME on Linux/macOS and APPDATA on Windows.
+	var envKey string
+	if runtime.GOOS == "windows" {
+		envKey = "APPDATA"
+	} else {
+		envKey = "XDG_CONFIG_HOME"
+	}
+	original := os.Getenv(envKey)
+	t.Cleanup(func() { os.Setenv(envKey, original) })
+	os.Setenv(envKey, dir)
 
 	svc, err := settings.NewService()
 	if err != nil {

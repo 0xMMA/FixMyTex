@@ -139,6 +139,14 @@ export class Settings {
              */
             this["completed_setup"] = false;
         }
+        if (!("debug_logging" in $$source)) {
+            /**
+             * writes debug.log to the app config dir
+             * @member
+             * @type {boolean}
+             */
+            this["debug_logging"] = false;
+        }
 
         Object.assign(this, $$source);
     }
