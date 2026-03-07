@@ -8,8 +8,8 @@
   --surface-ground: #0f0f0f;
   --surface-card: #1a1a1a;
   --surface-border: #2a2a2a;
-  --primary: #a78bfa;
-  --primary-hover: #c4b5fd;
+  --primary: #f97316;
+  --primary-hover: #fb923c;
   --text-color: #e2e8f0;
   --text-muted: #94a3b8;
   --radius: 8px;
@@ -92,8 +92,8 @@ nav .container {
 
 .hero-badge {
   display: inline-block;
-  background: rgba(167, 139, 250, 0.1);
-  border: 1px solid rgba(167, 139, 250, 0.3);
+  background: rgba(249, 115, 22, 0.1);
+  border: 1px solid rgba(249, 115, 22, 0.3);
   color: var(--primary);
   font-size: 0.8rem;
   font-weight: 600;
@@ -204,7 +204,7 @@ nav .container {
 }
 
 .feature-card:hover {
-  border-color: rgba(167, 139, 250, 0.4);
+  border-color: rgba(249, 115, 22, 0.4);
 }
 
 .feature-icon {
