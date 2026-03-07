@@ -116,6 +116,15 @@ nav .container {
   color: var(--primary);
 }
 
+.hero h1 .dot {
+  display: inline-block;
+  width: 0.18em;
+  height: 0.18em;
+  background: var(--primary);
+  margin-left: 0.05em;
+  vertical-align: baseline;
+}
+
 .hero h1 kbd {
   font-family: inherit;
   font-size: inherit;
@@ -124,6 +133,7 @@ nav .container {
   border: none;
   padding: 0;
   color: var(--text-muted);
+  letter-spacing: 0;
 }
 
 .hero p {
