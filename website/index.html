@@ -3,14 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KeyLint — AI-powered clipboard text fixer</title>
-  <meta name="description" content="KeyLint fixes and enhances your clipboard text with AI. One hotkey — silent fix, no interruptions. Supports OpenAI, Anthropic, Ollama, and AWS Bedrock." />
-  <meta property="og:title" content="KeyLint — AI-powered clipboard text fixer" />
+  <title>KeyLint — Fix text instantly with AI | One hotkey, perfect writing</title>
+  <meta name="description" content="KeyLint fixes your text instantly with one hotkey. Perfect for emails, chat messages, documents, and social media posts. Supports OpenAI, Anthropic, Ollama, and AWS Bedrock. Free & open source for Windows." />
+  <meta name="theme-color" content="#f97316" />
+  <meta property="og:title" content="KeyLint — Fix text instantly with AI" />
   <meta property="og:description" content="One hotkey. Perfect text. Fixes grammar, tone, and style silently in the background." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://keylint.io" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="KeyLint — Fix text instantly with AI" />
+  <meta name="twitter:description" content="One hotkey. Perfect text. Fixes grammar, tone, and style silently — no app-switching required." />
+  <link rel="canonical" href="https://keylint.io/" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⌨️</text></svg>" />
   <link rel="stylesheet" href="style.css" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "KeyLint",
+    "operatingSystem": "Windows",
+    "applicationCategory": "UtilitiesApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "url": "https://keylint.io",
+    "description": "AI-powered clipboard text fixer. One hotkey — silent fix, no interruptions.",
+    "license": "https://opensource.org/licenses/MIT"
+  }
+  </script>
 </head>
 <body>
 
@@ -28,9 +50,9 @@
   <main>
     <section class="hero">
       <div class="container">
-        <div class="hero-badge">Open Source Desktop App</div>
-        <h1>Fix your text.<br /><span>Instantly.</span></h1>
-        <p>KeyLint watches your clipboard and fixes grammar, tone, and style with AI — triggered by a global hotkey, no app-switching required.</p>
+        <div class="hero-badge">Free & Open Source</div>
+        <h1>Select text<br /><kbd>CTRL+G</kbd><br /><span>Fixed.</span></h1>
+        <p>Perfect for emails, chat messages, documents, and social media posts. No more copy-pasting between tools — KeyLint fixes your text instantly, wherever you're typing.</p>
         <div class="hero-actions">
           <a class="btn btn-primary" href="https://github.com/0xMMA/KeyLint/releases/download/v3.5.0/FixMyTex_3.5.0_x64-setup.exe">
             Download for Windows
@@ -48,34 +70,46 @@
         <h2>Text fixes that stay out of your way</h2>
         <div class="features-grid">
           <div class="feature-card">
-            <div class="feature-icon">⚡</div>
-            <h3>Silent hotkey fix</h3>
-            <p>Press a global shortcut and your clipboard text is fixed and replaced — no window focus, no interruption, no copy-paste loop.</p>
+            <div class="feature-head">
+              <span class="feature-icon">⚡</span>
+              <h3>Silent Fix</h3>
+            </div>
+            <p>Select text in any app. Press the hotkey. Your clipboard text is fixed and written back — no window, no interruption, no copy-paste loop.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon">✍️</div>
-            <h3>Advanced enhancement</h3>
-            <p>Open the full UI to rewrite for tone, brevity, formality, or a custom instruction. Preview before replacing.</p>
+            <div class="feature-head">
+              <span class="feature-icon">✍️</span>
+              <h3>Deep Enhance</h3>
+            </div>
+            <p>Open the enhancement panel to rewrite for tone, brevity, or formality. Preview the result before it replaces your text.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon">🤖</div>
-            <h3>BYOK — Your AI, your keys</h3>
-            <p>Connect your own OpenAI, Anthropic, Ollama, or AWS Bedrock account. Keys stay in your OS keyring — never leave your machine.</p>
+            <div class="feature-head">
+              <span class="feature-icon">🤖</span>
+              <h3>BYOK</h3>
+            </div>
+            <p>Bring your own API key — OpenAI, Anthropic, Ollama, or AWS Bedrock. Keys stay in your OS keyring and never leave your machine.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon">🌍</div>
-            <h3>Multilingual</h3>
-            <p>Automatically detects the language of your text and fixes it in-language without translating.</p>
+            <div class="feature-head">
+              <span class="feature-icon">🌍</span>
+              <h3>Multilingual</h3>
+            </div>
+            <p>Writes in English? Fixed in English. German? Fixed in German. KeyLint detects the language and corrects without translating.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon">🖥️</div>
-            <h3>Lives in your tray</h3>
-            <p>Minimizes to the system tray and stays ready. Single-click for the menu, double-click to open the UI.</p>
+            <div class="feature-head">
+              <span class="feature-icon">🖥️</span>
+              <h3>System Tray</h3>
+            </div>
+            <p>Lives in your system tray. Single-click for the menu, double-click to open. Uses minimal resources.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon">🔒</div>
-            <h3>Private by design</h3>
-            <p>All API calls go through the local Go backend. No telemetry, no cloud sync, no clipboard logging.</p>
+            <div class="feature-head">
+              <span class="feature-icon">🔒</span>
+              <h3>Private</h3>
+            </div>
+            <p>All API calls go through the local Go backend on your machine. No telemetry, no cloud sync, no clipboard history stored.</p>
           </div>
         </div>
       </div>
@@ -95,8 +129,8 @@
 
     <section class="cta">
       <div class="container">
-        <h2>Start fixing text in minutes</h2>
-        <p>Download the latest release, add your API key, and press the hotkey.</p>
+        <h2>Fix your writing in 60 seconds</h2>
+        <p>Download, add your API key, press <kbd>Ctrl+G</kbd>.</p>
         <a class="btn btn-primary" href="https://github.com/0xMMA/KeyLint/releases/download/v3.5.0/FixMyTex_3.5.0_x64-setup.exe">
           Download for Windows
         </a>
