@@ -116,6 +116,16 @@ nav .container {
   color: var(--primary);
 }
 
+.hero h1 kbd {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--text-muted);
+}
+
 .hero p {
   font-size: 1.2rem;
   color: var(--text-muted);
@@ -207,15 +217,33 @@ nav .container {
   border-color: rgba(249, 115, 22, 0.4);
 }
 
+.feature-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
 .feature-icon {
-  font-size: 1.6rem;
-  margin-bottom: 14px;
+  font-size: 1.4rem;
+  flex-shrink: 0;
 }
 
 .feature-card h3 {
   font-size: 1rem;
   font-weight: 600;
-  margin-bottom: 8px;
+}
+
+kbd {
+  display: inline-block;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  padding: 1px 8px;
+  font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', 'Menlo', monospace;
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.6;
 }
 
 .feature-card p {
@@ -271,6 +299,11 @@ nav .container {
 .cta p {
   color: var(--text-muted);
   margin-bottom: 32px;
+}
+
+.cta kbd {
+  background: #1e293b;
+  border-color: #334155;
 }
 
 /* Footer */
