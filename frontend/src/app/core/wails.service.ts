@@ -9,6 +9,7 @@ import * as ClipboardService from '../../../bindings/keylint/internal/features/c
 import * as SimulateService from '../../../bindings/keylint/simulateservice.js';
 import * as EnhanceService from '../../../bindings/keylint/internal/features/enhance/service.js';
 import * as UpdaterService from '../../../bindings/keylint/internal/features/updater/service.js';
+import * as LoggerService from '../../../bindings/keylint/internal/features/logger/service.js';
 import { Settings, KeyStatus } from '../../../bindings/keylint/internal/features/settings/models.js';
 import { UpdateInfo } from '../../../bindings/keylint/internal/features/updater/models.js';
 
@@ -24,6 +25,7 @@ const BROWSER_MODE_DEFAULTS: Settings = {
   theme_preference: 'dark',
   completed_setup: false,
   debug_logging: false,
+  sensitive_logging: false,
 };
 
 @Injectable({ providedIn: 'root' })
@@ -159,6 +161,14 @@ export class WailsService implements OnDestroy {
   simulateShortcut(): Promise<void> {
     if (!isDevMode()) return Promise.resolve();
     return SimulateService.SimulateShortcut();
+  }
+
+  log(level: string, msg: string): Promise<void> {
+    try {
+      return LoggerService.Log(level, msg).catch(() => {});
+    } catch {
+      return Promise.resolve();
+    }
   }
 
   ngOnDestroy(): void {

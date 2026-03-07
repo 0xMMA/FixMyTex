@@ -11,14 +11,17 @@ import (
 )
 
 var (
-	l       = slog.New(slog.NewTextHandler(io.Discard, nil))
-	logFile *os.File
+	l               = slog.New(slog.NewTextHandler(io.Discard, nil))
+	logFile         *os.File
+	sensitiveEnabled bool
 )
 
 // Init enables or disables file logging. When enabled, output goes to
 // %AppData%/KeyLint/debug.log (Windows) or $HOME/.config/KeyLint/debug.log (Linux).
+// sensitive controls whether Sensitive() calls are written to the log.
 // Safe to call only once at startup; not goroutine-safe with concurrent log calls.
-func Init(enabled bool) {
+func Init(enabled, sensitive bool) {
+	sensitiveEnabled = sensitive
 	if logFile != nil {
 		_ = logFile.Close()
 		logFile = nil
@@ -40,10 +43,17 @@ func Init(enabled bool) {
 	}
 	logFile = f
 	l = slog.New(slog.NewTextHandler(f, &slog.HandlerOptions{Level: slog.LevelDebug}))
-	l.Info("logger initialized", "path", logPath)
+	l.Info("logger initialized", "path", logPath, "sensitive", sensitive)
 }
 
 func Info(msg string, args ...any)  { l.Info(msg, args...) }
 func Debug(msg string, args ...any) { l.Debug(msg, args...) }
 func Warn(msg string, args ...any)  { l.Warn(msg, args...) }
 func Error(msg string, args ...any) { l.Error(msg, args...) }
+
+// Sensitive logs only when sensitive logging is enabled. Use for request/response bodies.
+func Sensitive(msg string, args ...any) {
+	if sensitiveEnabled {
+		l.Debug(msg, args...)
+	}
+}

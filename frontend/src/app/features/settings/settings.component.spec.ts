@@ -53,6 +53,20 @@ describe('SettingsComponent', () => {
     expect(el.querySelector('p-tablist')).toBeTruthy();
   });
 
+  it('debug-logging section contains both toggle and hint text', () => {
+    const section = el.querySelector('[data-testid="debug-logging-section"]');
+    expect(section).toBeTruthy();
+    expect(section!.querySelector('p-toggle-switch')).toBeTruthy();
+    expect(section!.querySelector('small')).toBeTruthy();
+  });
+
+  it('sensitive-logging section contains both toggle and hint text', () => {
+    const section = el.querySelector('[data-testid="sensitive-logging-section"]');
+    expect(section).toBeTruthy();
+    expect(section!.querySelector('p-toggle-switch')).toBeTruthy();
+    expect(section!.querySelector('small')).toBeTruthy();
+  });
+
   it('shortcut key input is present with correct initial value', () => {
     const input = el.querySelector<HTMLInputElement>('[data-testid="shortcut-input"]');
     expect(input).toBeTruthy();

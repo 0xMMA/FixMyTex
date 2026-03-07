@@ -7,6 +7,7 @@ import (
 
 	"keylint/internal/app"
 	"keylint/internal/features/enhance"
+	featurelogger "keylint/internal/features/logger"
 	"keylint/internal/features/shortcut"
 	"keylint/internal/features/updater"
 	"keylint/internal/logger"
@@ -46,14 +47,19 @@ func main() {
 		log.Fatalf("failed to initialise app: %v", err)
 	}
 
-	// Initialize structured logger based on the saved setting.
-	logger.Init(services.Settings.Get().DebugLogging)
+	// Initialize structured logger based on the saved settings.
+	cfg := services.Settings.Get()
+	logger.Init(cfg.DebugLogging, cfg.SensitiveLogging)
+	logger.Info("app initializing", "version", AppVersion)
 
 	// Register backend services so the frontend can call their methods.
 	wailsApp.RegisterService(application.NewService(services.Settings))
 	wailsApp.RegisterService(application.NewService(services.Welcome))
 	wailsApp.RegisterService(application.NewService(services.Clipboard))
 	wailsApp.RegisterService(application.NewService(enhance.NewService(services.Settings)))
+
+	// Log service — forwards frontend log messages into debug.log.
+	wailsApp.RegisterService(application.NewService(featurelogger.NewService()))
 
 	// Updater service — AppVersion injected at build time via ldflags.
 	wailsApp.RegisterService(application.NewService(updater.NewService(AppVersion)))
@@ -76,6 +82,8 @@ func main() {
 		e.Cancel()
 	})
 
+	logger.Info("window created")
+
 	// Start the system tray.
 	services.Tray.Setup(window)
 
@@ -83,6 +91,9 @@ func main() {
 	// Unregister on shutdown so dev-mode restarts don't leave a stale registration.
 	if err := services.Shortcut.Register(); err != nil {
 		log.Printf("warn: shortcut registration failed: %v", err)
+		logger.Warn("shortcut: registration failed", "err", err)
+	} else {
+		logger.Info("shortcut: registered", "key", cfg.ShortcutKey)
 	}
 	wailsApp.OnShutdown(func() { services.Shortcut.Unregister() })
 
@@ -93,6 +104,7 @@ func main() {
 	go func() {
 		ch := services.Shortcut.Triggered()
 		for event := range ch {
+			logger.Info("shortcut: triggered", "source", event.Source)
 			if err := services.Clipboard.CopyFromForeground(); err != nil {
 				logger.Warn("shortcut: CopyFromForeground failed", "err", err)
 			}

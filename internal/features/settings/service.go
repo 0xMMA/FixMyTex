@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"keylint/internal/logger"
+
 	keyring "github.com/zalando/go-keyring"
 )
 
@@ -46,10 +48,20 @@ func NewService() (*Service, error) {
 
 func (s *Service) load() error {
 	data, err := os.ReadFile(s.filePath)
-	if err != nil {
+	if os.IsNotExist(err) {
+		logger.Info("settings: file not found, using defaults", "path", s.filePath)
 		return err
 	}
-	return json.Unmarshal(data, &s.current)
+	if err != nil {
+		logger.Error("settings: read failed", "path", s.filePath, "err", err)
+		return err
+	}
+	if err := json.Unmarshal(data, &s.current); err != nil {
+		logger.Error("settings: unmarshal failed", "err", err)
+		return err
+	}
+	logger.Info("settings: loaded", "path", s.filePath)
+	return nil
 }
 
 // Get returns a copy of the current settings.
@@ -64,7 +76,11 @@ func (s *Service) Save(updated Settings) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(s.filePath, data, 0600)
+	if err := os.WriteFile(s.filePath, data, 0600); err != nil {
+		return err
+	}
+	logger.Info("settings: saved", "path", s.filePath)
+	return nil
 }
 
 // GetKeyStatus returns whether an API key is configured for the given provider,

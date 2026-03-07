@@ -22,7 +22,8 @@ type Settings struct {
 	StartOnBoot     bool     `json:"start_on_boot"`
 	ThemePreference string   `json:"theme_preference"` // "light" | "dark" | "system"
 	CompletedSetup  bool     `json:"completed_setup"`
-	DebugLogging    bool     `json:"debug_logging"` // writes debug.log to the app config dir
+	DebugLogging      bool     `json:"debug_logging"`      // writes debug.log to the app config dir
+	SensitiveLogging  bool     `json:"sensitive_logging"`  // logs full API payloads; never share the log file while enabled
 }
 
 // Default returns a Settings with sensible defaults.
