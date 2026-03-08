@@ -22,6 +22,9 @@ var AppVersion = "dev"
 //go:embed all:frontend/dist
 var assets embed.FS
 
+//go:embed build/appicon.png
+var appIcon []byte
+
 func init() {
 	application.RegisterEvent[string]("shortcut:triggered")
 	application.RegisterEvent[string]("settings:changed")
@@ -34,6 +37,7 @@ func main() {
 	wailsApp := application.New(application.Options{
 		Name:        "KeyLint",
 		Description: "AI-powered text enhancement",
+		Icon:        appIcon,
 		Assets: application.AssetOptions{
 			Handler: application.AssetFileServerFS(assets),
 		},
@@ -42,7 +46,7 @@ func main() {
 		},
 	})
 
-	services, err := app.InitializeApp(wailsApp)
+	services, err := app.InitializeApp(wailsApp, app.AppIcon(appIcon))
 	if err != nil {
 		log.Fatalf("failed to initialise app: %v", err)
 	}
