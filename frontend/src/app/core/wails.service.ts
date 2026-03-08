@@ -26,6 +26,7 @@ const BROWSER_MODE_DEFAULTS: Settings = {
   completed_setup: false,
   debug_logging: false,
   sensitive_logging: false,
+  update_channel: '',
 };
 
 @Injectable({ providedIn: 'root' })

@@ -6,27 +6,32 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strconv"
 	"strings"
+
+	"keylint/internal/features/settings"
 
 	"github.com/minio/selfupdate"
 )
 
-const defaultLatestJSONURL = "https://github.com/0xMMA/KeyLint/releases/latest/download/latest.json"
+const defaultReleasesAPIURL = "https://api.github.com/repos/0xMMA/KeyLint/releases?per_page=20"
 
 // Service checks for updates and can apply them in-place using minio/selfupdate.
 type Service struct {
-	currentVersion string
-	latestJSONURL  string
-	client         *http.Client
+	currentVersion  string
+	releasesAPIURL  string
+	client          *http.Client
+	settingsSvc     *settings.Service
 }
 
 // NewService creates an updater Service with the given current version string.
 // The version is typically injected at build time via -ldflags "-X main.AppVersion=x.y.z".
-func NewService(version string) *Service {
+func NewService(version string, settingsSvc *settings.Service) *Service {
 	return &Service{
-		currentVersion: version,
-		latestJSONURL:  defaultLatestJSONURL,
-		client:         &http.Client{},
+		currentVersion:  version,
+		releasesAPIURL:  defaultReleasesAPIURL,
+		client:          &http.Client{},
+		settingsSvc:     settingsSvc,
 	}
 }
 
@@ -35,8 +40,7 @@ func (s *Service) GetVersion() string {
 	return s.currentVersion
 }
 
-// CheckForUpdate fetches latest.json and compares its version against the running binary.
-// Returns an UpdateInfo describing whether an update is available.
+// CheckForUpdate fetches the GitHub Releases API and finds the best available update.
 func (s *Service) CheckForUpdate() (UpdateInfo, error) {
 	info := UpdateInfo{CurrentVersion: s.currentVersion}
 
@@ -45,31 +49,96 @@ func (s *Service) CheckForUpdate() (UpdateInfo, error) {
 		return info, nil
 	}
 
-	resp, err := s.client.Get(s.latestJSONURL)
+	// Resolve effective channel from settings.
+	channel := s.resolveChannel()
+	info.Channel = channel
+
+	req, err := http.NewRequest("GET", s.releasesAPIURL, nil)
 	if err != nil {
-		return info, fmt.Errorf("fetching latest.json: %w", err)
+		return info, fmt.Errorf("creating request: %w", err)
+	}
+	req.Header.Set("Accept", "application/vnd.github+json")
+	req.Header.Set("User-Agent", "KeyLint")
+
+	resp, err := s.client.Do(req)
+	if err != nil {
+		return info, fmt.Errorf("fetching releases: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return info, fmt.Errorf("latest.json returned status %d", resp.StatusCode)
+		return info, fmt.Errorf("releases API returned status %d", resp.StatusCode)
 	}
 
-	var latest LatestJSON
-	if err := json.NewDecoder(resp.Body).Decode(&latest); err != nil {
-		return info, fmt.Errorf("parsing latest.json: %w", err)
+	var releases []githubRelease
+	if err := json.NewDecoder(resp.Body).Decode(&releases); err != nil {
+		return info, fmt.Errorf("parsing releases: %w", err)
 	}
 
-	info.LatestVersion = latest.Version
-	info.Notes = latest.Notes
-
-	key := platformKey()
-	if asset, ok := latest.Platforms[key]; ok {
-		info.ReleaseURL = asset.URL
+	// Find the highest-versioned candidate.
+	var best *githubRelease
+	for i := range releases {
+		r := &releases[i]
+		if r.Draft {
+			continue
+		}
+		if channel == "stable" && r.Prerelease {
+			continue
+		}
+		if best == nil || isNewer(r.TagName, best.TagName) {
+			best = r
+		}
 	}
 
-	info.IsAvailable = isNewer(latest.Version, s.currentVersion)
+	if best == nil {
+		return info, nil
+	}
+
+	info.LatestVersion = strings.TrimPrefix(best.TagName, "v")
+	info.Notes = best.Body
+
+	// Match platform asset by filename substring.
+	info.ReleaseURL = matchPlatformAsset(best.Assets)
+
+	info.IsAvailable = isNewer(best.TagName, s.currentVersion)
 	return info, nil
+}
+
+// resolveChannel determines the effective update channel.
+func (s *Service) resolveChannel() string {
+	if s.settingsSvc != nil {
+		cfg := s.settingsSvc.Get()
+		if cfg.UpdateChannel == "stable" || cfg.UpdateChannel == "pre-release" {
+			return cfg.UpdateChannel
+		}
+	}
+	// Auto-detect from current version.
+	pv := parseVersion(s.currentVersion)
+	if pv.preType < 3 {
+		return "pre-release"
+	}
+	return "stable"
+}
+
+// matchPlatformAsset finds the download URL for the current platform from a list of assets.
+func matchPlatformAsset(assets []githubAsset) string {
+	var substring string
+	switch runtime.GOOS {
+	case "windows":
+		substring = "windows-amd64-setup"
+	default:
+		substring = "linux-amd64"
+	}
+	if runtime.GOARCH == "arm64" {
+		substring = strings.Replace(substring, "amd64", "arm64", 1)
+	}
+
+	for _, a := range assets {
+		if strings.Contains(a.Name, substring) {
+			return a.BrowserDownloadURL
+		}
+	}
+	return ""
 }
 
 // DownloadAndInstall fetches the binary for the current platform and replaces the running exe.
@@ -82,7 +151,7 @@ func (s *Service) DownloadAndInstall() error {
 		return fmt.Errorf("no update available")
 	}
 	if updateInfo.ReleaseURL == "" {
-		return fmt.Errorf("no download URL for platform %s", platformKey())
+		return fmt.Errorf("no download URL for current platform")
 	}
 
 	resp, err := s.client.Get(updateInfo.ReleaseURL)
@@ -108,62 +177,91 @@ func (s *Service) DownloadAndInstall() error {
 	return nil
 }
 
-// platformKey returns the latest.json platforms map key for the current OS/arch.
-func platformKey() string {
-	var osName string
-	switch runtime.GOOS {
-	case "windows":
-		osName = "windows"
-	case "darwin":
-		osName = "darwin"
-	default:
-		osName = "linux"
-	}
-	var arch string
-	switch runtime.GOARCH {
-	case "arm64":
-		arch = "aarch64"
-	default:
-		arch = "x86_64"
-	}
-	return osName + "-" + arch
+// parsedVersion holds the decomposed parts of a semver string with optional pre-release suffix.
+type parsedVersion struct {
+	major   int
+	minor   int
+	patch   int
+	preType int // 0=alpha, 1=beta, 2=rc, 3=stable (no suffix)
+	preNum  int // trailing number from suffix (e.g. rc2 → 2, alpha → 0)
 }
 
-// isNewer returns true when latestVer is strictly newer than currentVer.
-// Both versions may have a leading 'v' prefix.
-func isNewer(latestVer, currentVer string) bool {
-	l := strings.TrimPrefix(latestVer, "v")
-	c := strings.TrimPrefix(currentVer, "v")
-	lp := strings.Split(l, ".")
-	cp := strings.Split(c, ".")
-	// Pad shorter slice.
-	for len(lp) < 3 {
-		lp = append(lp, "0")
+// parseVersion parses a version string like "4.1.8-alpha", "v4.1.8-rc2", "4.1.8".
+func parseVersion(s string) parsedVersion {
+	s = strings.TrimPrefix(s, "v")
+
+	var pv parsedVersion
+	pv.preType = 3 // stable by default
+
+	// Split off pre-release suffix at first hyphen.
+	base := s
+	suffix := ""
+	if idx := strings.IndexByte(s, '-'); idx >= 0 {
+		base = s[:idx]
+		suffix = s[idx+1:]
 	}
-	for len(cp) < 3 {
-		cp = append(cp, "0")
+
+	// Parse major.minor.patch
+	parts := strings.Split(base, ".")
+	if len(parts) >= 1 {
+		pv.major, _ = strconv.Atoi(parts[0])
 	}
-	for i := range 3 {
-		lv := parseIntSafe(lp[i])
-		cv := parseIntSafe(cp[i])
-		if lv > cv {
-			return true
+	if len(parts) >= 2 {
+		pv.minor, _ = strconv.Atoi(parts[1])
+	}
+	if len(parts) >= 3 {
+		pv.patch, _ = strconv.Atoi(parts[2])
+	}
+
+	// Parse pre-release suffix.
+	if suffix != "" {
+		lower := strings.ToLower(suffix)
+		switch {
+		case strings.HasPrefix(lower, "alpha"):
+			pv.preType = 0
+			pv.preNum = parseTrailingInt(lower[5:])
+		case strings.HasPrefix(lower, "beta"):
+			pv.preType = 1
+			pv.preNum = parseTrailingInt(lower[4:])
+		case strings.HasPrefix(lower, "rc"):
+			pv.preType = 2
+			pv.preNum = parseTrailingInt(lower[2:])
+		default:
+			// Unknown suffix — treat as pre-release with lowest priority.
+			pv.preType = 0
+			pv.preNum = 0
 		}
-		if lv < cv {
-			return false
-		}
 	}
-	return false
+
+	return pv
 }
 
-func parseIntSafe(s string) int {
-	n := 0
-	for _, ch := range s {
-		if ch < '0' || ch > '9' {
-			break
-		}
-		n = n*10 + int(ch-'0')
+// parseTrailingInt extracts a number from a string like "2" or "" (returns 0 for empty).
+func parseTrailingInt(s string) int {
+	if s == "" {
+		return 0
 	}
+	n, _ := strconv.Atoi(s)
 	return n
 }
 
+// isNewer returns true when latestVer is strictly newer than currentVer.
+// Both versions may have a leading 'v' prefix and optional pre-release suffixes.
+func isNewer(latestVer, currentVer string) bool {
+	l := parseVersion(latestVer)
+	c := parseVersion(currentVer)
+
+	if l.major != c.major {
+		return l.major > c.major
+	}
+	if l.minor != c.minor {
+		return l.minor > c.minor
+	}
+	if l.patch != c.patch {
+		return l.patch > c.patch
+	}
+	if l.preType != c.preType {
+		return l.preType > c.preType
+	}
+	return l.preNum > c.preNum
+}

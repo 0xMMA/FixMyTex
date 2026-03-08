@@ -194,6 +194,19 @@ describe('SettingsComponent', () => {
       expect(component.updateInfo).toBeNull();
     });
 
+    it('update channel selector renders in About tab', async () => {
+      // Click on the About tab to activate it.
+      const aboutTab = el.querySelector('p-tab[value="about"]') as HTMLElement;
+      aboutTab?.click();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const section = el.querySelector('[data-testid="update-channel-section"]');
+      expect(section).toBeTruthy();
+      expect(section!.querySelector('p-select')).toBeTruthy();
+    });
+
     it('installUpdate() sets updateSuccess on success', async () => {
       wailsMock.downloadAndInstall.mockResolvedValue(undefined);
       component.updateInfo = { ...defaultUpdateInfo, is_available: true, latest_version: '3.7.0' };

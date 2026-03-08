@@ -66,7 +66,7 @@ func main() {
 	wailsApp.RegisterService(application.NewService(featurelogger.NewService()))
 
 	// Updater service — AppVersion injected at build time via ldflags.
-	wailsApp.RegisterService(application.NewService(updater.NewService(AppVersion)))
+	wailsApp.RegisterService(application.NewService(updater.NewService(AppVersion, services.Settings)))
 
 	// Dev-tools shortcut simulation service.
 	sim := &simulateService{shortcut: services.Shortcut}
