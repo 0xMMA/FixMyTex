@@ -39,7 +39,7 @@ Focus: the two core features — **Silent Fix** and **Pyramidize**.
 
 ## Version & Updates
 
-- [ ] **Version + update indicator in main nav** *(v4.0.0-alpha finding)* — display the app version
+- [x] **Version + update indicator in main nav** *(v4.0.0-alpha finding)* — display the app version
       in small text at the bottom-left of the shell nav alongside a single icon that lights up when
       an update is available. Clicking the icon (or version text) should navigate to Settings → About.
       The version string is already available via `wails.getVersion()`; update status via
