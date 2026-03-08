@@ -10,10 +10,10 @@ version: "0.1.0"
 section: "default"
 priority: "extra"
 maintainer: ${GIT_COMMITTER_NAME} <${GIT_COMMITTER_EMAIL}>
-description: "A KeyLint application"
-vendor: "My Company"
-homepage: "https://wails.io"
-license: "MIT"
+description: "AI-powered clipboard text fixer"
+vendor: "KeyLint"
+homepage: "https://keylint.io"
+license: "MIT + Commons Clause"
 release: "1"
 
 contents:
