@@ -3,7 +3,7 @@
 [![Build Linux](https://github.com/0xMMA/KeyLint/actions/workflows/build-linux.yml/badge.svg)](https://github.com/0xMMA/KeyLint/actions/workflows/build-linux.yml)
 [![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/0xMMA/KeyLint?include_prereleases)](https://github.com/0xMMA/KeyLint/releases)
 [![GitHub all releases](https://img.shields.io/github/downloads/0xMMA/KeyLint/total)](https://github.com/0xMMA/KeyLint/releases)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License: MIT + Commons Clause](https://img.shields.io/badge/license-MIT%20%2B%20Commons%20Clause-blue.svg)](LICENSE)
 
 **Fix text instantly with AI — one hotkey, perfect writing.**
 
@@ -46,7 +46,7 @@ Contributions are welcome! Please open an issue or submit a pull request.
 
 ## License
 
-MIT — see [LICENSE](LICENSE) for details.
+MIT + Commons Clause — see [LICENSE](LICENSE) for details.
 
 ---
 
