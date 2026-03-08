@@ -79,7 +79,7 @@ export class ShellComponent implements OnInit, OnDestroy {
   }
 
   goToAbout(): void {
-    void this.router.navigate(['/settings']);
+    void this.router.navigate(['/settings'], { queryParams: { tab: 'about' } });
   }
 
   private async loadVersionInfo(): Promise<void> {

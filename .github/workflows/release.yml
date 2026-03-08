@@ -96,6 +96,16 @@ jobs:
         working-directory: frontend
         run: npm run build
 
+      - name: Generate Windows resource file
+        run: |
+          export PATH=$PATH:$HOME/go/bin
+          wails3 generate syso \
+            -arch amd64 \
+            -icon build/windows/icon.ico \
+            -manifest build/windows/wails.exe.manifest \
+            -info build/windows/info.json \
+            -out wails_windows_amd64.syso
+
       - name: Build Windows binary
         run: |
           export PATH=$PATH:$HOME/go/bin

@@ -2,9 +2,18 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ComponentFixture } from '@angular/core/testing';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { SettingsComponent } from './settings.component';
 import { WailsService } from '../../core/wails.service';
 import { createWailsMock, defaultSettings, defaultKeyStatus, defaultUpdateInfo } from '../../../testing/wails-mock';
+
+function makeActivatedRoute(tab?: string): Partial<ActivatedRoute> {
+  return {
+    snapshot: {
+      queryParamMap: convertToParamMap(tab ? { tab } : {}),
+    } as ActivatedRoute['snapshot'],
+  };
+}
 
 // PrimeNG TabList uses ResizeObserver which is not available in jsdom
 (globalThis as Record<string, unknown>)['ResizeObserver'] = class {
@@ -29,6 +38,7 @@ describe('SettingsComponent', () => {
       providers: [
         provideAnimationsAsync(),
         { provide: WailsService, useValue: wailsMock },
+        { provide: ActivatedRoute, useValue: makeActivatedRoute() },
       ],
     }).compileComponents();
 
@@ -164,6 +174,21 @@ describe('SettingsComponent', () => {
 
     expect(wailsMock.deleteKey).toHaveBeenCalledWith('openai');
     expect(pk.status?.is_set).toBe(false);
+  });
+
+  describe('activeTab from query param', () => {
+    it('defaults to "general" when no tab param is present', async () => {
+      // Outer beforeEach provides makeActivatedRoute() with no tab param
+      await component.ngOnInit();
+      expect(component.activeTab).toBe('general');
+    });
+
+    it('sets activeTab to "about" when tab=about query param is present', async () => {
+      const route = TestBed.inject(ActivatedRoute);
+      vi.spyOn(route.snapshot.queryParamMap, 'get').mockReturnValue('about');
+      await component.ngOnInit();
+      expect(component.activeTab).toBe('about');
+    });
   });
 
   describe('About tab', () => {

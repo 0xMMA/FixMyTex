@@ -103,11 +103,11 @@ describe('ShellComponent — theme / body class', () => {
     expect(el.querySelector('[data-testid="update-indicator"]')).toBeFalsy();
   });
 
-  it('goToAbout navigates to /settings', async () => {
+  it('goToAbout navigates to /settings with tab=about', async () => {
     const fixture = await createAndWait('dark');
     const router = TestBed.inject(Router);
     const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
     fixture.componentInstance.goToAbout();
-    expect(navigateSpy).toHaveBeenCalledWith(['/settings']);
+    expect(navigateSpy).toHaveBeenCalledWith(['/settings'], { queryParams: { tab: 'about' } });
   });
 });

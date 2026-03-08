@@ -9,6 +9,7 @@ import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primeng/tabs';
 import { MessageModule } from 'primeng/message';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
+import { ActivatedRoute } from '@angular/router';
 import { WailsService, Settings as AppSettings, KeyStatus, UpdateInfo } from '../../core/wails.service';
 import { LogService } from '../../core/log.service';
 
@@ -33,7 +34,7 @@ interface ProviderKey {
     <div class="settings-page">
       <p-card>
         @if (settings) {
-          <p-tabs value="general">
+          <p-tabs [value]="activeTab">
             <p-tablist>
               <p-tab value="general">General</p-tab>
               <p-tab value="providers">AI Providers</p-tab>
@@ -320,6 +321,7 @@ export class SettingsComponent implements OnInit {
   settings: AppSettings | null = null;
   saved = false;
   keyError = '';
+  activeTab = 'general';
 
   appVersion = '';
   updateInfo: UpdateInfo | null = null;
@@ -354,12 +356,14 @@ export class SettingsComponent implements OnInit {
   ];
 
   constructor(
+    private readonly route: ActivatedRoute,
     private readonly wails: WailsService,
     private readonly cdr: ChangeDetectorRef,
     private readonly log: LogService,
   ) {}
 
   async ngOnInit(): Promise<void> {
+    this.activeTab = this.route.snapshot.queryParamMap.get('tab') ?? 'general';
     this.settings = await this.wails.loadSettings();
     this.log.info('settings: loaded');
     await this.refreshKeyStatuses();
