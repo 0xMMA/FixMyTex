@@ -7,26 +7,18 @@ Focus: the two core features — **Silent Fix** and **Pyramidize**.
 
 ## System Tray & Window Lifecycle
 
-- [ ] **Minimize to tray on close** *(v4.0.0-alpha finding)* — closing the window should hide it to the
-      system tray rather than quit. Currently `ApplicationShouldTerminateAfterLastWindowClosed: true`
-      in `main.go` causes full exit. Fix: set to `false`, intercept window-close event, and call
-      `window.Hide()` instead. Tray menu already has "Exit" for intentional quit.
+- [x] **Minimize to tray on close** — `ApplicationShouldTerminateAfterLastWindowClosed: false` set in
+      `main.go`; window-close event calls `window.Hide()`.
 
-- [ ] **Tray icon click / double-click brings window to front** *(v4.0.0-alpha finding)* — clicking or
-      double-clicking the tray icon should show and focus the window. The "Open KeyLint" menu item
-      calls `tray.ShowWindow()` but the icon itself has no click handler. Add
-      `tray.OnClick` / `tray.OnDoubleClick` in `internal/features/tray/service.go`.
+- [x] **Tray icon click / double-click brings window to front** — `tray.OnClick` and
+      `tray.OnDoubleClick` handlers added in `internal/features/tray/service.go`.
 
 ---
 
 ## Silent Fix
 
-- [ ] **Auto-paste to source app** *(#1 priority — v4.0.0-alpha confirmed broken)* — after writing
-      fixed text to clipboard, send Ctrl+V back to the originally focused window.
-      Windows: Win32 `SendInput` (v1 used `system_utils.rs` `SendInput()`).
-      Linux: `xdotool key ctrl+v`.
-      The Fix component already writes the result to clipboard (`wails.writeClipboard`) but never
-      sends the keystroke, so the result never reaches the source application.
+- [x] **Auto-paste to source app** — `PasteToForeground` implemented on both platforms:
+      Windows via Win32 `SendInput` (`paste_windows.go`), Linux via `xdotool` (`paste_linux.go`).
 
 - [ ] **Linux hotkey** — currently a no-op stub (`service_linux.go`). Wire up a real global
       shortcut (e.g. `github.com/robotn/gohook` or `xbindkeys` integration).
@@ -94,10 +86,10 @@ The entire v1 `PyramidalAgentService` pipeline needs to be rebuilt in Go + Angul
 
 ## Priority Order
 
-1. **Auto-paste to source app** — the single most important missing feature; silent fix is broken without it
-2. **Minimize to tray on close** — app is unusable as a background tool without this
-3. **Tray icon click brings window to front** — standard tray UX expectation
-4. **Version + update indicator in nav** — polish / discoverability
+1. ~~**Auto-paste to source app**~~ ✓ done
+2. ~~**Minimize to tray on close**~~ ✓ done
+3. ~~**Tray icon click brings window to front**~~ ✓ done
+4. ~~**Version + update indicator in nav**~~ ✓ done
 5. Pyramidize pipeline (core value proposition)
 6. Pyramidize UI controls
 7. Linux hotkey
