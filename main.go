@@ -8,6 +8,7 @@ import (
 	"keylint/internal/app"
 	"keylint/internal/features/enhance"
 	featurelogger "keylint/internal/features/logger"
+	"keylint/internal/features/pyramidize"
 	"keylint/internal/features/shortcut"
 	"keylint/internal/features/updater"
 	"keylint/internal/logger"
@@ -62,6 +63,10 @@ func main() {
 	wailsApp.RegisterService(application.NewService(services.Clipboard))
 	wailsApp.RegisterService(application.NewService(enhance.NewService(services.Settings)))
 
+	// Pyramidize service — captures source app on hotkey and exposes RPC methods.
+	pyramidizeSvc := pyramidize.NewService(services.Settings, services.Clipboard)
+	wailsApp.RegisterService(application.NewService(pyramidizeSvc))
+
 	// Log service — forwards frontend log messages into debug.log.
 	wailsApp.RegisterService(application.NewService(featurelogger.NewService()))
 
@@ -109,6 +114,9 @@ func main() {
 		ch := services.Shortcut.Triggered()
 		for event := range ch {
 			logger.Info("shortcut: triggered", "source", event.Source)
+			// Capture the source app window BEFORE copying from foreground,
+			// so SendBack() can restore focus to the correct window later.
+			pyramidizeSvc.CaptureSourceApp()
 			if err := services.Clipboard.CopyFromForeground(); err != nil {
 				logger.Warn("shortcut: CopyFromForeground failed", "err", err)
 			}
