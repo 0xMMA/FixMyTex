@@ -34,13 +34,21 @@ var serviceSet = wire.NewSet(
 	provideShortcutService,
 )
 
+// AppIcon is the application icon bytes (PNG), used for the tray and window icon.
+type AppIcon []byte
+
 // InitializeApp is the Wire-generated constructor. Run `wire gen ./internal/app/`
 // to produce wire_gen.go. The *application.App is provided externally.
-func InitializeApp(wailsApp *application.App) (*App, error) {
+func InitializeApp(wailsApp *application.App, icon AppIcon) (*App, error) {
 	wire.Build(
 		serviceSet,
-		tray.NewService,
+		provideTrayService,
 		wire.Struct(new(App), "*"),
 	)
 	return nil, nil
+}
+
+// provideTrayService adapts the AppIcon type to the []byte that tray.NewService expects.
+func provideTrayService(app *application.App, icon AppIcon) *tray.Service {
+	return tray.NewService(app, []byte(icon))
 }

@@ -18,20 +18,21 @@
 .layout-logo {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
   padding: 1.5rem 1rem 1rem;
   border-bottom: 1px solid var(--p-surface-700, #3f3f46);
-
-  .logo-icon {
-    font-size: 1.5rem;
-    color: var(--p-primary-color, #f97316);
-  }
 
   .logo-text {
     font-size: 1.25rem;
     font-weight: 700;
-    color: var(--p-primary-color, #f97316);
     letter-spacing: -0.025em;
+  }
+
+  .logo-key {
+    color: var(--p-surface-50, #fff);
+  }
+
+  .logo-lint {
+    color: var(--p-primary-color, #f97316);
   }
 }
 

@@ -13,8 +13,7 @@ import { WailsService } from '../core/wails.service';
     <div class="layout-wrapper">
       <aside class="layout-sidebar">
         <div class="layout-logo">
-          <i class="pi pi-sparkles logo-icon"></i>
-          <span class="logo-text">KeyLint</span>
+          <span class="logo-text"><span class="logo-key">Key</span><span class="logo-lint">Lint</span></span>
         </div>
         <nav class="sidebar-nav">
           <ul>

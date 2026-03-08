@@ -7,12 +7,13 @@ import (
 
 // Service manages the system tray icon and menu.
 type Service struct {
-	app *application.App
+	app  *application.App
+	icon []byte
 }
 
 // NewService creates a new TrayService.
-func NewService(app *application.App) *Service {
-	return &Service{app: app}
+func NewService(app *application.App, icon []byte) *Service {
+	return &Service{app: app, icon: icon}
 }
 
 // Setup initialises the system tray with menu items.
@@ -20,6 +21,9 @@ func NewService(app *application.App) *Service {
 func (s *Service) Setup(window application.Window) {
 	tray := s.app.SystemTray.New()
 	tray.SetLabel("KeyLint")
+	if len(s.icon) > 0 {
+		tray.SetIcon(s.icon)
+	}
 
 	menu := s.app.NewMenu()
 	menu.Add("Open KeyLint").OnClick(func(ctx *application.Context) {

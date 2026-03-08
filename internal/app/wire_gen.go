@@ -20,7 +20,7 @@ import (
 
 // InitializeApp is the Wire-generated constructor. Run `wire gen ./internal/app/`
 // to produce wire_gen.go. The *application.App is provided externally.
-func InitializeApp(wailsApp *application.App) (*App, error) {
+func InitializeApp(wailsApp *application.App, icon AppIcon) (*App, error) {
 	service, err := settings.NewService()
 	if err != nil {
 		return nil, err
@@ -28,7 +28,7 @@ func InitializeApp(wailsApp *application.App) (*App, error) {
 	welcomeService := welcome.NewService(service)
 	shortcutService := provideShortcutService()
 	clipboardService := clipboard.NewService()
-	trayService := tray.NewService(wailsApp)
+	trayService := provideTrayService(wailsApp, icon)
 	app := &App{
 		Settings:  service,
 		Welcome:   welcomeService,
@@ -56,3 +56,11 @@ func provideShortcutService() shortcut.Service {
 }
 
 var serviceSet = wire.NewSet(settings.NewService, welcome.NewService, clipboard.NewService, provideShortcutService)
+
+// AppIcon is the application icon bytes (PNG), used for the tray and window icon.
+type AppIcon []byte
+
+// provideTrayService adapts the AppIcon type to the []byte that tray.NewService expects.
+func provideTrayService(app *application.App, icon AppIcon) *tray.Service {
+	return tray.NewService(app, []byte(icon))
+}
