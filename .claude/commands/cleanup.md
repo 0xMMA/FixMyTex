@@ -20,11 +20,18 @@ Sync the local repo with `origin`, prune stale remote refs, and fast-forward the
    - If any remote-tracking branches were pruned, list them
    - If fetch fails, report the error and stop
 
-3. **Pull**
+3. **Delete stale local branches**
+   - Run `git branch -vv` and find branches whose upstream is marked `[gone]`
+   - Skip the current branch — never delete the branch you're on
+   - For each stale branch: `git branch -d <branch>` (safe delete — will refuse if unmerged)
+   - If `-d` fails on a branch (unmerged work): warn the user and skip that branch
+   - List any deleted branches and any that were skipped
+
+4. **Pull**
    - `git pull`
    - If pull fails (e.g. diverged history): report the error and stop — never force-pull
 
-4. **Report outcome**
+5. **Report outcome**
    - Current branch (`git branch --show-current`)
    - Latest commit (`git log --oneline -1`)
    - Confirm clean status
