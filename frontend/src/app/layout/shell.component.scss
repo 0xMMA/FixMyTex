@@ -87,6 +87,36 @@
   }
 }
 
+.sidebar-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--p-surface-700, #3f3f46);
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: var(--p-surface-800, #27272a);
+  }
+
+  .version-text {
+    font-size: 0.75rem;
+    color: var(--p-surface-400, #a1a1aa);
+  }
+
+  .update-indicator {
+    font-size: 0.875rem;
+    color: var(--p-primary-color, #f97316);
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
 .layout-main {
   flex: 1;
   overflow: auto;

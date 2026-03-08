@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { isDevMode } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { WailsService } from '../core/wails.service';
@@ -47,6 +47,12 @@ import { WailsService } from '../core/wails.service';
             }
           </ul>
         </nav>
+        <div class="sidebar-footer" data-testid="version-footer" (click)="goToAbout()">
+          <span class="version-text">v{{ appVersion || '…' }}</span>
+          @if (updateAvailable) {
+            <i class="pi pi-arrow-circle-up update-indicator" data-testid="update-indicator" title="Update available"></i>
+          }
+        </div>
       </aside>
       <div class="layout-main">
         <router-outlet />
@@ -56,13 +62,36 @@ import { WailsService } from '../core/wails.service';
 })
 export class ShellComponent implements OnInit, OnDestroy {
   readonly dev = isDevMode();
+  appVersion = '';
+  updateAvailable = false;
   private sub?: Subscription;
 
-  constructor(private readonly wails: WailsService) {}
+  constructor(
+    private readonly wails: WailsService,
+    private readonly router: Router,
+    private readonly cdr: ChangeDetectorRef,
+  ) {}
 
   ngOnInit(): void {
     void this.applyTheme();
+    void this.loadVersionInfo();
     this.sub = this.wails.settingsChanged$.subscribe(() => void this.applyTheme());
+  }
+
+  goToAbout(): void {
+    void this.router.navigate(['/settings']);
+  }
+
+  private async loadVersionInfo(): Promise<void> {
+    this.appVersion = await this.wails.getVersion();
+    this.cdr.detectChanges();
+    try {
+      const info = await this.wails.checkForUpdate();
+      this.updateAvailable = info.is_available;
+    } catch {
+      // Silently ignore — update check is best-effort.
+    }
+    this.cdr.detectChanges();
   }
 
   ngOnDestroy(): void {

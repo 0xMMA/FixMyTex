@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ComponentFixture } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { ShellComponent } from './shell.component';
 import { WailsService } from '../core/wails.service';
-import { createWailsMock, defaultSettings } from '../../testing/wails-mock';
+import { createWailsMock, defaultSettings, defaultUpdateInfo } from '../../testing/wails-mock';
 
 describe('ShellComponent — theme / body class', () => {
   let wailsMock: ReturnType<typeof createWailsMock>;
@@ -67,5 +67,47 @@ describe('ShellComponent — theme / body class', () => {
     const el: HTMLElement = fixture.nativeElement;
     expect(el.querySelector('.layout-sidebar')).toBeTruthy();
     expect(el.querySelector('nav.sidebar-nav')).toBeTruthy();
+  });
+
+  it('displays version in sidebar footer', async () => {
+    wailsMock.getVersion.mockResolvedValue('4.1.7');
+    const fixture = await createAndWait('dark');
+    const el: HTMLElement = fixture.nativeElement;
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const footer = el.querySelector('[data-testid="version-footer"]');
+    expect(footer).toBeTruthy();
+    expect(footer!.textContent).toContain('v4.1.7');
+  });
+
+  it('shows update indicator when update is available', async () => {
+    wailsMock.getVersion.mockResolvedValue('4.1.7');
+    wailsMock.checkForUpdate.mockResolvedValue({ ...defaultUpdateInfo, is_available: true, latest_version: '4.1.8' });
+    const fixture = await createAndWait('dark');
+    const el: HTMLElement = fixture.nativeElement;
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(el.querySelector('[data-testid="update-indicator"]')).toBeTruthy();
+  });
+
+  it('hides update indicator when no update is available', async () => {
+    wailsMock.getVersion.mockResolvedValue('4.1.8');
+    wailsMock.checkForUpdate.mockResolvedValue({ ...defaultUpdateInfo, is_available: false });
+    const fixture = await createAndWait('dark');
+    const el: HTMLElement = fixture.nativeElement;
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(el.querySelector('[data-testid="update-indicator"]')).toBeFalsy();
+  });
+
+  it('goToAbout navigates to /settings', async () => {
+    const fixture = await createAndWait('dark');
+    const router = TestBed.inject(Router);
+    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    fixture.componentInstance.goToAbout();
+    expect(navigateSpy).toHaveBeenCalledWith(['/settings']);
   });
 });
