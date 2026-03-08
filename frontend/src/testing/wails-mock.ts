@@ -14,6 +14,7 @@ export const defaultSettings: Settings = {
   completed_setup: false,
   debug_logging: false,
   sensitive_logging: false,
+  update_channel: '',
 };
 
 export const defaultKeyStatus: KeyStatus = { is_set: false, source: 'none' };
@@ -24,6 +25,7 @@ export const defaultUpdateInfo: UpdateInfo = {
   current_version: '3.6.0',
   release_url: '',
   notes: '',
+  channel: '',
 };
 
 export function createWailsMock() {

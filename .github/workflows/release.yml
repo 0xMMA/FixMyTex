@@ -196,10 +196,21 @@ jobs:
           }
           EOF
 
+      - name: Detect pre-release tag
+        id: prerelease
+        run: |
+          TAG="${{ github.ref_name }}"
+          if [[ "$TAG" =~ -(alpha|beta|rc) ]]; then
+            echo "IS_PRERELEASE=true" >> $GITHUB_OUTPUT
+          else
+            echo "IS_PRERELEASE=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           draft: true
+          prerelease: ${{ steps.prerelease.outputs.IS_PRERELEASE == 'true' }}
           generate_release_notes: true
           files: |
             dist/KeyLint-${{ steps.version.outputs.VERSION }}-linux-amd64

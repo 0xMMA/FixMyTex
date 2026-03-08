@@ -50,6 +50,13 @@ export class UpdateInfo {
              */
             this["notes"] = "";
         }
+        if (!("channel" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["channel"] = "";
+        }
 
         Object.assign(this, $$source);
     }

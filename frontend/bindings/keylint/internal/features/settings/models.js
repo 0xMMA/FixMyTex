@@ -155,6 +155,14 @@ export class Settings {
              */
             this["sensitive_logging"] = false;
         }
+        if (!("update_channel" in $$source)) {
+            /**
+             * "" (auto-detect), "stable", or "pre-release"
+             * @member
+             * @type {string}
+             */
+            this["update_channel"] = "";
+        }
 
         Object.assign(this, $$source);
     }

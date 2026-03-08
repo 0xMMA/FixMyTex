@@ -24,6 +24,7 @@ type Settings struct {
 	CompletedSetup  bool     `json:"completed_setup"`
 	DebugLogging      bool     `json:"debug_logging"`      // writes debug.log to the app config dir
 	SensitiveLogging  bool     `json:"sensitive_logging"`  // logs full API payloads; never share the log file while enabled
+	UpdateChannel     string   `json:"update_channel"`     // "" (auto-detect), "stable", or "pre-release"
 }
 
 // Default returns a Settings with sensible defaults.

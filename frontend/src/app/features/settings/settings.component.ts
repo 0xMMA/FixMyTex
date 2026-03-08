@@ -177,6 +177,17 @@ interface ProviderKey {
                 <p>Built with Go, Angular, and PrimeNG.</p>
                 <p data-testid="app-version">Version: {{ appVersion }}</p>
 
+                <div class="form-group mt-3" data-testid="update-channel-section">
+                  <label>Update Channel</label>
+                  <p-select
+                    [(ngModel)]="settings.update_channel"
+                    [options]="updateChannels"
+                    optionLabel="label"
+                    optionValue="value"
+                  />
+                  <small class="hint-text">Auto detects from your current version: pre-release versions check for pre-releases, stable versions check for stable only.</small>
+                </div>
+
                 <div class="mt-3">
                   <p-button
                     data-testid="check-update-btn"
@@ -328,6 +339,12 @@ export class SettingsComponent implements OnInit {
     { label: 'Dark', value: 'dark' },
     { label: 'Light', value: 'light' },
     { label: 'System', value: 'system' },
+  ];
+
+  readonly updateChannels = [
+    { label: 'Auto (detect from version)', value: '' },
+    { label: 'Stable', value: 'stable' },
+    { label: 'Pre-release', value: 'pre-release' },
   ];
 
   providerKeys: ProviderKey[] = [
