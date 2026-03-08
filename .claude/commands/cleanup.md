@@ -21,15 +21,19 @@ Sync the local repo with `origin`, prune stale remote refs, and fast-forward the
    - If fetch fails, report the error and stop
 
 3. **Delete stale local branches**
-   - Run `git branch -vv` and find branches whose upstream is marked `[gone]`
-   - Skip the current branch — never delete the branch you're on
-   - For each stale branch, try `git branch -d <branch>` first (fast-forward merge check)
+   - Collect candidate branches: all local branches other than `main` (including the current one)
+   - For each candidate, determine its status:
+     a. **Has a merged PR** — check with `gh pr list --head <branch> --state merged --json number --jq '.[0].number'`
+     b. **Has an open PR** — skip, still in progress
+     c. **No PR exists** — skip, could be local WIP (just mention it in the report)
+   - For branches with a merged PR, try `git branch -d <branch>` first
    - If `-d` fails (common with squash merges), verify the branch's work is in `main`:
      1. Find files the branch changed: `git diff --name-only $(git merge-base main <branch>) <branch>`
-     2. Check if those files differ between main and the branch: `git diff main <branch> -- <those files>`
+     2. Check those files against main: `git diff main <branch> -- <those files>`
      3. If that diff is empty (or only shows files added to main *after* the branch): safe to `git branch -D <branch>`
-     4. If the branch has file content not present in main: warn the user and skip that branch
-   - List deleted branches and any that were skipped with reasons
+     4. If the branch has content not present in main: warn the user and skip it
+   - If the current branch is being deleted, `git checkout main` first, then delete it
+   - List deleted branches, skipped branches (with reasons), and any local-only branches
 
 4. **Pull**
    - `git pull`
