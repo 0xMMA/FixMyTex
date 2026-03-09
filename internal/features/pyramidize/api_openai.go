@@ -13,13 +13,16 @@ import (
 // callOpenAI sends a system + user message pair to the OpenAI chat completions API
 // and returns the raw content string of the first choice. It requests JSON object
 // output mode so the model is constrained to return valid JSON.
-func callOpenAI(client *http.Client, systemPrompt, userMessage, apiKey string) (string, error) {
+func callOpenAI(client *http.Client, systemPrompt, userMessage, apiKey, model string) (string, error) {
+	if model == "" {
+		model = "gpt-5.2"
+	}
 	type msg struct {
 		Role    string `json:"role"`
 		Content string `json:"content"`
 	}
 	payload, err := json.Marshal(map[string]any{
-		"model": "gpt-4o-mini",
+		"model": model,
 		"messages": []msg{
 			{Role: "system", Content: systemPrompt},
 			{Role: "user", Content: userMessage},

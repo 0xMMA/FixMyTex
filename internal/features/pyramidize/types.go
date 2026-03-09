@@ -7,6 +7,8 @@ type PyramidizeRequest struct {
 	CommunicationStyle string `json:"communicationStyle"` // "professional"|"casual"|"concise"|"detailed"|"persuasive"|"neutral"|"diplomatic"|"direct"
 	RelationshipLevel  string `json:"relationshipLevel"`  // "close"|"professional"|"authority"|"public"
 	CustomInstructions string `json:"customInstructions"` // optional, not persisted
+	Provider           string `json:"provider"`           // optional override: "claude"|"openai"|"ollama" — falls back to settings.ActiveProvider
+	Model              string `json:"model"`              // optional override, e.g. "claude-sonnet-4-6" — falls back to provider default
 }
 
 // PyramidizeResult is the RPC response from the main Pyramidize call.
@@ -32,6 +34,8 @@ type RefineGlobalRequest struct {
 	DocumentType       string `json:"documentType"`
 	CommunicationStyle string `json:"communicationStyle"`
 	RelationshipLevel  string `json:"relationshipLevel"`
+	Provider           string `json:"provider"`
+	Model              string `json:"model"`
 }
 
 // RefineGlobalResult is the RPC response for a full-canvas AI revision.
@@ -45,6 +49,8 @@ type SpliceRequest struct {
 	OriginalText string `json:"originalText"`
 	SelectedText string `json:"selectedText"`
 	Instruction  string `json:"instruction"`
+	Provider     string `json:"provider"`
+	Model        string `json:"model"`
 }
 
 // SpliceResult is the RPC response for rewriting a selected canvas section.

@@ -90,14 +90,16 @@ func (svc *Service) Pyramidize(req PyramidizeRequest) (PyramidizeResult, error) 
 	defer cancel()
 
 	cfg := svc.settings.Get()
-	logger.Info("pyramidize: start", "docType", req.DocumentType, "provider", cfg.ActiveProvider)
+	opts := aiOpts{provider: req.Provider, model: req.Model}
+	logger.Info("pyramidize: start", "docType", req.DocumentType, "provider", cfg.ActiveProvider,
+		"overrideProvider", req.Provider, "overrideModel", req.Model)
 
 	var result PyramidizeResult
 	docType := strings.ToLower(req.DocumentType)
 
 	// Step 1: Auto-detect if needed
 	if docType == "auto" {
-		detected, err := svc.detect(ctx, cfg, req.Text)
+		detected, err := svc.detect(ctx, cfg, opts, req.Text)
 		if err != nil {
 			if ctx.Err() != nil {
 				return PyramidizeResult{}, fmt.Errorf("cancelled")
@@ -116,7 +118,7 @@ func (svc *Service) Pyramidize(req PyramidizeRequest) (PyramidizeResult, error) 
 	}
 
 	// Step 2: Foundation generation
-	foundation, err := svc.foundation(ctx, cfg, req, docType)
+	foundation, err := svc.foundation(ctx, cfg, opts, req, docType)
 	if err != nil {
 		if ctx.Err() != nil {
 			return PyramidizeResult{}, fmt.Errorf("cancelled")
@@ -145,7 +147,7 @@ func (svc *Service) Pyramidize(req PyramidizeRequest) (PyramidizeResult, error) 
 		logger.Info("pyramidize: quality below threshold, refining",
 			"score", foundation.QualityScore, "flags", foundation.QualityFlags, "threshold", threshold)
 
-		refined, err := svc.refine(ctx, cfg, req.Text, foundation.FullDocument, foundation.QualityFlags)
+		refined, err := svc.refine(ctx, cfg, opts, req.Text, foundation.FullDocument, foundation.QualityFlags)
 		if err != nil {
 			if ctx.Err() != nil {
 				return PyramidizeResult{}, fmt.Errorf("cancelled")
@@ -183,12 +185,13 @@ func (svc *Service) RefineGlobal(req RefineGlobalRequest) (RefineGlobalResult, e
 	defer cancel()
 
 	cfg := svc.settings.Get()
+	opts := aiOpts{provider: req.Provider, model: req.Model}
 	systemPrompt, userMessage := buildGlobalRefinePrompt(
 		req.FullCanvas, req.OriginalText, req.Instruction,
 		req.DocumentType, req.CommunicationStyle, req.RelationshipLevel,
 	)
 
-	raw, err := svc.callAIWithContext(ctx, cfg, systemPrompt, userMessage)
+	raw, err := svc.callAIWithContext(ctx, cfg, opts, systemPrompt, userMessage)
 	if err != nil {
 		if ctx.Err() != nil {
 			return RefineGlobalResult{}, fmt.Errorf("cancelled")
@@ -212,11 +215,12 @@ func (svc *Service) Splice(req SpliceRequest) (SpliceResult, error) {
 	defer cancel()
 
 	cfg := svc.settings.Get()
+	opts := aiOpts{provider: req.Provider, model: req.Model}
 	systemPrompt, userMessage := buildSplicePrompt(
 		req.FullCanvas, req.OriginalText, req.SelectedText, req.Instruction,
 	)
 
-	raw, err := svc.callAIWithContext(ctx, cfg, systemPrompt, userMessage)
+	raw, err := svc.callAIWithContext(ctx, cfg, opts, systemPrompt, userMessage)
 	if err != nil {
 		if ctx.Err() != nil {
 			return SpliceResult{}, fmt.Errorf("cancelled")
@@ -300,10 +304,17 @@ func (svc *Service) SetQualityThreshold(v float64) error {
 	return svc.settings.Save(cfg)
 }
 
+// aiOpts carries optional provider/model overrides for a single pipeline run.
+// Empty strings fall back to the configured defaults.
+type aiOpts struct {
+	provider string // if empty, uses cfg.ActiveProvider
+	model    string // if empty, uses provider built-in default
+}
+
 // --- internal pipeline helpers ---
 
-func (svc *Service) detect(ctx context.Context, cfg settings.Settings, text string) (detectResult, error) {
-	raw, err := svc.callAIWithContext(ctx, cfg, detectPromptTemplate, text)
+func (svc *Service) detect(ctx context.Context, cfg settings.Settings, opts aiOpts, text string) (detectResult, error) {
+	raw, err := svc.callAIWithContext(ctx, cfg, opts, detectPromptTemplate, text)
 	if err != nil {
 		return detectResult{}, err
 	}
@@ -314,9 +325,9 @@ func (svc *Service) detect(ctx context.Context, cfg settings.Settings, text stri
 	return r, nil
 }
 
-func (svc *Service) foundation(ctx context.Context, cfg settings.Settings, req PyramidizeRequest, docType string) (foundationResult, error) {
+func (svc *Service) foundation(ctx context.Context, cfg settings.Settings, opts aiOpts, req PyramidizeRequest, docType string) (foundationResult, error) {
 	systemPrompt, userMessage := buildDocTypePrompt(docType, req.CommunicationStyle, req.RelationshipLevel, req.CustomInstructions, req.Text)
-	raw, err := svc.callAIWithContext(ctx, cfg, systemPrompt, userMessage)
+	raw, err := svc.callAIWithContext(ctx, cfg, opts, systemPrompt, userMessage)
 	if err != nil {
 		return foundationResult{}, err
 	}
@@ -327,9 +338,9 @@ func (svc *Service) foundation(ctx context.Context, cfg settings.Settings, req P
 	return r, nil
 }
 
-func (svc *Service) refine(ctx context.Context, cfg settings.Settings, originalText, failedOutput string, flags []string) (refineResult, error) {
+func (svc *Service) refine(ctx context.Context, cfg settings.Settings, opts aiOpts, originalText, failedOutput string, flags []string) (refineResult, error) {
 	systemPrompt, userMessage := buildRefinePrompt(originalText, failedOutput, flags)
-	raw, err := svc.callAIWithContext(ctx, cfg, systemPrompt, userMessage)
+	raw, err := svc.callAIWithContext(ctx, cfg, opts, systemPrompt, userMessage)
 	if err != nil {
 		return refineResult{}, err
 	}
@@ -356,7 +367,7 @@ func buildDocTypePrompt(docType, style, relationship, customInstructions, text s
 
 // callAIWithContext runs an AI call in a goroutine and returns when the call
 // completes or the context is cancelled (whichever comes first).
-func (svc *Service) callAIWithContext(ctx context.Context, cfg settings.Settings, systemPrompt, userMessage string) (string, error) {
+func (svc *Service) callAIWithContext(ctx context.Context, cfg settings.Settings, opts aiOpts, systemPrompt, userMessage string) (string, error) {
 	type result struct {
 		out string
 		err error
@@ -364,7 +375,7 @@ func (svc *Service) callAIWithContext(ctx context.Context, cfg settings.Settings
 	ch := make(chan result, 1)
 
 	go func() {
-		out, err := svc.callAISync(cfg, systemPrompt, userMessage)
+		out, err := svc.callAISync(cfg, opts, systemPrompt, userMessage)
 		ch <- result{out, err}
 	}()
 
@@ -376,25 +387,31 @@ func (svc *Service) callAIWithContext(ctx context.Context, cfg settings.Settings
 	}
 }
 
-// callAISync dispatches to the configured provider synchronously.
-func (svc *Service) callAISync(cfg settings.Settings, systemPrompt, userMessage string) (string, error) {
-	switch cfg.ActiveProvider {
+// callAISync dispatches to the configured (or overridden) provider synchronously.
+func (svc *Service) callAISync(cfg settings.Settings, opts aiOpts, systemPrompt, userMessage string) (string, error) {
+	provider := opts.provider
+	if provider == "" {
+		provider = cfg.ActiveProvider
+	}
+	model := opts.model
+
+	switch provider {
 	case "openai":
 		key := svc.settings.GetKey("openai")
 		if key == "" {
 			return "", fmt.Errorf("OpenAI API key is not configured — go to Settings → AI Providers")
 		}
-		return callOpenAI(svc.client, systemPrompt, userMessage, key)
+		return callOpenAI(svc.client, systemPrompt, userMessage, key, model)
 	case "claude":
 		key := svc.settings.GetKey("claude")
 		if key == "" {
 			return "", fmt.Errorf("Anthropic API key is not configured — go to Settings → AI Providers")
 		}
-		return callClaude(svc.client, systemPrompt, userMessage, key)
+		return callClaude(svc.client, systemPrompt, userMessage, key, model)
 	case "ollama":
-		return callOllama(svc.client, systemPrompt, userMessage, cfg.Providers.OllamaURL)
+		return callOllama(svc.client, systemPrompt, userMessage, cfg.Providers.OllamaURL, model)
 	default:
-		return "", fmt.Errorf("unsupported provider: %q", cfg.ActiveProvider)
+		return "", fmt.Errorf("unsupported provider: %q", provider)
 	}
 }
 

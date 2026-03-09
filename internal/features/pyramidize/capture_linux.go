@@ -29,13 +29,17 @@ func captureSourceApp() (name string, windowID string) {
 }
 
 // sendBackToWindow focuses the given xdotool window and sends Ctrl+V to paste.
-// This is best-effort on Linux; returns nil if windowID is empty.
+// Best-effort: returns nil if windowID is empty or xdotool is not available.
 func sendBackToWindow(windowID string) error {
 	if windowID == "" {
 		return nil
 	}
-	if err := exec.Command("xdotool", "windowfocus", windowID).Run(); err != nil {
-		return err
+	if _, err := exec.LookPath("xdotool"); err != nil {
+		return nil // xdotool not installed — silently skip
 	}
-	return exec.Command("xdotool", "key", "--window", windowID, "ctrl+v").Run()
+	if err := exec.Command("xdotool", "windowfocus", windowID).Run(); err != nil {
+		return nil // best-effort — focus may fail if window closed
+	}
+	_ = exec.Command("xdotool", "key", "--window", windowID, "ctrl+v").Run()
+	return nil
 }

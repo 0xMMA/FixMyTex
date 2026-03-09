@@ -12,9 +12,12 @@ import (
 
 // callClaude sends a system + user message pair to the Anthropic Messages API
 // and returns the raw text of the first content block.
-func callClaude(client *http.Client, systemPrompt, userMessage, apiKey string) (string, error) {
+func callClaude(client *http.Client, systemPrompt, userMessage, apiKey, model string) (string, error) {
+	if model == "" {
+		model = "claude-sonnet-4-6"
+	}
 	payload, err := json.Marshal(map[string]any{
-		"model":      "claude-haiku-4-5-20251001",
+		"model":      model,
 		"max_tokens": 4096,
 		"system":     systemPrompt,
 		"messages": []map[string]string{

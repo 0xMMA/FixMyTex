@@ -162,6 +162,95 @@ func TestUnmarshalRobust(t *testing.T) {
 	})
 }
 
+// --- repairJSONStrings ---
+
+func TestRepairJSONStrings(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{
+			name:  "no repair needed",
+			input: `{"key": "value"}`,
+			want:  `{"key": "value"}`,
+		},
+		{
+			name:  "already escaped quote",
+			input: `{"key": "say \"hi\""}`,
+			want:  `{"key": "say \"hi\""}`,
+		},
+		{
+			name:  "unescaped quote in value — not followed by structural char",
+			input: `{"fullDocument": "he said "hello" and left"}`,
+			want:  `{"fullDocument": "he said \"hello\" and left"}`,
+		},
+		{
+			name:  "real-world LLM output: German email with unescaped close quote",
+			// The closing " of a quoted phrase is followed by a space then a word —
+			// not a structural char. The repair should escape it.
+			input: `{"fullDocument": "next Steps Projekt "Qlik Sense" abgeschlossen","qualityScore":0.9,"qualityFlags":[]}`,
+			want:  `{"fullDocument": "next Steps Projekt \"Qlik Sense\" abgeschlossen","qualityScore":0.9,"qualityFlags":[]}`,
+		},
+		{
+			name:  "multiple unescaped quotes in one value",
+			input: `{"text": "word "one" and "two" here"}`,
+			want:  `{"text": "word \"one\" and \"two\" here"}`,
+		},
+		{
+			name:  "quote at end of value — structural comma follows",
+			input: `{"a": "val", "b": "other"}`,
+			want:  `{"a": "val", "b": "other"}`,
+		},
+		{
+			name:  "empty value",
+			input: `{"k": ""}`,
+			want:  `{"k": ""}`,
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got := repairJSONStrings(tc.input)
+			if got != tc.want {
+				t.Errorf("repairJSONStrings:\ninput: %s\ngot:   %s\nwant:  %s", tc.input, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestUnmarshalRobustRepairs(t *testing.T) {
+	t.Run("unescaped quote in fullDocument value", func(t *testing.T) {
+		// Simulates the real bug: Claude returns JSON where the document text
+		// contains an unescaped " char (e.g. „Qlik Sense" with ASCII closing quote).
+		raw := "```json\n{\"fullDocument\": \"next Steps Projekt \\u201eQlik Sense\\\" abgeschlossen\",\"headers\":[],\"language\":\"de\",\"qualityScore\":0.9,\"qualityFlags\":[]}\n```"
+		// Use a simpler direct case that matches the actual failure scenario:
+		raw2 := `{"fullDocument": "Steps "Qlik Sense" done","headers":[],"language":"de","qualityScore":0.85,"qualityFlags":[]}`
+		var r foundationResult
+		if err := unmarshalRobust(raw2, &r); err != nil {
+			t.Fatalf("unmarshalRobust failed on unescaped quote input: %v", err)
+		}
+		if r.Language != "de" {
+			t.Errorf("expected language 'de', got %q", r.Language)
+		}
+		if r.QualityScore != 0.85 {
+			t.Errorf("expected qualityScore 0.85, got %v", r.QualityScore)
+		}
+		_ = raw
+	})
+
+	t.Run("trailing content after JSON object", func(t *testing.T) {
+		// json.Decoder handles trailing content; json.Unmarshal does not.
+		var r detectResult
+		raw := `{"type":"EMAIL","language":"en","confidence":0.95}  extra stuff`
+		if err := unmarshalRobust(raw, &r); err != nil {
+			t.Fatalf("unmarshalRobust failed on trailing content: %v", err)
+		}
+		if r.Type != "EMAIL" {
+			t.Errorf("expected type EMAIL, got %q", r.Type)
+		}
+	})
+}
+
 // --- LookupDocType ---
 
 func TestLookupDocType(t *testing.T) {

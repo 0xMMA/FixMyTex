@@ -13,9 +13,12 @@ import (
 // callOllama sends a combined system+user prompt to the Ollama /api/generate endpoint
 // and returns the raw response string. JSON output mode is not enforced at the API
 // level for Ollama; unmarshalRobust handles any fence stripping needed.
-func callOllama(client *http.Client, systemPrompt, userMessage, baseURL string) (string, error) {
+func callOllama(client *http.Client, systemPrompt, userMessage, baseURL, model string) (string, error) {
 	if baseURL == "" {
 		baseURL = "http://localhost:11434"
+	}
+	if model == "" {
+		model = "llama3.2"
 	}
 
 	// Ollama /api/generate takes a single "prompt" field.
@@ -23,7 +26,7 @@ func callOllama(client *http.Client, systemPrompt, userMessage, baseURL string) 
 	combinedPrompt := systemPrompt + "\n\n---\n\n" + userMessage
 
 	payload, err := json.Marshal(map[string]any{
-		"model":  "llama3.2",
+		"model":  model,
 		"prompt": combinedPrompt,
 		"stream": false,
 	})

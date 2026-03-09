@@ -6,6 +6,7 @@ import { Subscription } from 'rxjs';
 import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { TextareaModule } from 'primeng/textarea';
+import { InputTextModule } from 'primeng/inputtext';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageModule } from 'primeng/message';
 import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primeng/tabs';
@@ -22,6 +23,40 @@ interface TraceEntry {
   timestamp: Date;
 }
 
+const PROVIDER_OPTIONS = [
+  { label: 'Anthropic', value: 'claude' },
+  { label: 'OpenAI', value: 'openai' },
+  { label: 'Ollama', value: 'ollama' },
+];
+
+const PROVIDER_MODELS: Record<string, Array<{ label: string; value: string }>> = {
+  claude: [
+    { label: 'Sonnet 4.6', value: 'claude-sonnet-4-6' },
+    { label: 'Opus 4.6', value: 'claude-opus-4-6' },
+    { label: 'Haiku 4.5', value: 'claude-haiku-4-5' },
+  ],
+  openai: [
+    { label: 'GPT-5.2', value: 'gpt-5.2' },
+    { label: 'GPT-5.2 Pro', value: 'gpt-5.2-pro' },
+    { label: 'GPT-4.1', value: 'gpt-4.1' },
+    { label: 'GPT-4.1 Mini', value: 'gpt-4.1-mini' },
+    { label: 'o3', value: 'o3' },
+  ],
+  ollama: [
+    { label: 'llama3.2', value: 'llama3.2' },
+    { label: 'mistral', value: 'mistral' },
+    { label: 'gemma3', value: 'gemma3' },
+    { label: 'phi4', value: 'phi4' },
+    { label: 'qwen2.5', value: 'qwen2.5' },
+  ],
+};
+
+const DEFAULT_MODELS: Record<string, string> = {
+  claude: 'claude-sonnet-4-6',
+  openai: 'gpt-5.2',
+  ollama: 'llama3.2',
+};
+
 let originalText = '';
 let pyramidizedText = '';   // snapshot of most recent foundation call
 let canvasText = '';         // live working surface
@@ -34,8 +69,11 @@ let activeTab: 'original' | 'canvas' = 'original';
 let isPreviewMode = false;
 let traceLogOpen = false;
 let wasCancelled = false;
-
 let bannerDismissed = false; // session-only
+let selectedProvider = 'claude';
+let selectedModel = 'claude-sonnet-4-6';
+let qualityThreshold = 0.65;
+let advancedOpen = false;
 
 function makeId(): string {
   return Math.random().toString(36).slice(2);
@@ -57,6 +95,7 @@ function addTrace(label: string, snapshot: string): void {
     SelectModule,
     ButtonModule,
     TextareaModule,
+    InputTextModule,
     ProgressSpinnerModule,
     MessageModule,
     Tabs, TabList, Tab, TabPanels, TabPanel,
@@ -79,9 +118,34 @@ function addTrace(label: string, snapshot: string): void {
               [text]="true"
               (onClick)="dismissBanner()"
               pTooltip="Dismiss"
+              appendTo="body"
             />
           </div>
         }
+
+        <!-- Provider + Model selectors (UX-01) -->
+        <div class="form-group">
+          <label>Provider</label>
+          <p-select
+            data-testid="provider-select"
+            [(ngModel)]="providerView"
+            [options]="providerOptions"
+            optionLabel="label"
+            optionValue="value"
+            (onChange)="onProviderChange()"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Model</label>
+          <p-select
+            data-testid="model-select"
+            [(ngModel)]="modelView"
+            [options]="currentModelOptions"
+            optionLabel="label"
+            optionValue="value"
+          />
+        </div>
 
         <div class="form-group">
           <label>Document Type</label>
@@ -147,9 +211,30 @@ function addTrace(label: string, snapshot: string): void {
           </ng-template>
         </p-button>
 
-        <div class="provider-badge" (click)="goToSettings()">
-          <span class="provider-dot">⚫</span>
-          <span class="provider-name">{{ activeProvider }}</span>
+        <!-- Advanced section (UX-04) -->
+        <div class="advanced-section">
+          <button class="advanced-toggle" (click)="toggleAdvanced()" type="button">
+            <i class="pi" [class.pi-chevron-right]="!advancedOpenView" [class.pi-chevron-down]="advancedOpenView"></i>
+            <span>Advanced</span>
+          </button>
+          @if (advancedOpenView) {
+            <div class="advanced-body">
+              <div class="form-group">
+                <label>Quality threshold</label>
+                <div class="threshold-row">
+                  <input
+                    type="number"
+                    [(ngModel)]="qualityThresholdView"
+                    min="0" max="1" step="0.05"
+                    class="threshold-input"
+                    (change)="saveThreshold()"
+                  />
+                  <span class="threshold-hint">0–1</span>
+                </div>
+                <small class="hint-text">Scores below this trigger a refinement pass (default 0.65).</small>
+              </div>
+            </div>
+          }
         </div>
       </div>
 
@@ -170,122 +255,135 @@ function addTrace(label: string, snapshot: string): void {
             />
           </div>
         } @else {
-          <p-tabs [value]="activeTabView" (valueChange)="onTabChange($event)">
-            <p-tablist>
-              <p-tab value="original">Original</p-tab>
-              <p-tab value="canvas">Canvas</p-tab>
-            </p-tablist>
-            <p-tabpanels>
-              <!-- Original tab -->
-              <p-tabpanel value="original">
-                <div class="tab-panel-content">
-                  @if (!originalTextView) {
-                    <div class="empty-original">
-                      <p class="hint-text">Paste or type text to pyramidize.</p>
-                      <p-button
-                        data-testid="paste-from-clipboard-btn"
-                        label="Paste from Clipboard"
-                        icon="pi pi-clipboard"
-                        severity="secondary"
-                        (onClick)="pasteFromClipboard()"
-                      />
-                    </div>
-                  }
-                  <textarea
-                    #originalTextarea
-                    data-testid="original-textarea"
-                    pTextarea
-                    [(ngModel)]="originalTextView"
-                    (ngModelChange)="onOriginalChange($event)"
-                    rows="20"
-                    placeholder="Paste or type text to pyramidize…"
-                    class="canvas-textarea"
-                    (keydown)="onOriginalKeydown($event)"
-                  ></textarea>
-                </div>
-              </p-tabpanel>
-
-              <!-- Canvas tab -->
-              <p-tabpanel value="canvas">
-                <div class="tab-panel-content">
-                  <div class="canvas-mode-toggle">
-                    <p-button
-                      label="Edit"
-                      size="small"
-                      [severity]="!isPreviewModeView ? 'primary' : 'secondary'"
-                      (onClick)="setPreviewMode(false)"
-                    />
-                    <p-button
-                      label="Preview"
-                      size="small"
-                      [severity]="isPreviewModeView ? 'primary' : 'secondary'"
-                      (onClick)="setPreviewMode(true)"
-                    />
+          <div class="tabs-container">
+            <p-tabs [value]="activeTabView" (valueChange)="onTabChange($event)">
+              <p-tablist>
+                <p-tab value="original">Original</p-tab>
+                <p-tab value="canvas">Canvas</p-tab>
+              </p-tablist>
+              <p-tabpanels>
+                <!-- Original tab -->
+                <p-tabpanel value="original">
+                  <div class="tab-panel-content">
+                    @if (!originalTextView) {
+                      <div class="empty-original">
+                        <p class="hint-text">Paste or type text to pyramidize.</p>
+                        <p-button
+                          data-testid="paste-from-clipboard-btn"
+                          label="Paste from Clipboard"
+                          icon="pi pi-clipboard"
+                          severity="secondary"
+                          (onClick)="pasteFromClipboard()"
+                        />
+                      </div>
+                    }
+                    <textarea
+                      #originalTextarea
+                      data-testid="original-textarea"
+                      pTextarea
+                      [(ngModel)]="originalTextView"
+                      (ngModelChange)="onOriginalChange($event)"
+                      placeholder="Paste or type text to pyramidize…"
+                      class="canvas-textarea"
+                      (keydown)="onOriginalKeydown($event)"
+                    ></textarea>
                   </div>
+                </p-tabpanel>
 
-                  @if (isPreviewModeView) {
-                    <div
-                      class="canvas-preview"
-                      [innerHTML]="canvasTextView | markdown"
-                    ></div>
-                  } @else {
-                    <div class="canvas-edit-wrapper" (mouseup)="onCanvasMouseUp($event)">
-                      <textarea
-                        #canvasTextarea
-                        data-testid="canvas-textarea"
-                        pTextarea
-                        [(ngModel)]="canvasTextView"
-                        (ngModelChange)="onCanvasChange($event)"
-                        rows="20"
-                        placeholder="Canvas will appear here after Pyramidize…"
-                        class="canvas-textarea"
-                        (keydown)="onCanvasKeydown($event)"
-                      ></textarea>
-                    </div>
-                  }
-
-                  <!-- Selection bubble -->
-                  @if (showSelectionBubble && !isPreviewModeView) {
-                    <div
-                      class="selection-bubble"
-                      [style.top.px]="bubbleY"
-                      [style.left.px]="bubbleX"
-                    >
-                      <input
-                        pInputText
-                        [(ngModel)]="selectionInstruction"
-                        placeholder="Ask AI…"
-                        class="bubble-input"
-                        (keydown.enter)="applySelectionInstruction()"
+                <!-- Canvas tab -->
+                <p-tabpanel value="canvas">
+                  <div class="tab-panel-content">
+                    <div class="canvas-mode-toggle">
+                      <p-button
+                        label="Edit"
+                        size="small"
+                        [severity]="!isPreviewModeView ? 'primary' : 'secondary'"
+                        (onClick)="setPreviewMode(false)"
                       />
                       <p-button
-                        icon="pi pi-sparkles"
-                        label="Apply"
+                        label="Preview"
                         size="small"
-                        [disabled]="!selectionInstruction.trim()"
-                        (onClick)="applySelectionInstruction()"
-                      />
-                      <p-button
-                        icon="pi pi-times"
-                        size="small"
-                        severity="secondary"
-                        [text]="true"
-                        (onClick)="closeSelectionBubble()"
+                        [severity]="isPreviewModeView ? 'primary' : 'secondary'"
+                        (onClick)="setPreviewMode(true)"
                       />
                     </div>
-                  }
-                </div>
-              </p-tabpanel>
-            </p-tabpanels>
-          </p-tabs>
+
+                    @if (isPreviewModeView) {
+                      <div
+                        class="canvas-preview"
+                        [innerHTML]="canvasTextView | markdown"
+                      ></div>
+                    } @else {
+                      <div class="canvas-edit-wrapper" (mouseup)="onCanvasMouseUp($event)">
+                        <textarea
+                          #canvasTextarea
+                          data-testid="canvas-textarea"
+                          pTextarea
+                          [(ngModel)]="canvasTextView"
+                          (ngModelChange)="onCanvasChange($event)"
+                          placeholder="Canvas will appear here after Pyramidize…"
+                          class="canvas-textarea"
+                          (keydown)="onCanvasKeydown($event)"
+                        ></textarea>
+                      </div>
+                    }
+
+                    <!-- Selection bubble -->
+                    @if (showSelectionBubble && !isPreviewModeView) {
+                      <div
+                        class="selection-bubble"
+                        [style.top.px]="bubbleY"
+                        [style.left.px]="bubbleX"
+                      >
+                        <input
+                          pInputText
+                          [(ngModel)]="selectionInstruction"
+                          placeholder="Ask AI…"
+                          class="bubble-input"
+                          (keydown.enter)="applySelectionInstruction()"
+                        />
+                        <p-button
+                          icon="pi pi-sparkles"
+                          label="Apply"
+                          size="small"
+                          [disabled]="!selectionInstruction.trim()"
+                          (onClick)="applySelectionInstruction()"
+                        />
+                        <p-button
+                          icon="pi pi-times"
+                          size="small"
+                          severity="secondary"
+                          [text]="true"
+                          (onClick)="closeSelectionBubble()"
+                        />
+                      </div>
+                    }
+                  </div>
+                </p-tabpanel>
+              </p-tabpanels>
+            </p-tabs>
+          </div>
         }
 
-        <!-- Error display -->
+        <!-- Error display (UX-03) -->
         @if (errorMessage) {
-          <div class="error-row">
-            <span>❌ {{ errorMessage }}</span>
+          <div class="error-row" data-testid="error-row">
+            <span
+              class="error-text"
+              [pTooltip]="errorMessage"
+              appendTo="body"
+              tooltipPosition="top"
+            >❌ {{ errorMessage }}</span>
+            <p-button
+              icon="pi pi-copy"
+              size="small"
+              severity="secondary"
+              [text]="true"
+              pTooltip="Copy error"
+              appendTo="body"
+              (onClick)="copyError()"
+            />
             <p-button label="Retry" size="small" severity="secondary" (onClick)="retry()" />
-            <p-button label="Change Provider" size="small" severity="secondary" (onClick)="goToSettings()" />
           </div>
         }
 
@@ -296,7 +394,7 @@ function addTrace(label: string, snapshot: string): void {
           </div>
         }
 
-        <!-- Instruction bar (fixed at bottom of canvas area) -->
+        <!-- Instruction bar -->
         <div class="instruction-bar">
           <input
             #instructionInput
@@ -355,6 +453,40 @@ function addTrace(label: string, snapshot: string): void {
             />
           }
         </div>
+
+        <!-- Trace peek overlay (UX-06) -->
+        @if (peekEntry) {
+          <div class="trace-peek-overlay" data-testid="trace-peek-overlay">
+            <div class="trace-peek-panel">
+              <div class="trace-peek-header">
+                <span class="trace-peek-title">{{ peekEntry.label }}</span>
+                <span class="trace-peek-time">{{ formatTime(peekEntry.timestamp) }}</span>
+                <p-button
+                  icon="pi pi-times"
+                  size="small"
+                  severity="secondary"
+                  [text]="true"
+                  (onClick)="closePeek()"
+                />
+              </div>
+              <pre class="trace-peek-content">{{ peekEntry.snapshot }}</pre>
+              <div class="trace-peek-footer">
+                <p-button
+                  label="Revert to here"
+                  size="small"
+                  severity="danger"
+                  (onClick)="revertTo(peekEntry)"
+                />
+                <p-button
+                  label="Close"
+                  size="small"
+                  severity="secondary"
+                  (onClick)="closePeek()"
+                />
+              </div>
+            </div>
+          </div>
+        }
       </div>
 
       <!-- ── Trace log panel ── -->
@@ -373,6 +505,8 @@ function addTrace(label: string, snapshot: string): void {
               severity="secondary"
               [text]="true"
               pTooltip="Add checkpoint"
+              tooltipPosition="left"
+              appendTo="body"
               (onClick)="addCheckpoint()"
             />
             <p-button
@@ -381,6 +515,8 @@ function addTrace(label: string, snapshot: string): void {
               severity="secondary"
               [text]="true"
               pTooltip="Collapse"
+              tooltipPosition="left"
+              appendTo="body"
               (onClick)="toggleTraceLog()"
             />
           </div>
@@ -396,28 +532,6 @@ function addTrace(label: string, snapshot: string): void {
               </div>
             }
           </div>
-
-          @if (peekEntry) {
-            <div class="trace-peek">
-              <div class="trace-peek-header">
-                <span>{{ peekEntry.label }}</span>
-                <p-button
-                  icon="pi pi-times"
-                  size="small"
-                  severity="secondary"
-                  [text]="true"
-                  (onClick)="closePeek()"
-                />
-              </div>
-              <pre class="trace-peek-content">{{ peekEntry.snapshot }}</pre>
-              <p-button
-                label="Revert to here"
-                size="small"
-                severity="danger"
-                (onClick)="revertTo(peekEntry)"
-              />
-            </div>
-          }
         } @else {
           <div class="trace-icon-strip">
             <p-button
@@ -426,6 +540,8 @@ function addTrace(label: string, snapshot: string): void {
               severity="secondary"
               [text]="true"
               pTooltip="Trace log"
+              tooltipPosition="left"
+              appendTo="body"
               (onClick)="toggleTraceLog()"
             />
           </div>
@@ -511,20 +627,42 @@ function addTrace(label: string, snapshot: string): void {
       margin-left: 0.5rem;
     }
 
-    .provider-badge {
+    /* Advanced section (UX-04) */
+    .advanced-section {
+      border-top: 1px solid var(--p-content-border-color);
+      padding-top: 0.5rem;
+      margin-top: 0.25rem;
+    }
+    .advanced-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
       display: flex;
       align-items: center;
       gap: 0.4rem;
-      cursor: pointer;
-      padding: 0.35rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       color: var(--p-text-muted-color);
-      transition: background 0.15s;
+      padding: 0.2rem 0;
+      width: 100%;
     }
-    .provider-badge:hover { background: var(--p-content-hover-background); }
-    .provider-dot { font-size: 0.55rem; }
-    .provider-name { font-size: 0.78rem; }
+    .advanced-toggle:hover { color: var(--p-text-color); }
+    .advanced-body { padding-top: 0.5rem; }
+    .threshold-row {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .threshold-input {
+      width: 80px;
+      padding: 0.3rem 0.5rem;
+      font-size: 0.85rem;
+      background: var(--p-inputtext-background, var(--p-surface-ground));
+      border: 1px solid var(--p-content-border-color);
+      border-radius: 4px;
+      color: var(--p-text-color);
+    }
+    .threshold-hint { font-size: 0.75rem; color: var(--p-text-muted-color); }
+    .hint-text { font-size: 0.78rem; color: var(--p-text-muted-color); margin: 0; }
 
     /* ── Canvas area ── */
     .canvas-area {
@@ -535,6 +673,8 @@ function addTrace(label: string, snapshot: string): void {
       padding: 1rem;
       gap: 0.75rem;
       min-width: 0;
+      min-height: 0;
+      position: relative;
     }
 
     .step-indicator {
@@ -548,11 +688,53 @@ function addTrace(label: string, snapshot: string): void {
     .step-spinner { width: 24px; height: 24px; }
     .step-label { flex: 1; font-size: 0.9rem; }
 
+    /* Tabs container — must flex-grow to fill available space (UX-07) */
+    .tabs-container {
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .tabs-container ::ng-deep .p-tabs {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+    }
+    /* display:flex on the CONTAINER (.p-tabpanels) is safe — it does not make hidden
+       panels visible. The [hidden] attribute sets display:none on each inactive
+       .p-tabpanel element itself, so those children don't participate in flex layout.
+       Without display:flex here the active panel's flex:1 has no effect (flex
+       properties only work inside a flex formatting context). */
+    .tabs-container ::ng-deep .p-tabpanels {
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    /* Active panel fills the .p-tabpanels flex container.
+       We must NOT set display on the generic .p-tabpanel selector — that would
+       override the UA-stylesheet display:none applied via the [hidden] attribute
+       on inactive panels and make them visible simultaneously. */
+    .tabs-container ::ng-deep .p-tabpanel:not([hidden]) {
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
     .tab-panel-content {
-      position: relative;
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
+      position: relative;
     }
 
     .empty-original {
@@ -568,12 +750,13 @@ function addTrace(label: string, snapshot: string): void {
       z-index: 1;
     }
     .empty-original p-button { pointer-events: all; }
-    .hint-text { font-size: 0.85rem; color: var(--p-text-muted-color); margin: 0; }
 
+    /* Canvas textarea and preview fill remaining height (UX-07) */
     .canvas-textarea {
+      flex: 1;
+      min-height: 0;
+      resize: none;
       width: 100%;
-      min-height: 320px;
-      resize: vertical;
       font-family: var(--p-font-family);
       font-size: 0.9rem;
       line-height: 1.6;
@@ -582,11 +765,12 @@ function addTrace(label: string, snapshot: string): void {
     .canvas-mode-toggle {
       display: flex;
       gap: 0.5rem;
-      margin-bottom: 0.5rem;
+      flex-shrink: 0;
     }
 
     .canvas-preview {
-      min-height: 320px;
+      flex: 1;
+      min-height: 0;
       padding: 1rem;
       border: 1px solid var(--p-content-border-color);
       border-radius: 6px;
@@ -607,6 +791,10 @@ function addTrace(label: string, snapshot: string): void {
     }
 
     .canvas-edit-wrapper {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
       position: relative;
     }
 
@@ -625,22 +813,33 @@ function addTrace(label: string, snapshot: string): void {
     }
     .bubble-input { width: 180px; font-size: 0.85rem; }
 
-    /* Error row */
+    /* Error row — clipped to 2 lines (UX-03) */
     .error-row {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.5rem;
       color: var(--p-red-400, #f87171);
       font-size: 0.85rem;
-      padding: 0.5rem;
+      padding: 0.5rem 0.75rem;
       background: var(--p-content-hover-background);
       border-radius: 6px;
+      flex-shrink: 0;
+    }
+    .error-text {
+      flex: 1;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      word-break: break-word;
+      cursor: default;
     }
 
     .refinement-warning {
       font-size: 0.8rem;
       color: var(--p-amber-400, #fbbf24);
       padding: 0.4rem 0.5rem;
+      flex-shrink: 0;
     }
 
     /* Instruction bar */
@@ -650,6 +849,7 @@ function addTrace(label: string, snapshot: string): void {
       align-items: center;
       border-top: 1px solid var(--p-content-border-color);
       padding-top: 0.75rem;
+      flex-shrink: 0;
     }
     .instruction-input { flex: 1; }
 
@@ -658,6 +858,55 @@ function addTrace(label: string, snapshot: string): void {
       display: flex;
       gap: 0.5rem;
       flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+
+    /* Trace peek overlay — covers the canvas area (UX-06) */
+    .trace-peek-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: flex;
+      align-items: stretch;
+      z-index: 50;
+      padding: 0.75rem;
+    }
+    .trace-peek-panel {
+      flex: 1;
+      background: var(--p-surface-card, var(--p-surface-900));
+      border: 1px solid var(--p-content-border-color);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .trace-peek-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--p-content-border-color);
+      flex-shrink: 0;
+    }
+    .trace-peek-title { flex: 1; font-weight: 600; font-size: 0.9rem; }
+    .trace-peek-time { font-size: 0.75rem; color: var(--p-text-muted-color); }
+    .trace-peek-content {
+      flex: 1;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      padding: 1rem;
+      margin: 0;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      font-family: var(--p-font-family);
+    }
+    .trace-peek-footer {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      border-top: 1px solid var(--p-content-border-color);
+      flex-shrink: 0;
     }
 
     /* ── Trace log panel ── */
@@ -709,32 +958,6 @@ function addTrace(label: string, snapshot: string): void {
     .trace-entry.active { background: var(--p-highlight-background); }
     .trace-label { font-size: 0.8rem; }
     .trace-time { font-size: 0.7rem; color: var(--p-text-muted-color); }
-
-    .trace-peek {
-      border-top: 1px solid var(--p-content-border-color);
-      padding: 0.5rem 0.75rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-    }
-    .trace-peek-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-    .trace-peek-content {
-      font-size: 0.75rem;
-      max-height: 120px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      word-break: break-word;
-      background: var(--p-content-hover-background);
-      border-radius: 4px;
-      padding: 0.4rem;
-      margin: 0;
-    }
   `],
 })
 export class TextEnhancementComponent implements OnInit, OnDestroy {
@@ -766,13 +989,23 @@ export class TextEnhancementComponent implements OnInit, OnDestroy {
 
   get bannerDismissedView(): boolean { return bannerDismissed; }
 
-  // ── Component-local state (does not need to persist across navigation) ──
+  get providerView(): string { return selectedProvider; }
+  set providerView(v: string) { selectedProvider = v; }
+
+  get modelView(): string { return selectedModel; }
+  set modelView(v: string) { selectedModel = v; }
+
+  get qualityThresholdView(): number { return qualityThreshold; }
+  set qualityThresholdView(v: number) { qualityThreshold = v; }
+
+  get advancedOpenView(): boolean { return advancedOpen; }
+
+  // ── Component-local state ──
   isLoading = false;
   stepLabel = '';
   errorMessage = '';
   refinementWarning = '';
   apiKeySet = true;
-  activeProvider = '';
   customInstructions = '';
   globalInstruction = '';
   detectedTypeView = '';
@@ -794,6 +1027,12 @@ export class TextEnhancementComponent implements OnInit, OnDestroy {
   private sub?: Subscription;
 
   @ViewChild('canvasTextarea') canvasTextareaRef?: ElementRef<HTMLTextAreaElement>;
+
+  readonly providerOptions = PROVIDER_OPTIONS;
+
+  get currentModelOptions(): Array<{ label: string; value: string }> {
+    return PROVIDER_MODELS[selectedProvider] ?? PROVIDER_MODELS['claude'];
+  }
 
   readonly docTypeOptions = [
     { label: 'AUTO (detect)', value: 'auto' },
@@ -829,15 +1068,22 @@ export class TextEnhancementComponent implements OnInit, OnDestroy {
   ) {}
 
   async ngOnInit(): Promise<void> {
-    // Load source app name, check API key status
     sourceApp = await this.wails.getSourceApp();
     const settings = await this.wails.loadSettings();
-    this.activeProvider = settings.active_provider ?? '';
-    const keyStatus = await this.wails.getKeyStatus(settings.active_provider ?? '');
+
+    // Initialise provider from settings if not already set this session
+    if (!selectedProvider && settings.active_provider) {
+      selectedProvider = settings.active_provider;
+      selectedModel = DEFAULT_MODELS[selectedProvider] ?? 'claude-sonnet-4-6';
+    }
+
+    const keyStatus = await this.wails.getKeyStatus(selectedProvider);
     this.apiKeySet = keyStatus.is_set;
+
+    qualityThreshold = await this.wails.getQualityThreshold();
+
     this.cdr.detectChanges();
 
-    // Subscribe to hotkey shortcut events
     this.sub = this.wails.shortcutTriggered$.subscribe(async () => {
       const clipboardContent = await this.wails.readClipboard();
       sourceApp = await this.wails.getSourceApp();
@@ -872,10 +1118,14 @@ export class TextEnhancementComponent implements OnInit, OnDestroy {
   }
 
   onDocTypeChange(): void {
-    // Clear detection indicator when user manually picks a type
     if (docType !== 'auto') {
       this.detectedTypeView = '';
     }
+  }
+
+  onProviderChange(): void {
+    // Reset model to default for new provider
+    selectedModel = DEFAULT_MODELS[selectedProvider] ?? '';
   }
 
   onTabChange(value: unknown): void {
@@ -891,11 +1141,22 @@ export class TextEnhancementComponent implements OnInit, OnDestroy {
     this.peekEntry = null;
   }
 
+  toggleAdvanced(): void {
+    advancedOpen = !advancedOpen;
+  }
+
   dismissBanner(): void {
     bannerDismissed = true;
   }
 
-  // ── Original textarea keyboard shortcut ──
+  async saveThreshold(): Promise<void> {
+    try {
+      await this.wails.setQualityThreshold(qualityThreshold);
+    } catch {
+      // best-effort
+    }
+  }
+
   onOriginalKeydown(event: KeyboardEvent): void {
     if (event.ctrlKey && event.key === 'Enter') {
       event.preventDefault();
@@ -903,7 +1164,6 @@ export class TextEnhancementComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ── Canvas textarea keyboard shortcut ──
   onCanvasKeydown(event: KeyboardEvent): void {
     if (event.ctrlKey && event.key === 'Enter') {
       event.preventDefault();
@@ -943,6 +1203,8 @@ export class TextEnhancementComponent implements OnInit, OnDestroy {
       communicationStyle: commStyle,
       relationshipLevel: relLevel,
       customInstructions: this.customInstructions,
+      provider: selectedProvider,
+      model: selectedModel,
     };
 
     const doCall = async (): Promise<void> => {
@@ -1016,6 +1278,8 @@ export class TextEnhancementComponent implements OnInit, OnDestroy {
         documentType: docType,
         communicationStyle: commStyle,
         relationshipLevel: relLevel,
+        provider: selectedProvider,
+        model: selectedModel,
       });
       addTrace(`Refined: "${instruction.slice(0, 30)}"`, canvasText);
       canvasText = result.newCanvas;
@@ -1082,6 +1346,8 @@ export class TextEnhancementComponent implements OnInit, OnDestroy {
         originalText,
         selectedText,
         instruction,
+        provider: selectedProvider,
+        model: selectedModel,
       });
       const before = canvasText.slice(0, start);
       const after = canvasText.slice(end);
@@ -1138,17 +1404,16 @@ export class TextEnhancementComponent implements OnInit, OnDestroy {
         }),
       ]);
     } catch {
-      // Fallback: write plain text
       await navigator.clipboard.writeText(plain);
     }
   }
 
-  async sendBack(): Promise<void> {
-    await this.svc.sendBack(canvasText);
+  async copyError(): Promise<void> {
+    await navigator.clipboard.writeText(this.errorMessage);
   }
 
-  goToSettings(): void {
-    void this.router.navigate(['/settings']);
+  async sendBack(): Promise<void> {
+    await this.svc.sendBack(canvasText);
   }
 
   async retry(): Promise<void> {

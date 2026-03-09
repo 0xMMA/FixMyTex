@@ -93,6 +93,22 @@ export class PyramidizeRequest {
              */
             this["customInstructions"] = "";
         }
+        if (!("provider" in $$source)) {
+            /**
+             * optional override: "claude"|"openai"|"ollama" — falls back to settings.ActiveProvider
+             * @member
+             * @type {string}
+             */
+            this["provider"] = "";
+        }
+        if (!("model" in $$source)) {
+            /**
+             * optional override, e.g. "claude-sonnet-4-6" — falls back to provider default
+             * @member
+             * @type {string}
+             */
+            this["model"] = "";
+        }
 
         Object.assign(this, $$source);
     }
@@ -271,6 +287,20 @@ export class RefineGlobalRequest {
              */
             this["relationshipLevel"] = "";
         }
+        if (!("provider" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["provider"] = "";
+        }
+        if (!("model" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["model"] = "";
+        }
 
         Object.assign(this, $$source);
     }
@@ -353,6 +383,20 @@ export class SpliceRequest {
              * @type {string}
              */
             this["instruction"] = "";
+        }
+        if (!("provider" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["provider"] = "";
+        }
+        if (!("model" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["model"] = "";
         }
 
         Object.assign(this, $$source);

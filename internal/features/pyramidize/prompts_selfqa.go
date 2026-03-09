@@ -17,7 +17,8 @@ qualityScore = (subject_score + mece_score + style_score) / 3 - (completeness_ri
 qualityFlags: include any applicable: "MECE_VIOLATION", "INFO_LOSS", "STYLE_MISMATCH", "SUBJECT_FORMAT"
 </self_evaluation>
 
-Respond ONLY with valid JSON (no markdown fences, no explanation):
+Respond ONLY with valid JSON (no markdown fences, no explanation, no trailing text).
+CRITICAL: All double-quote characters inside string values MUST be escaped as \" — this includes quotes in the document text, headers, and any other string fields.
 {
   "fullDocument": "complete document text with subject/title as first line",
   "headers": ["header 1", "header 2"],

@@ -175,13 +175,6 @@ interface ProviderKey {
 
               <!-- App Defaults tab -->
               <p-tabpanel value="app-defaults">
-                <div class="form-group">
-                  <label>Pyramidize Quality Threshold</label>
-                  <input type="number" pInputText [(ngModel)]="qualityThreshold" min="0" max="1" step="0.05" style="width:120px" />
-                  <small class="hint-text">Values below this score trigger a refinement call (0–1, default 0.65).</small>
-                  <p-button label="Save Threshold" size="small" severity="secondary" (onClick)="saveThreshold()" />
-                </div>
-
                 <div class="form-group mt-4">
                   <label>App Presets</label>
                   @if (presets.length === 0 && !addingPreset) {

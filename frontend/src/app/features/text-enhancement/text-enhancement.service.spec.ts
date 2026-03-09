@@ -51,7 +51,7 @@ describe('TextEnhancementService', () => {
 
   it('pyramidize() delegates to wails.pyramidize()', async () => {
     wailsMock.pyramidize.mockResolvedValue(mockPyramidizeResult);
-    const req = { text: 'hello', documentType: 'auto', communicationStyle: 'professional', relationshipLevel: 'professional', customInstructions: '' };
+    const req = { text: 'hello', documentType: 'auto', communicationStyle: 'professional', relationshipLevel: 'professional', customInstructions: '', provider: 'claude', model: 'claude-sonnet-4-6' };
     const result = await svc.pyramidize(req);
     expect(wailsMock.pyramidize).toHaveBeenCalledWith(req);
     expect(result).toEqual(mockPyramidizeResult);
@@ -62,7 +62,7 @@ describe('TextEnhancementService', () => {
   it('refineGlobal() delegates to wails.refineGlobal()', async () => {
     const mockResult = { newCanvas: 'Refined text' };
     wailsMock.refineGlobal.mockResolvedValue(mockResult);
-    const req = { fullCanvas: 'canvas', originalText: 'orig', instruction: 'shorter', documentType: 'email', communicationStyle: 'professional', relationshipLevel: 'professional' };
+    const req = { fullCanvas: 'canvas', originalText: 'orig', instruction: 'shorter', documentType: 'email', communicationStyle: 'professional', relationshipLevel: 'professional', provider: 'claude', model: 'claude-sonnet-4-6' };
     const result = await svc.refineGlobal(req);
     expect(wailsMock.refineGlobal).toHaveBeenCalledWith(req);
     expect(result).toEqual(mockResult);
@@ -73,7 +73,7 @@ describe('TextEnhancementService', () => {
   it('splice() delegates to wails.splice()', async () => {
     const mockResult = { rewrittenSection: 'New section' };
     wailsMock.splice.mockResolvedValue(mockResult);
-    const req = { fullCanvas: 'canvas', originalText: 'orig', selectedText: 'selected', instruction: 'rewrite' };
+    const req = { fullCanvas: 'canvas', originalText: 'orig', selectedText: 'selected', instruction: 'rewrite', provider: 'claude', model: 'claude-sonnet-4-6' };
     const result = await svc.splice(req);
     expect(wailsMock.splice).toHaveBeenCalledWith(req);
     expect(result).toEqual(mockResult);
