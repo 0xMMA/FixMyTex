@@ -144,18 +144,18 @@ test.describe('Shell — layout-main dimensions', () => {
 // ── Logo vertical padding when collapsed ──────────────────────────────────────
 
 test.describe('Shell — logo area padding in collapsed state', () => {
-  test('logo "K" is vertically centered within the logo area (top ≈ bottom gap)', async ({ page }) => {
+  test('"K" is vertically centered within the logo area (top ≈ bottom gap)', async ({ page }) => {
     await gotoFix(page);
     await collapse(page);
+    await page.waitForTimeout(350);
 
     const logoArea = await getRect(page, '.layout-logo');
-    const logoIcon = await getRect(page, '.layout-logo .logo-icon');
+    const kRect    = await getRect(page, '.layout-logo .logo-k');
 
-    const topGap    = logoIcon.top - logoArea.top;
-    const bottomGap = logoArea.bottom - logoIcon.bottom;
+    const topGap    = kRect.top - logoArea.top;
+    const bottomGap = logoArea.bottom - kRect.bottom;
 
     // With padding: 1.5rem 1rem 1rem, top gap is larger than bottom gap.
-    // This test checks if the asymmetric vertical padding looks intentional.
     // Top gap should not be more than 2× the bottom gap (otherwise "K" looks dropped).
     expect(topGap / bottomGap, '"K" vertical position ratio (top/bottom gap)').toBeLessThanOrEqual(2.5);
   });

@@ -22,11 +22,7 @@ let sidebarHovered   = false;
         (mouseenter)="onSidebarEnter()"
         (mouseleave)="onSidebarLeave()">
         <div class="layout-logo">
-          @if (!collapsedView || hoverExpanded) {
-            <span class="logo-text"><span class="logo-key">Key</span><span class="logo-lint">Lint</span></span>
-          } @else {
-            <span class="logo-icon"><span class="logo-key">K</span><span class="logo-lint">L</span></span>
-          }
+          <span class="logo-k logo-key">K</span><span class="logo-reveal logo-ey logo-key">ey</span><span class="logo-l logo-lint">L</span><span class="logo-reveal logo-int logo-lint">int</span>
         </div>
         <nav class="sidebar-nav">
           <ul>

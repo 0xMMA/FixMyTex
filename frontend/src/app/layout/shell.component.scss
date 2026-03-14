@@ -39,6 +39,13 @@
       padding: 0;
     }
 
+    // Collapsed (not hover-expanded): contract "ey" and "int" so only "K" and "L" show.
+    &:not(.hover-expanded) .layout-logo {
+      .logo-reveal {
+        max-width: 0;
+      }
+    }
+
     // Hover-expand: full sidebar overlays main content without layout shift.
     &.hover-expanded {
       width: 17rem;
@@ -62,27 +69,26 @@
   justify-content: center;
   padding: 1.5rem 1rem 1rem;
   border-bottom: 1px solid var(--p-surface-700, #3f3f46);
-  white-space: nowrap;
   overflow: hidden;
 
-  .logo-text {
+  // Shared type styles for all logo character spans.
+  .logo-k, .logo-reveal, .logo-l {
     font-size: 1.25rem;
     font-weight: 700;
     letter-spacing: -0.025em;
+    line-height: 1;
   }
 
-  .logo-icon {
-    font-size: 1.25rem;
-    font-weight: 700;
-    letter-spacing: -0.025em;
-  }
+  .logo-key { color: var(--p-surface-50, #fff); }
+  .logo-lint { color: var(--p-primary-color, #f97316); }
 
-  .logo-key {
-    color: var(--p-surface-50, #fff);
-  }
-
-  .logo-lint {
-    color: var(--p-primary-color, #f97316);
+  // "ey" and "int" expand in as the sidebar opens.
+  // max-width clips characters without affecting flex alignment of neighbours.
+  .logo-reveal {
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 4em;
+    transition: max-width 0.18s ease;
   }
 }
 
@@ -112,6 +118,14 @@
   transition: background 0.15s, color 0.15s;
   white-space: nowrap;
   overflow: hidden;
+
+  // line-height:1 on the text label keeps its box height = font-size (0.9rem),
+  // which is shorter than the icon height (1rem). This prevents the <a> from
+  // growing taller when the label appears on hover-expand, which would cause
+  // align-items:center to re-center the icon — the visible 1-2px "drop" bug.
+  span {
+    line-height: 1;
+  }
 
   i {
     font-size: 1rem;

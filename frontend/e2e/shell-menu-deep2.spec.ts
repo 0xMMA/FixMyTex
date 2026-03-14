@@ -115,27 +115,30 @@ test.describe('Shell — logo area dimensions', () => {
     expect(Math.abs(expandedH - collapsedH), 'logo area height diff').toBeLessThanOrEqual(4);
   });
 
-  test('logo "K" is fully visible (not clipped) in collapsed state', async ({ page }) => {
+  test('"K" is fully visible (not clipped) in collapsed state', async ({ page }) => {
     await gotoFix(page);
     await collapse(page);
+    await page.waitForTimeout(350);
 
-    const sidebar  = await getRect(page, '.layout-sidebar');
-    const logoIcon = await getRect(page, '.layout-logo .logo-icon');
+    const sidebar = await getRect(page, '.layout-sidebar');
+    const kRect   = await getRect(page, '.layout-logo .logo-k');
 
-    // The "K" must be fully within the sidebar
-    expect(logoIcon.left).toBeGreaterThanOrEqual(sidebar.left - 1);
-    expect(logoIcon.right).toBeLessThanOrEqual(sidebar.right + 1);
-    expect(logoIcon.width).toBeGreaterThan(0);
+    expect(kRect.left).toBeGreaterThanOrEqual(sidebar.left - 1);
+    expect(kRect.right).toBeLessThanOrEqual(sidebar.right + 1);
+    expect(kRect.width).toBeGreaterThan(0);
   });
 
-  test('logo padding does not cause the "K" to be wider than the sidebar', async ({ page }) => {
+  test('"K" and "L" combined width does not exceed the collapsed sidebar width', async ({ page }) => {
     await gotoFix(page);
     await collapse(page);
+    await page.waitForTimeout(350);
 
-    const sidebar  = await getRect(page, '.layout-sidebar');
-    const logoIcon = await getRect(page, '.layout-logo .logo-icon');
+    const sidebar = await getRect(page, '.layout-sidebar');
+    const kRect   = await getRect(page, '.layout-logo .logo-k');
+    const lRect   = await getRect(page, '.layout-logo .logo-l');
+    const klWidth = lRect.right - kRect.left;
 
-    expect(logoIcon.width).toBeLessThanOrEqual(sidebar.width);
+    expect(klWidth).toBeLessThanOrEqual(sidebar.width);
   });
 });
 

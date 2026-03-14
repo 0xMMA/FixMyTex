@@ -102,17 +102,20 @@ test.describe('Shell — active Pyramidize SVG icon colour', () => {
 // ── 3. Collapsed logo shows "KL" ──────────────────────────────────────────────
 
 test.describe('Shell — collapsed logo "KL"', () => {
-  test('collapsed logo text is "KL"', async ({ page }) => {
+  test('collapsed: "ey" and "int" collapse to zero width (only KL visible)', async ({ page }) => {
     await gotoFix(page);
     await collapse(page);
-    const text = await page.locator('.layout-logo').innerText();
-    expect(text.trim()).toBe('KL');
+    await page.waitForTimeout(350); // let max-width transition complete
+    const eyW  = (await page.locator('.layout-logo .logo-ey').boundingBox())?.width ?? 0;
+    const intW = (await page.locator('.layout-logo .logo-int').boundingBox())?.width ?? 0;
+    expect(eyW,  '"ey" width when collapsed').toBeLessThanOrEqual(2);
+    expect(intW, '"int" width when collapsed').toBeLessThanOrEqual(2);
   });
 
   test('"K" in collapsed logo is white', async ({ page }) => {
     await gotoFix(page);
     await collapse(page);
-    const color = await page.locator('.layout-logo .logo-key').evaluate(
+    const color = await page.locator('.layout-logo .logo-k').evaluate(
       (el) => getComputedStyle(el).color,
     );
     // --p-surface-50 resolves to #fafafa (rgb(250,250,250)) in this theme
@@ -122,7 +125,7 @@ test.describe('Shell — collapsed logo "KL"', () => {
   test('"L" in collapsed logo is orange', async ({ page }) => {
     await gotoFix(page);
     await collapse(page);
-    const color = await page.locator('.layout-logo .logo-lint').evaluate(
+    const color = await page.locator('.layout-logo .logo-l').evaluate(
       (el) => getComputedStyle(el).color,
     );
     // Primary orange: rgb(249, 115, 22) or similar
@@ -130,12 +133,13 @@ test.describe('Shell — collapsed logo "KL"', () => {
     expect(isOrange, 'L should be orange').toBe(true);
   });
 
-  test('expanded logo shows "KeyLint" (not "KL")', async ({ page }) => {
+  test('expanded: "ey" and "int" are fully visible (non-zero width)', async ({ page }) => {
     await gotoFix(page);
-    const text = await page.locator('.layout-logo').innerText();
-    expect(text.trim()).toContain('Key');
-    expect(text.trim()).toContain('Lint');
-    expect(text.trim()).not.toBe('KL');
+    await page.waitForTimeout(300);
+    const eyW  = (await page.locator('.layout-logo .logo-ey').boundingBox())?.width ?? 0;
+    const intW = (await page.locator('.layout-logo .logo-int').boundingBox())?.width ?? 0;
+    expect(eyW,  '"ey" width when expanded').toBeGreaterThan(5);
+    expect(intW, '"int" width when expanded').toBeGreaterThan(5);
   });
 });
 
@@ -204,16 +208,17 @@ test.describe('Shell — hover-expand popover', () => {
     expect(width, 'sidebar should collapse back after mouse leave').toBeLessThanOrEqual(60);
   });
 
-  test('hover-expand shows "KeyLint" logo (not "KL")', async ({ page }) => {
+  test('hover-expand: "ey" and "int" are visible (non-zero width)', async ({ page }) => {
     await gotoFix(page);
     await collapse(page);
 
     await page.locator('.layout-sidebar').hover();
     await page.waitForTimeout(350);
 
-    const text = await page.locator('.layout-logo').innerText();
-    expect(text.trim()).toContain('Key');
-    expect(text.trim()).toContain('Lint');
+    const eyW  = (await page.locator('.layout-logo .logo-ey').boundingBox())?.width ?? 0;
+    const intW = (await page.locator('.layout-logo .logo-int').boundingBox())?.width ?? 0;
+    expect(eyW,  '"ey" width during hover-expand').toBeGreaterThan(5);
+    expect(intW, '"int" width during hover-expand').toBeGreaterThan(5);
   });
 
   test('sidebar does NOT hover-expand when already fully expanded', async ({ page }) => {

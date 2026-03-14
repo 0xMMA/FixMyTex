@@ -7,6 +7,7 @@ import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { TextareaModule } from 'primeng/textarea';
 import { InputTextModule } from 'primeng/inputtext';
+import { InputNumber } from 'primeng/inputnumber';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageModule } from 'primeng/message';
 import { Tabs, TabList, Tab, TabPanels, TabPanel } from 'primeng/tabs';
@@ -96,6 +97,7 @@ function addTrace(label: string, snapshot: string): void {
     ButtonModule,
     TextareaModule,
     InputTextModule,
+    InputNumber,
     ProgressSpinnerModule,
     MessageModule,
     Tabs, TabList, Tab, TabPanels, TabPanel,
@@ -222,12 +224,13 @@ function addTrace(label: string, snapshot: string): void {
               <div class="form-group">
                 <label>Quality threshold</label>
                 <div class="threshold-row">
-                  <input
-                    type="number"
+                  <p-inputnumber
                     [(ngModel)]="qualityThresholdView"
-                    min="0" max="1" step="0.05"
-                    class="threshold-input"
-                    (change)="saveThreshold()"
+                    [min]="0" [max]="1" [step]="0.05"
+                    [maxFractionDigits]="2"
+                    [showButtons]="false"
+                    inputStyleClass="threshold-input"
+                    (onChange)="saveThreshold()"
                   />
                   <span class="threshold-hint">0–1</span>
                 </div>
@@ -259,7 +262,7 @@ function addTrace(label: string, snapshot: string): void {
             <p-tabs [value]="activeTabView" (valueChange)="onTabChange($event)">
               <p-tablist>
                 <p-tab value="original">Original</p-tab>
-                <p-tab value="canvas">Canvas</p-tab>
+                <p-tab value="canvas">Editor</p-tab>
               </p-tablist>
               <p-tabpanels>
                 <!-- Original tab -->
@@ -290,7 +293,7 @@ function addTrace(label: string, snapshot: string): void {
                   </div>
                 </p-tabpanel>
 
-                <!-- Canvas tab -->
+                <!-- Editor tab -->
                 <p-tabpanel value="canvas">
                   <div class="tab-panel-content">
                     <div class="canvas-mode-toggle">
@@ -321,7 +324,7 @@ function addTrace(label: string, snapshot: string): void {
                           pTextarea
                           [(ngModel)]="canvasTextView"
                           (ngModelChange)="onCanvasChange($event)"
-                          placeholder="Canvas will appear here after Pyramidize…"
+                          placeholder="Editor will appear here after Pyramidize…"
                           class="canvas-textarea"
                           (keydown)="onCanvasKeydown($event)"
                         ></textarea>
@@ -455,34 +458,41 @@ function addTrace(label: string, snapshot: string): void {
         </div>
 
         <!-- Trace peek overlay (UX-06) -->
-        @if (peekEntry) {
+        @if (activeEntry) {
           <div class="trace-peek-overlay" data-testid="trace-peek-overlay">
             <div class="trace-peek-panel">
               <div class="trace-peek-header">
-                <span class="trace-peek-title">{{ peekEntry.label }}</span>
-                <span class="trace-peek-time">{{ formatTime(peekEntry.timestamp) }}</span>
-                <p-button
-                  icon="pi pi-times"
-                  size="small"
-                  severity="secondary"
-                  [text]="true"
-                  (onClick)="closePeek()"
-                />
+                <span class="trace-peek-title">{{ activeEntry.label }}</span>
+                <span class="trace-peek-time">{{ formatTime(activeEntry.timestamp) }}</span>
+                @if (!peekEntry) {
+                  <span class="trace-peek-hint">Click to pin</span>
+                }
+                @if (peekEntry) {
+                  <p-button
+                    icon="pi pi-times"
+                    size="small"
+                    severity="secondary"
+                    [text]="true"
+                    (onClick)="closePeek()"
+                  />
+                }
               </div>
-              <pre class="trace-peek-content">{{ peekEntry.snapshot }}</pre>
+              <pre class="trace-peek-content">{{ activeEntry.snapshot }}</pre>
               <div class="trace-peek-footer">
                 <p-button
                   label="Revert to here"
                   size="small"
                   severity="danger"
-                  (onClick)="revertTo(peekEntry)"
+                  (onClick)="revertTo(activeEntry)"
                 />
-                <p-button
-                  label="Close"
-                  size="small"
-                  severity="secondary"
-                  (onClick)="closePeek()"
-                />
+                @if (peekEntry) {
+                  <p-button
+                    label="Close"
+                    size="small"
+                    severity="secondary"
+                    (onClick)="closePeek()"
+                  />
+                }
               </div>
             </div>
           </div>
@@ -526,6 +536,8 @@ function addTrace(label: string, snapshot: string): void {
                 class="trace-entry"
                 [class.active]="peekEntry?.id === entry.id"
                 (click)="peekTrace(entry)"
+                (mouseenter)="hoverTrace(entry)"
+                (mouseleave)="clearHoverTrace()"
               >
                 <span class="trace-label">{{ entry.label }}</span>
                 <span class="trace-time">{{ formatTime(entry.timestamp) }}</span>
@@ -653,13 +665,8 @@ function addTrace(label: string, snapshot: string): void {
       gap: 0.4rem;
     }
     .threshold-input {
-      width: 80px;
-      padding: 0.3rem 0.5rem;
+      width: 80px !important;
       font-size: 0.85rem;
-      background: var(--p-inputtext-background, var(--p-surface-ground));
-      border: 1px solid var(--p-content-border-color);
-      border-radius: 4px;
-      color: var(--p-text-color);
     }
     .threshold-hint { font-size: 0.75rem; color: var(--p-text-muted-color); }
     .hint-text { font-size: 0.78rem; color: var(--p-text-muted-color); margin: 0; }
@@ -890,6 +897,7 @@ function addTrace(label: string, snapshot: string): void {
     }
     .trace-peek-title { flex: 1; font-weight: 600; font-size: 0.9rem; }
     .trace-peek-time { font-size: 0.75rem; color: var(--p-text-muted-color); }
+    .trace-peek-hint { font-size: 0.7rem; color: var(--p-text-muted-color); font-style: italic; }
     .trace-peek-content {
       flex: 1;
       overflow-y: auto;
@@ -1018,8 +1026,11 @@ export class TextEnhancementComponent implements OnInit, OnDestroy {
   private selectionStart = 0;
   private selectionEnd = 0;
 
-  // Trace peek
+  // Trace peek — peekEntry is sticky (click), hoverEntry is transient (mouseenter)
   peekEntry: TraceEntry | null = null;
+  hoverEntry: TraceEntry | null = null;
+
+  get activeEntry(): TraceEntry | null { return this.peekEntry ?? this.hoverEntry; }
 
   // Retry state
   private lastRequest: (() => Promise<void>) | null = null;
@@ -1184,10 +1195,10 @@ export class TextEnhancementComponent implements OnInit, OnDestroy {
     if (!originalText.trim()) return;
 
     if (canvasText.trim()) {
-      if (!confirm('Re-pyramidize? The current canvas will be saved to the trace log.')) {
+      if (!confirm('Re-pyramidize? The current editor content will be saved to the trace log.')) {
         return;
       }
-      addTrace('Canvas (saved)', canvasText);
+      addTrace('Editor (saved)', canvasText);
     }
 
     wasCancelled = false;
@@ -1373,11 +1384,25 @@ export class TextEnhancementComponent implements OnInit, OnDestroy {
 
   peekTrace(entry: TraceEntry): void {
     this.peekEntry = entry;
+    this.hoverEntry = null;
+    this.cdr.detectChanges();
+  }
+
+  hoverTrace(entry: TraceEntry): void {
+    if (!this.peekEntry) {
+      this.hoverEntry = entry;
+      this.cdr.detectChanges();
+    }
+  }
+
+  clearHoverTrace(): void {
+    this.hoverEntry = null;
     this.cdr.detectChanges();
   }
 
   closePeek(): void {
     this.peekEntry = null;
+    this.hoverEntry = null;
   }
 
   revertTo(entry: TraceEntry): void {

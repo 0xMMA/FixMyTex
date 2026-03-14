@@ -40,32 +40,42 @@ test.describe('Shell — logo area', () => {
     expect(r.width).toBeGreaterThan(0);
   });
 
-  test('logo shows full "KeyLint" text when expanded', async ({ page }) => {
+  test('"ey" and "int" are visible (non-zero width) when expanded', async ({ page }) => {
     await gotoFix(page);
-    const text = await page.locator('.layout-logo').innerText();
-    expect(text.trim()).toContain('Key');
-    expect(text.trim()).toContain('Lint');
+    await page.waitForTimeout(300);
+    const eyW  = (await getRect(page, '.layout-logo .logo-ey')).width;
+    const intW = (await getRect(page, '.layout-logo .logo-int')).width;
+    expect(eyW,  '"ey" width when expanded').toBeGreaterThan(5);
+    expect(intW, '"int" width when expanded').toBeGreaterThan(5);
   });
 
-  test('logo shows "KL" icon when collapsed', async ({ page }) => {
+  test('"ey" and "int" collapse to zero width when sidebar is collapsed', async ({ page }) => {
     await gotoFix(page);
     await collapse(page);
-    const text = await page.locator('.layout-logo').innerText();
-    expect(text.trim()).toBe('KL');
+    await page.waitForTimeout(350); // let max-width transition complete
+    const eyW  = (await getRect(page, '.layout-logo .logo-ey')).width;
+    const intW = (await getRect(page, '.layout-logo .logo-int')).width;
+    expect(eyW,  '"ey" width when collapsed').toBeLessThanOrEqual(2);
+    expect(intW, '"int" width when collapsed').toBeLessThanOrEqual(2);
   });
 
-  test('logo "K" is horizontally centered within the collapsed sidebar', async ({ page }) => {
+  test('"KL" is horizontally centered within the collapsed sidebar', async ({ page }) => {
     await gotoFix(page);
     await collapse(page);
+    await page.waitForTimeout(350);
 
-    const sidebar  = await getRect(page, '.layout-sidebar');
-    const logoIcon = await getRect(page, '.layout-logo .logo-icon');
+    const sidebar = await getRect(page, '.layout-sidebar');
+    const kRect   = await getRect(page, '.layout-logo .logo-k');
+    const lRect   = await getRect(page, '.layout-logo .logo-l');
 
+    // Centre of the visible "KL" pair vs centre of the sidebar
+    const klLeft    = kRect.left;
+    const klRight   = lRect.right;
+    const klCenterX = (klLeft + klRight) / 2;
     const sidebarCenterX = sidebar.left + sidebar.width / 2;
-    const iconCenterX    = logoIcon.left + logoIcon.width / 2;
 
-    expect(Math.abs(iconCenterX - sidebarCenterX), 'logo K centering offset')
-      .toBeLessThanOrEqual(8);
+    expect(Math.abs(klCenterX - sidebarCenterX), '"KL" centering offset')
+      .toBeLessThanOrEqual(10);
   });
 });
 
