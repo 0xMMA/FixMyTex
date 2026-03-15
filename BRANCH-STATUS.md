@@ -115,3 +115,4 @@ Unit tests: `cd frontend && npm test`.
 - App Presets UI in Settings (`GetAppPresets` / `SetAppPreset` RPCs exist)
 - Windows `SendInput` for Send Back (Linux xdotool works)
 - E2E tests for Pyramidize canvas interactions (covered by unit tests only)
+- **Bug:** collapsed sidebar version row renders double `vv` prefix — needs investigation and fix
